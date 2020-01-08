@@ -14,7 +14,7 @@ import bpy
 from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, StringProperty
 
 from sverchok.node_tree import SverchCustomTreeNode, throttled
-from sverchok.data_structure import updateNode, zip_long_repeat, fullList
+from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match_long_repeat
 from sverchok.utils.modules.eval_formula import get_variables, safe_eval
 
 if mcubes_available:
@@ -61,9 +61,48 @@ if mcubes_available:
             max = vs.max(axis=0)
             return min.tolist(), max.tolist()
 
-        def evaluate(self, x, y, z):
-            variables = dict(x=x, y=y, z=z)
-            return safe_eval(self.formula, variables)
+        def evaluate(self, variables):
+            def function(x, y, z):
+                variables.update(dict(x=x, y=y, z=z))
+                #self.info("Vs: %s", variables)
+                return safe_eval(self.formula, variables)
+            return function
+
+        def get_variables(self):
+            variables = get_variables(self.formula)
+            variables.difference_update({'x', 'y', 'z'})
+            return list(sorted(list(variables)))
+
+        def adjust_sockets(self):
+            variables = self.get_variables()
+            for key in self.inputs.keys():
+                if key not in variables and key not in {'Bounds', 'Value', 'Samples'}:
+                    self.debug("Input {} not in variables {}, remove it".format(key, str(variables)))
+                    self.inputs.remove(self.inputs[key])
+            for v in variables:
+                if v not in self.inputs:
+                    self.debug("Variable {} not in inputs {}, add it".format(v, str(self.inputs.keys())))
+                    self.inputs.new('SvStringsSocket', v)
+
+        def update(self):
+            '''
+            update analyzes the state of the node and returns if the criteria to start processing
+            are not met.
+            '''
+
+            if not self.formula:
+                return
+
+            self.adjust_sockets()
+
+        def get_input(self):
+            variables = self.get_variables()
+            inputs = {}
+
+            for var in variables:
+                if var in self.inputs and self.inputs[var].is_linked:
+                    inputs[var] = self.inputs[var].sv_get()
+            return inputs
 
         def process(self):
             if not any(socket.is_linked for socket in self.outputs):
@@ -76,9 +115,14 @@ if mcubes_available:
             if isinstance(value_s[0], (list, tuple)):
                 value_s = value_s[0]
 
+            var_names = self.get_variables()
+            inputs = self.get_input()
+            input_values = [inputs.get(name, [[0]]) for name in var_names]
+            parameters = match_long_repeat([vertices_s, value_s, samples_s] + input_values)
+
             verts_out = []
             faces_out = []
-            for vertices, value, samples in zip_long_repeat(vertices_s, value_s, samples_s):
+            for vertices, value, samples, *var_values_s in zip(*parameters):
                 if isinstance(samples, (list, tuple)):
                     samples = samples[0]
                 if isinstance(value, (list, tuple)):
@@ -86,17 +130,20 @@ if mcubes_available:
 
                 b1, b2 = self.get_bounds(vertices)
 
-                self.info("Eval for value = %s", value)
-                # Extract the 16-isosurface
-                new_verts, new_faces = mcubes.marching_cubes_func(
-                        tuple(b1), tuple(b2),
-                        samples, samples, samples,              # Number of samples in each dimension
-                        self.evaluate,                          # Implicit function
-                        value)                         # Isosurface value
+                for var_values in var_values_s:
+                    variables = dict(zip(var_names, var_values))
+                    self.debug("Vars: %s", variables)
+                    self.debug("Eval for value = %s", value)
+                    # Extract the 16-isosurface
+                    new_verts, new_faces = mcubes.marching_cubes_func(
+                            tuple(b1), tuple(b2),
+                            samples, samples, samples,              # Number of samples in each dimension
+                            self.evaluate(variables.copy()),
+                            value)                         # Isosurface value
 
-                new_verts, new_faces = new_verts.tolist(), new_faces.tolist()
-                verts_out.append(new_verts)
-                faces_out.append(new_faces)
+                    new_verts, new_faces = new_verts.tolist(), new_faces.tolist()
+                    verts_out.append(new_verts)
+                    faces_out.append(new_faces)
 
             self.outputs['Vertices'].sv_set(verts_out)
             self.outputs['Faces'].sv_set(faces_out)
