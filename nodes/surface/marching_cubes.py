@@ -5,8 +5,15 @@ try:
     import mcubes
     mcubes_available = True
 except ImportError as e:
-    info("mcubes package is not available, Marching Cubes node will not be available")
+    info("mcubes package is not available")
     mcubes_available = False
+
+try:
+    from skimage import measure
+    skimage_available = True
+except ImportError as e:
+    info("SciKit-Image package is not available")
+    skimage_available = False
 
 import numpy as np
 
@@ -17,7 +24,7 @@ from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match_long_repeat
 from sverchok.utils.modules.eval_formula import get_variables, safe_eval
 
-if mcubes_available:
+if mcubes_available or skimage_available:
 
     class SvExMarchingCubesNode(bpy.types.Node, SverchCustomTreeNode):
         """
@@ -45,6 +52,19 @@ if mcubes_available:
                 default = "x*x + y*y + z*z",
                 update = updateNode)
 
+        def get_modes(self, context):
+            modes = []
+            if mcubes_available:
+                modes.append(("mcubes", "PyMCubes", "PyMCubes", 1))
+            if skimage_available:
+                modes.append(("skimage", "SciKit-Image", "SciKit-Image", 2))
+            return modes
+
+        implementation : EnumProperty(
+                name = "Implementation",
+                items = get_modes,
+                update = updateNode)
+
         def sv_init(self, context):
             self.inputs.new('SvVerticesSocket', "Bounds")
             self.inputs.new('SvStringsSocket', "Value").prop_name = 'iso_value'
@@ -53,6 +73,7 @@ if mcubes_available:
             self.outputs.new('SvStringsSocket', "Faces")
 
         def draw_buttons(self, context, layout):
+            layout.prop(self, "implementation", text="")
             layout.prop(self, "formula", text="")
         
         def get_bounds(self, vertices):
@@ -143,12 +164,21 @@ if mcubes_available:
                     grid = np.meshgrid(x_range, y_range, z_range, indexing='ij')
                     func_values = self.make_function(variables.copy())(*grid)
 
-                    new_verts, new_faces = mcubes.marching_cubes(
-                            func_values,
-                            value)                         # Isosurface value
+                    if self.implementation == 'mcubes':
+                        new_verts, new_faces = mcubes.marching_cubes(
+                                func_values,
+                                value)                         # Isosurface value
 
-                    new_verts = (new_verts / samples) * (b2n - b1n) + b1n
-                    new_verts, new_faces = new_verts.tolist(), new_faces.tolist()
+                        new_verts = (new_verts / samples) * (b2n - b1n) + b1n
+                        new_verts, new_faces = new_verts.tolist(), new_faces.tolist()
+                    else: # skimage
+                        spacing = tuple(1 / (b2n - b1n))
+                        new_verts, new_faces, normals, values = measure.marching_cubes_lewiner(
+                                func_values, level = value,
+                                #spacing = spacing,
+                                step_size = 1)
+                        new_verts = (new_verts / samples) * (b2n - b1n) + b1n
+                        new_verts, new_faces = new_verts.tolist(), new_faces.tolist()
                     verts_out.append(new_verts)
                     faces_out.append(new_faces)
 
