@@ -64,7 +64,7 @@ if mcubes_available:
         def make_function(self, variables):
             def function(x, y, z):
                 variables.update(dict(x=x, y=y, z=z))
-                #self.info("Vs: %s", variables)
+                #self.debug("Vs: %s", variables)
                 return safe_eval(self.formula, variables)
             return np.vectorize(function)
 
@@ -130,12 +130,12 @@ if mcubes_available:
 
                 b1, b2 = self.get_bounds(vertices)
                 b1n, b2n = np.array(b1), np.array(b2)
-                self.info("Bounds: %s - %s", b1, b2)
+                self.debug("Bounds: %s - %s", b1, b2)
 
                 for var_values in var_values_s:
                     variables = dict(zip(var_names, var_values))
-                    self.info("Vars: %s", variables)
-                    self.info("Eval for value = %s", value)
+                    self.debug("Vars: %s", variables)
+                    self.debug("Eval for value = %s", value)
 
                     x_range = np.linspace(b1[0], b2[0], num=samples)
                     y_range = np.linspace(b1[1], b2[1], num=samples)
