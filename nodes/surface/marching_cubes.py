@@ -61,12 +61,12 @@ if mcubes_available:
             max = vs.max(axis=0)
             return min.tolist(), max.tolist()
 
-        def evaluate(self, variables):
+        def make_function(self, variables):
             def function(x, y, z):
                 variables.update(dict(x=x, y=y, z=z))
                 #self.info("Vs: %s", variables)
                 return safe_eval(self.formula, variables)
-            return function
+            return np.vectorize(function)
 
         def get_variables(self):
             variables = get_variables(self.formula)
@@ -129,18 +129,25 @@ if mcubes_available:
                     value = value[0]
 
                 b1, b2 = self.get_bounds(vertices)
+                b1n, b2n = np.array(b1), np.array(b2)
+                self.info("Bounds: %s - %s", b1, b2)
 
                 for var_values in var_values_s:
                     variables = dict(zip(var_names, var_values))
-                    self.debug("Vars: %s", variables)
-                    self.debug("Eval for value = %s", value)
-                    # Extract the 16-isosurface
-                    new_verts, new_faces = mcubes.marching_cubes_func(
-                            tuple(b1), tuple(b2),
-                            samples, samples, samples,              # Number of samples in each dimension
-                            self.evaluate(variables.copy()),
+                    self.info("Vars: %s", variables)
+                    self.info("Eval for value = %s", value)
+
+                    x_range = np.linspace(b1[0], b2[0], num=samples)
+                    y_range = np.linspace(b1[1], b2[1], num=samples)
+                    z_range = np.linspace(b1[2], b2[2], num=samples)
+                    grid = np.meshgrid(x_range, y_range, z_range, indexing='ij')
+                    func_values = self.make_function(variables.copy())(*grid)
+
+                    new_verts, new_faces = mcubes.marching_cubes(
+                            func_values,
                             value)                         # Isosurface value
 
+                    new_verts = (new_verts / samples) * (b2n - b1n) + b1n
                     new_verts, new_faces = new_verts.tolist(), new_faces.tolist()
                     verts_out.append(new_verts)
                     faces_out.append(new_faces)
