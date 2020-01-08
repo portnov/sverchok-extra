@@ -6,7 +6,7 @@ try:
     from geomdl import utilities
     geomdl_available = True
 except ImportError as e:
-    info("geomdl package is not available, NURBS Surface node will not be available")
+    info("geomdl package is not available, NURBS Curve node will not be available")
     geomdl_available = False
 
 import bpy
@@ -27,16 +27,16 @@ if geomdl_available:
         bl_icon = 'OUTLINER_OB_EMPTY'
         sv_icon = 'SV_VORONOI'
 
-        delta : FloatProperty(
-                name = "Delta",
-                default = 0.02,
-                min = 0.0,
+        sample_size : FloatProperty(
+                name = "Samples",
+                default = 50,
+                min = 4,
                 update = updateNode)
 
         def sv_init(self, context):
             self.inputs.new('SvVerticesSocket', "ControlPoints")
             self.inputs.new('SvStringsSocket', "Weights")
-            self.inputs.new('SvStringsSocket', "Delta").prop_name = 'delta'
+            self.inputs.new('SvStringsSocket', "Samples").prop_name = 'sample_size'
             self.outputs.new('SvVerticesSocket', "Vertices")
             self.outputs.new('SvStringsSocket', "Edges")
 
@@ -44,13 +44,13 @@ if geomdl_available:
             vertices_s = self.inputs['ControlPoints'].sv_get()
             has_weights = self.inputs['Weights'].is_linked
             weights_s = self.inputs['Weights'].sv_get(default = [[1.0]])
-            delta_s = self.inputs['Delta'].sv_get()
+            samples_s = self.inputs['Samples'].sv_get()
 
             verts_out = []
             edges_out = []
-            for vertices, weights, delta in zip_long_repeat(vertices_s, weights_s, delta_s):
-                if isinstance(delta, (list, tuple)):
-                    delta = delta[0]
+            for vertices, weights, samples in zip_long_repeat(vertices_s, weights_s, samples_s):
+                if isinstance(samples, (list, tuple)):
+                    samples = samples[0]
                 fullList(weights, len(vertices))
 
                 # Create a 3-dimensional B-spline Curve
@@ -69,7 +69,7 @@ if geomdl_available:
                 curve.knotvector = utilities.generate_knot_vector(curve.degree, len(curve.ctrlpts))
 
                 # Set evaluation delta (controls the number of curve points)
-                curve.delta = delta
+                curve.sample_size = samples
 
                 # Get curve points (the curve will be automatically evaluated)
                 verts_out.append(curve.evalpts)
