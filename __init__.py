@@ -34,7 +34,8 @@ imported_modules = []
 
 def nodes_index():
     return [("Surface", [
-            ("surface.minimal_surface", "SvExMinimalSurfaceNode")
+            ("surface.minimal_surface", "SvExMinimalSurfaceNode"),
+            ("surface.nurbs_curve", "SvExNurbsCurveNode")
         ])
     ]
 
