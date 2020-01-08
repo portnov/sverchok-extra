@@ -28,7 +28,7 @@ if geomdl_available:
         bl_icon = 'OUTLINER_OB_EMPTY'
         sv_icon = 'SV_VORONOI'
 
-        sample_size : FloatProperty(
+        sample_size : IntProperty(
                 name = "Samples",
                 default = 50,
                 min = 4,

@@ -36,7 +36,8 @@ def nodes_index():
     return [("Surface", [
             ("surface.minimal_surface", "SvExMinimalSurfaceNode"),
             ("surface.nurbs_surface", "SvExNurbsSurfaceNode"),
-            ("surface.nurbs_curve", "SvExNurbsCurveNode")
+            ("surface.nurbs_curve", "SvExNurbsCurveNode"),
+            ("surface.marching_cubes", "SvExMarchingCubesNode")
         ])
     ]
 
