@@ -13,6 +13,7 @@ import numpy as np
 
 import bpy
 from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
+from mathutils import Matrix
 
 import sverchok
 from sverchok.node_tree import SverchCustomTreeNode, throttled
@@ -79,6 +80,7 @@ if scipy_available:
             self.inputs.new('SvStringsSocket', "GridPoints").prop_name = 'grid_points'
             self.inputs.new('SvStringsSocket', "Epsilon").prop_name = 'epsilon'
             self.inputs.new('SvStringsSocket', "Smooth").prop_name = 'smooth'
+            self.inputs.new('SvMatrixSocket', "Matrix")
             self.outputs.new('SvVerticesSocket', "Vertices")
             self.outputs.new('SvStringsSocket', "Edges")
             self.outputs.new('SvStringsSocket', "Faces")
@@ -118,19 +120,30 @@ if scipy_available:
             points_s = self.inputs['GridPoints'].sv_get()
             epsilon_s = self.inputs['Epsilon'].sv_get()
             smooth_s = self.inputs['Smooth'].sv_get()
+            matrices_s = self.inputs['Matrix'].sv_get(default = [[Matrix()]])
 
             verts_out = []
             edges_out = []
             faces_out = []
-            for vertices, grid_points, epsilon, smooth in zip_long_repeat(vertices_s, points_s, epsilon_s, smooth_s):
+            for vertices, matrix, grid_points, epsilon, smooth in zip_long_repeat(vertices_s, matrices_s, points_s, epsilon_s, smooth_s):
                 if isinstance(epsilon, (list, int)):
                     epsilon = epsilon[0]
                 if isinstance(smooth, (list, int)):
                     smooth = smooth[0]
                 if isinstance(grid_points, (list, int)):
                     grid_points = grid_points[0]
+                if isinstance(matrix, list):
+                    matrix = matrix[0]
+                has_matrix = matrix is not None and matrix != Matrix()
 
                 XYZ = np.array(vertices)
+                if has_matrix:
+                    np_matrix = np.array(matrix.to_3x3())
+                    inv_matrix = np.linalg.inv(np_matrix)
+                    #print(matrix)
+                    #print(XYZ)
+                    translation = np.array(matrix.translation)
+                    XYZ = np.matmul(inv_matrix, XYZ.T).T + translation
                 if self.orientation == 'X':
                     reorder = np.array([1, 2, 0])
                     XYZ = XYZ[:, reorder]
@@ -157,7 +170,11 @@ if scipy_available:
                 else: # Z
                     pass
 
-                new_verts = np.dstack((XI,YI,ZI)).tolist()
+                new_verts = np.dstack((XI,YI,ZI))
+                if has_matrix:
+                    new_verts = new_verts - translation
+                    new_verts = np.apply_along_axis(lambda v : np_matrix @ v, 2, new_verts)
+                new_verts = new_verts.tolist()
                 new_verts = sum(new_verts, [])
                 new_edges = self.make_edges(grid_points)
                 new_faces = self.make_faces(grid_points)
