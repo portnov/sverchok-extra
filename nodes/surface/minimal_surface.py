@@ -44,6 +44,18 @@ if scipy_available:
                 default = 'multiquadric',
                 update = updateNode)
 
+        axes = [
+            ('X', "X axis", "X axis", 0),
+            ('Y', "Y axis", "Y axis", 1),
+            ('Z', "Z axis", "Z axis", 2)
+        ]
+
+        orientation : EnumProperty(
+                name = "Orientation",
+                items = axes,
+                default = 'Z',
+                update = updateNode)
+
         grid_points : IntProperty(
                 name = "Points",
                 default = 25,
@@ -73,6 +85,7 @@ if scipy_available:
 
         def draw_buttons(self, context, layout):
             layout.prop(self, "function")
+            layout.prop(self, "orientation", expand=True)
 
         def make_edges(self, n_points):
             edges = []
@@ -118,6 +131,14 @@ if scipy_available:
                     grid_points = grid_points[0]
 
                 XYZ = np.array(vertices)
+                if self.orientation == 'X':
+                    reorder = np.array([1, 2, 0])
+                    XYZ = XYZ[:, reorder]
+                elif self.orientation == 'Y':
+                    reorder = np.array([2, 0, 1])
+                    XYZ = XYZ[:, reorder]
+                else: # Z
+                    pass
                 x_min = XYZ[:,0].min()
                 x_max = XYZ[:,0].max()
                 y_min = XYZ[:,1].min()
@@ -128,6 +149,13 @@ if scipy_available:
 
                 rbf = Rbf(XYZ[:,0],XYZ[:,1],XYZ[:,2],function=self.function,smooth=smooth,epsilon=epsilon)
                 ZI = rbf(XI,YI)
+
+                if self.orientation == 'X':
+                    YI, ZI, XI = XI, YI, ZI
+                elif self.orientation == 'Y':
+                    ZI, XI, YI = XI, YI, ZI
+                else: # Z
+                    pass
 
                 new_verts = np.dstack((XI,YI,ZI)).tolist()
                 new_verts = sum(new_verts, [])
