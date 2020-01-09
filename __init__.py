@@ -37,6 +37,7 @@ def nodes_index():
             ("surface.minimal_surface", "SvExMinimalSurfaceNode"),
             ("surface.nurbs_surface", "SvExNurbsSurfaceNode"),
             ("surface.nurbs_curve", "SvExNurbsCurveNode"),
+            ("surface.bend_along_nurbs_surface", "SvExBendAlongNurbsSurfaceNode"),
             ("surface.marching_cubes", "SvExMarchingCubesNode")
         ])
     ]
