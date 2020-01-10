@@ -34,13 +34,18 @@ imported_modules = []
 
 def nodes_index():
     return [("Surface", [
-            ("surface.minimal_surface", "SvExMinimalSurfaceNode"),
-            ("surface.smooth_spline", "SvExBivariateSplineNode"),
-            ("surface.nurbs_surface", "SvExNurbsSurfaceNode"),
-            ("surface.nurbs_curve", "SvExNurbsCurveNode"),
-            ("surface.bend_along_nurbs_surface", "SvExBendAlongGeomdlSurface"),
-            ("surface.marching_cubes", "SvExMarchingCubesNode")
-        ])
+                ("surface.minimal_surface", "SvExMinimalSurfaceNode"),
+                ("surface.smooth_spline", "SvExBivariateSplineNode"),
+                ("surface.nurbs_surface", "SvExNurbsSurfaceNode"),
+                ("surface.bend_along_nurbs_surface", "SvExBendAlongGeomdlSurface"),
+                ("surface.marching_cubes", "SvExMarchingCubesNode")
+            ]),
+            ("Curve", [
+                ("curve.nurbs_curve", "SvExNurbsCurveNode")
+            ]),
+            ("Spatial", [
+                ("spatial.voronoi3d", "SvExVoronoi3DNode")
+            ])
     ]
 
 def register_nodes():
