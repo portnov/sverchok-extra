@@ -17,7 +17,7 @@ from mathutils import Matrix
 
 import sverchok
 from sverchok.node_tree import SverchCustomTreeNode, throttled
-from sverchok.data_structure import updateNode, zip_long_repeat
+from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
 
 if scipy_available:
     class SvExMinimalSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
@@ -29,6 +29,21 @@ if scipy_available:
         bl_label = 'Minimal Surface'
         bl_icon = 'OUTLINER_OB_EMPTY'
         sv_icon = 'SV_VORONOI'
+
+        @throttled
+        def update_sockets(self, context):
+            self.inputs['Matrix'].hide_safe = self.coord_mode == 'UV'
+
+        coord_modes = [
+            ('XY', "X Y Z", "XY -> Z function", 0),
+            ('UV', "U V", "UV -> XYZ function", 1)
+        ]
+
+        coord_mode : EnumProperty(
+            name = "Coordinates",
+            items = coord_modes,
+            default = 'XY',
+            update = update_sockets)
 
         functions = [
             ('multiquadric', "Multi Quadric", "Multi Quadric", 0),
@@ -46,9 +61,9 @@ if scipy_available:
                 update = updateNode)
 
         axes = [
-            ('X', "X axis", "X axis", 0),
-            ('Y', "Y axis", "Y axis", 1),
-            ('Z', "Z axis", "Z axis", 2)
+            ('X', "X", "X axis", 0),
+            ('Y', "Y", "Y axis", 1),
+            ('Z', "Z", "Z axis", 2)
         ]
 
         orientation : EnumProperty(
@@ -84,12 +99,15 @@ if scipy_available:
             self.outputs.new('SvVerticesSocket', "Vertices")
             self.outputs.new('SvStringsSocket', "Edges")
             self.outputs.new('SvStringsSocket', "Faces")
+            self.update_sockets(context)
 
         def draw_buttons(self, context, layout):
+            layout.prop(self, "coord_mode", expand=True)
             layout.prop(self, "function")
-            layout.prop(self, "orientation", expand=True)
+            if self.coord_mode == 'XY':
+                layout.prop(self, "orientation", expand=True)
 
-        def make_edges(self, n_points):
+        def make_edges_xy(self, n_points):
             edges = []
             for row in range(n_points):
                 e_row = [(i + n_points * row, (i+1) + n_points * row) for i in range(n_points-1)]
@@ -99,7 +117,7 @@ if scipy_available:
                     edges.extend(e_col)
             return edges
 
-        def make_faces(self, n_points):
+        def make_faces_xy(self, n_points):
             faces = []
             for row in range(n_points - 1):
                 for col in range(n_points - 1):
@@ -107,6 +125,38 @@ if scipy_available:
                     face = (i, i+n_points, i+n_points+1, i+1)
                     faces.append(face)
             return faces
+
+        def make_uv(self, vertices):
+
+            def distance(v1, v2):
+                v1 = np.array(v1)
+                v2 = np.array(v2)
+                return np.linalg.norm(v1-v2)
+
+            u = 0
+            v = 0
+            us, vs = [], []
+            prev_row = None
+            rev_vs = None
+            for row in vertices:
+                u = 0
+                row_vs = []
+                prev_vertex = None
+                for j, vertex in enumerate(row):
+                    if prev_row is not None:
+                        dv = distance(prev_row[j], vertex)
+                        v = prev_vs[j] + dv
+                    if prev_vertex is not None:
+                        du = distance(prev_vertex, vertex)
+                        u += du
+                    us.append(u)
+                    vs.append(v)
+                    row_vs.append(v)
+                    prev_vertex = vertex
+                prev_row = row
+                prev_vs = row_vs
+
+            return np.array(us), np.array(vs)
 
         def process(self):
 
@@ -117,6 +167,8 @@ if scipy_available:
                 return
 
             vertices_s = self.inputs['Vertices'].sv_get()
+            if self.coord_mode == 'UV':
+                vertices_s = ensure_nesting_level(vertices_s, 4)
             points_s = self.inputs['GridPoints'].sv_get()
             epsilon_s = self.inputs['Epsilon'].sv_get()
             smooth_s = self.inputs['Smooth'].sv_get()
@@ -134,9 +186,13 @@ if scipy_available:
                     grid_points = grid_points[0]
                 if isinstance(matrix, list):
                     matrix = matrix[0]
-                has_matrix = matrix is not None and matrix != Matrix()
+                has_matrix = self.coord_mode == 'XY' and matrix is not None and matrix != Matrix()
 
-                XYZ = np.array(vertices)
+                if self.coord_mode == 'XY':
+                    XYZ = np.array(vertices)
+                else: # UV
+                    all_vertices = sum(vertices, [])
+                    XYZ = np.array(all_vertices)
                 if has_matrix:
                     np_matrix = np.array(matrix.to_3x3())
                     inv_matrix = np.linalg.inv(np_matrix)
@@ -144,41 +200,64 @@ if scipy_available:
                     #print(XYZ)
                     translation = np.array(matrix.translation)
                     XYZ = np.matmul(inv_matrix, XYZ.T).T + translation
-                if self.orientation == 'X':
-                    reorder = np.array([1, 2, 0])
-                    XYZ = XYZ[:, reorder]
-                elif self.orientation == 'Y':
-                    reorder = np.array([2, 0, 1])
-                    XYZ = XYZ[:, reorder]
-                else: # Z
-                    pass
-                x_min = XYZ[:,0].min()
-                x_max = XYZ[:,0].max()
-                y_min = XYZ[:,1].min()
-                y_max = XYZ[:,1].max()
-                xi = np.linspace(x_min, x_max, grid_points)
-                yi = np.linspace(y_min, y_max, grid_points)
-                XI, YI = np.meshgrid(xi, yi)
 
-                rbf = Rbf(XYZ[:,0],XYZ[:,1],XYZ[:,2],function=self.function,smooth=smooth,epsilon=epsilon)
-                ZI = rbf(XI,YI)
+                if self.coord_mode == 'XY':
+                    if self.orientation == 'X':
+                        reorder = np.array([1, 2, 0])
+                        XYZ = XYZ[:, reorder]
+                    elif self.orientation == 'Y':
+                        reorder = np.array([2, 0, 1])
+                        XYZ = XYZ[:, reorder]
+                    else: # Z
+                        pass
 
-                if self.orientation == 'X':
-                    YI, ZI, XI = XI, YI, ZI
-                elif self.orientation == 'Y':
-                    ZI, XI, YI = XI, YI, ZI
-                else: # Z
-                    pass
+                if self.coord_mode == 'XY':
+                    x_min = XYZ[:,0].min()
+                    x_max = XYZ[:,0].max()
+                    y_min = XYZ[:,1].min()
+                    y_max = XYZ[:,1].max()
+                    xi = np.linspace(x_min, x_max, grid_points)
+                    yi = np.linspace(y_min, y_max, grid_points)
+                    XI, YI = np.meshgrid(xi, yi)
 
-                new_verts = np.dstack((XI,YI,ZI))
+                    rbf = Rbf(XYZ[:,0],XYZ[:,1],XYZ[:,2],function=self.function,smooth=smooth,epsilon=epsilon)
+                    ZI = rbf(XI,YI)
+
+                    if self.orientation == 'X':
+                        YI, ZI, XI = XI, YI, ZI
+                    elif self.orientation == 'Y':
+                        ZI, XI, YI = XI, YI, ZI
+                    else: # Z
+                        pass
+
+                    new_verts = np.dstack((XI,YI,ZI))
+                else:
+                    us, vs = self.make_uv(vertices)
+                    US, VS = np.meshgrid(us, vs)
+
+                    rbf = Rbf(us, vs, all_vertices,
+                            function = self.function,
+                            smooth = smooth,
+                            epsilon = epsilon, mode='N-D')
+
+                    u_min = us.min()
+                    v_min = vs.min()
+                    u_max = us.max()
+                    v_max = vs.max()
+                    target_us = np.linspace(u_min, u_max, grid_points)
+                    target_vs = np.linspace(v_min, v_max, grid_points)
+                    target_US, target_VS = np.meshgrid(target_us, target_vs)
+                    new_verts = rbf(target_US, target_VS)
+
                 if has_matrix:
                     new_verts = new_verts - translation
                     new_verts = np.apply_along_axis(lambda v : np_matrix @ v, 2, new_verts)
                 new_verts = new_verts.tolist()
-                new_verts = sum(new_verts, [])
-                new_edges = self.make_edges(grid_points)
-                new_faces = self.make_faces(grid_points)
-                verts_out.append(new_verts)
+                all_new_verts = sum(new_verts, [])
+                new_edges = self.make_edges_xy(grid_points)
+                new_faces = self.make_faces_xy(grid_points)
+
+                verts_out.append(all_new_verts)
                 edges_out.append(new_edges)
                 faces_out.append(new_faces)
 
