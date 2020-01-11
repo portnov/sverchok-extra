@@ -22,7 +22,8 @@ import bl_operators
 import sverchok
 from sverchok.core import sv_registration_utils, make_node_list
 from sverchok.utils import auto_gather_node_classes
-from sverchok.menu import SverchNodeItem, node_add_operators, SverchNodeCategory, register_node_panels, unregister_node_panels, unregister_node_add_operators
+from sverchok.menu import SverchNodeItem, node_add_operators, SverchNodeCategory, register_node_panels, unregister_node_panels, unregister_node_add_operators, register_extra_category_provider
+from sverchok.ui.nodeview_space_menu import make_extra_category_menus
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat
 
@@ -67,30 +68,48 @@ def make_menu():
     menu = []
     index = nodes_index()
     for category, items in index:
-        menu.append(
-                SverchNodeCategory(
-                    "SVERCHOK_EXTRA_" + category,
+        identifier = "SVERCHOK_EXTRA_" + category
+        cat = SverchNodeCategory(
+                    identifier,
                     category,
                     items = [SverchNodeItem.new(item[1]) for item in items]
                 )
-            )
+        menu.append(cat)
     return menu
 
+class SvExCategoryProvider(object):
+    def __init__(self, identifier, menu):
+        self.identifier = identifier
+        self.menu = menu
+
+    def get_categories(self):
+        return self.menu
+
+our_menu_classes = []
+
 def register():
+    global our_menu_classes
+
     register_nodes()
     extra_nodes = importlib.import_module(".nodes", "sverchok_extra")
     auto_gather_node_classes(extra_nodes)    
     menu = make_menu()
+    provider = SvExCategoryProvider("SVERCHOK_EXTRA", menu)
+    register_extra_category_provider(provider)
     #if 'SVERCHOK_EXTRA' in nodeitems_utils._node_categories:
         #unregister_node_panels()
         #nodeitems_utils.unregister_node_categories("SVERCHOK_EXTRA")
     nodeitems_utils.register_node_categories("SVERCHOK_EXTRA", menu)
+    our_menu_classes = make_extra_category_menus()
     #register_node_panels("SVERCHOK_EXTRA", menu)
 
 def unregister():
+    global our_menu_classes
     if 'SVERCHOK_EXTRA' in nodeitems_utils._node_categories:
         #unregister_node_panels()
         nodeitems_utils.unregister_node_categories("SVERCHOK_EXTRA")
+    for clazz in our_menu_classes:
+        bpy.utils.unregister_class(clazz)
     #unregister_node_add_operators()
     unregister_nodes()
 
