@@ -17,7 +17,7 @@ from mathutils import Matrix
 
 import sverchok
 from sverchok.node_tree import SverchCustomTreeNode, throttled
-from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
+from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, get_data_nesting_level
 
 if scipy_available:
     class SvExMinimalSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
@@ -33,10 +33,15 @@ if scipy_available:
         @throttled
         def update_sockets(self, context):
             self.inputs['Matrix'].hide_safe = self.coord_mode == 'UV'
+            self.inputs['SrcU'].hide_safe = self.coord_mode != 'UV' or not self.explicit_src_uv
+            self.inputs['SrcV'].hide_safe = self.coord_mode != 'UV' or not self.explicit_src_uv
+            self.inputs['TargetU'].hide_safe = self.coord_mode != 'UV' or not self.explicit_target_uv
+            self.inputs['TargetV'].hide_safe = self.coord_mode != 'UV' or not self.explicit_target_uv
+            self.inputs['GridPoints'].hide_safe = not (self.coord_mode == 'UV' and self.explicit_target_uv)
 
         coord_modes = [
-            ('XY', "X Y Z", "XY -> Z function", 0),
-            ('UV', "U V", "UV -> XYZ function", 1)
+            ('XY', "X Y -> Z", "XY -> Z function", 0),
+            ('UV', "U V -> X Y Z", "UV -> XYZ function", 1)
         ]
 
         coord_mode : EnumProperty(
@@ -90,11 +95,25 @@ if scipy_available:
                 min = 0.0,
                 update = updateNode)
 
+        explicit_src_uv : BoolProperty(
+                name = "Explicit source UV",
+                default = False,
+                update = update_sockets)
+
+        explicit_target_uv : BoolProperty(
+                name = "Explicit target UV",
+                default = False,
+                update = update_sockets)
+
         def sv_init(self, context):
             self.inputs.new('SvVerticesSocket', "Vertices")
             self.inputs.new('SvStringsSocket', "GridPoints").prop_name = 'grid_points'
             self.inputs.new('SvStringsSocket', "Epsilon").prop_name = 'epsilon'
             self.inputs.new('SvStringsSocket', "Smooth").prop_name = 'smooth'
+            self.inputs.new('SvStringsSocket', "SrcU")
+            self.inputs.new('SvStringsSocket', "SrcV")
+            self.inputs.new('SvStringsSocket', "TargetU")
+            self.inputs.new('SvStringsSocket', "TargetV")
             self.inputs.new('SvMatrixSocket', "Matrix")
             self.outputs.new('SvVerticesSocket', "Vertices")
             self.outputs.new('SvStringsSocket', "Edges")
@@ -106,6 +125,9 @@ if scipy_available:
             layout.prop(self, "function")
             if self.coord_mode == 'XY':
                 layout.prop(self, "orientation", expand=True)
+            if self.coord_mode == 'UV':
+                layout.prop(self, "explicit_src_uv")
+                layout.prop(self, "explicit_target_uv")
 
         def make_edges_xy(self, n_points):
             edges = []
@@ -172,12 +194,17 @@ if scipy_available:
             points_s = self.inputs['GridPoints'].sv_get()
             epsilon_s = self.inputs['Epsilon'].sv_get()
             smooth_s = self.inputs['Smooth'].sv_get()
+            src_us_s = self.inputs['SrcU'].sv_get(default = [[]])
+            src_vs_s = self.inputs['SrcV'].sv_get(default = [[]])
+            target_us_s = self.inputs['TargetU'].sv_get(default = [[]])
+            target_vs_s = self.inputs['TargetV'].sv_get(default = [[]])
             matrices_s = self.inputs['Matrix'].sv_get(default = [[Matrix()]])
 
             verts_out = []
             edges_out = []
             faces_out = []
-            for vertices, matrix, grid_points, epsilon, smooth in zip_long_repeat(vertices_s, matrices_s, points_s, epsilon_s, smooth_s):
+            inputs = zip_long_repeat(vertices_s, src_us_s, src_vs_s, matrices_s, points_s, target_us_s, target_vs_s, epsilon_s, smooth_s)
+            for vertices, src_us, src_vs, matrix, grid_points, target_us, target_vs, epsilon, smooth in inputs:
                 if isinstance(epsilon, (list, int)):
                     epsilon = epsilon[0]
                 if isinstance(smooth, (list, int)):
@@ -187,6 +214,12 @@ if scipy_available:
                 if isinstance(matrix, list):
                     matrix = matrix[0]
                 has_matrix = self.coord_mode == 'XY' and matrix is not None and matrix != Matrix()
+
+                if self.coord_mode == 'UV' and self.explicit_src_uv:
+                    if get_data_nesting_level(src_us) == 3:
+                        src_us = sum(src_us, [])
+                    if get_data_nesting_level(src_vs) == 3:
+                        src_vs = sum(src_vs, [])
 
                 if self.coord_mode == 'XY':
                     XYZ = np.array(vertices)
@@ -211,7 +244,6 @@ if scipy_available:
                     else: # Z
                         pass
 
-                if self.coord_mode == 'XY':
                     x_min = XYZ[:,0].min()
                     x_max = XYZ[:,0].max()
                     y_min = XYZ[:,1].min()
@@ -231,33 +263,46 @@ if scipy_available:
                         pass
 
                     new_verts = np.dstack((XI,YI,ZI))
-                else:
-                    us, vs = self.make_uv(vertices)
-                    US, VS = np.meshgrid(us, vs)
+                else: # UV
+                    if not self.explicit_src_uv:
+                        src_us, src_vs = self.make_uv(vertices)
+                    else:
+                        src_us = np.array(src_us)
+                        src_vs = np.array(src_vs)
 
-                    rbf = Rbf(us, vs, all_vertices,
+                    #self.info("Us: %s, Vs: %s", len(src_us), len(src_vs))
+                    rbf = Rbf(src_us, src_vs, all_vertices,
                             function = self.function,
                             smooth = smooth,
                             epsilon = epsilon, mode='N-D')
 
-                    u_min = us.min()
-                    v_min = vs.min()
-                    u_max = us.max()
-                    v_max = vs.max()
-                    target_us = np.linspace(u_min, u_max, grid_points)
-                    target_vs = np.linspace(v_min, v_max, grid_points)
-                    target_US, target_VS = np.meshgrid(target_us, target_vs)
-                    new_verts = rbf(target_US, target_VS)
+                    if not self.explicit_target_uv:
+                        u_min = src_us.min()
+                        v_min = src_vs.min()
+                        u_max = src_us.max()
+                        v_max = src_vs.max()
+                        target_u_range = np.linspace(u_min, u_max, grid_points)
+                        target_v_range = np.linspace(v_min, v_max, grid_points)
+                        target_us, target_vs = np.meshgrid(target_u_range, target_v_range)
+                    else:
+                        pass
+                        #target_u_range = np.array(target_us)
+                        #target_v_range = np.array(target_vs)
+                        #target_us, target_vs = np.meshgrid(target_u_range, target_v_range)
+
+                    #self.info("T Us: %s, T Vs: %s", target_us, target_vs)
+                    new_verts = rbf(target_us, target_vs)
 
                 if has_matrix:
                     new_verts = new_verts - translation
                     new_verts = np.apply_along_axis(lambda v : np_matrix @ v, 2, new_verts)
                 new_verts = new_verts.tolist()
-                all_new_verts = sum(new_verts, [])
+                if not self.explicit_target_uv:
+                    new_verts = sum(new_verts, [])
                 new_edges = self.make_edges_xy(grid_points)
                 new_faces = self.make_faces_xy(grid_points)
 
-                verts_out.append(all_new_verts)
+                verts_out.append(new_verts)
                 edges_out.append(new_edges)
                 faces_out.append(new_faces)
 
