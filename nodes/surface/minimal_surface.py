@@ -37,7 +37,7 @@ if scipy_available:
             self.inputs['SrcV'].hide_safe = self.coord_mode != 'UV' or not self.explicit_src_uv
             self.inputs['TargetU'].hide_safe = self.coord_mode != 'UV' or not self.explicit_target_uv
             self.inputs['TargetV'].hide_safe = self.coord_mode != 'UV' or not self.explicit_target_uv
-            self.inputs['GridPoints'].hide_safe = not (self.coord_mode == 'UV' and self.explicit_target_uv)
+            self.inputs['GridPoints'].hide_safe = not (self.coord_mode == 'XY' or self.explicit_target_uv)
             self.outputs['Edges'].hide_safe = (self.coord_mode == 'UV' and self.explicit_target_uv)
             self.outputs['Faces'].hide_safe = (self.coord_mode == 'UV' and self.explicit_target_uv)
 
