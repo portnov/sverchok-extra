@@ -7,6 +7,16 @@ class SvExRbfSurface(object):
         self.coord_mode = coord_mode
         self.input_orientation = input_orientation
         self.input_matrix = input_matrix
+        self.u_bounds = (0, 0)
+        self.v_bounds = (0, 0)
+
+    @property
+    def u_size(self):
+        return self.u_bounds[1] - self.u_bounds[0]
+
+    @property
+    def v_size(self):
+        return self.v_bounds[1] - self.v_bounds[0]
 
     @property
     def has_matrix(self):

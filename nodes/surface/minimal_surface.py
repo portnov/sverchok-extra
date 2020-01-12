@@ -261,11 +261,14 @@ if scipy_available:
                             smooth=smooth,
                             epsilon=epsilon, mode='1-D')
 
+                    x_min = XYZ[:,0].min()
+                    x_max = XYZ[:,0].max()
+                    y_min = XYZ[:,1].min()
+                    y_max = XYZ[:,1].max()
+                    u_bounds = (x_min, x_max)
+                    v_bounds = (y_min, y_max)
+
                     if not self.explicit_target_uv:
-                        x_min = XYZ[:,0].min()
-                        x_max = XYZ[:,0].max()
-                        y_min = XYZ[:,1].min()
-                        y_max = XYZ[:,1].max()
                         target_x_range = np.linspace(x_min, x_max, grid_points)
                         target_y_range = np.linspace(y_min, y_max, grid_points)
                         XI, YI = np.meshgrid(target_x_range, target_y_range)
@@ -294,11 +297,14 @@ if scipy_available:
                             smooth = smooth,
                             epsilon = epsilon, mode='N-D')
 
+                    u_min = src_us.min()
+                    v_min = src_vs.min()
+                    u_max = src_us.max()
+                    v_max = src_vs.max()
+                    u_bounds = (u_min, u_max)
+                    v_bounds = (v_min, v_max)
+
                     if not self.explicit_target_uv:
-                        u_min = src_us.min()
-                        v_min = src_vs.min()
-                        u_max = src_us.max()
-                        v_max = src_vs.max()
                         target_u_range = np.linspace(u_min, u_max, grid_points)
                         target_v_range = np.linspace(v_min, v_max, grid_points)
                         target_us, target_vs = np.meshgrid(target_u_range, target_v_range)
@@ -323,7 +329,10 @@ if scipy_available:
                 verts_out.append(new_verts)
                 edges_out.append(new_edges)
                 faces_out.append(new_faces)
-                surfaces_out.append(SvExRbfSurface(rbf, self.coord_mode, self.orientation, matrix))
+                surface = SvExRbfSurface(rbf, self.coord_mode, self.orientation, matrix)
+                surface.u_bounds = u_bounds
+                surface.v_bounds = v_bounds
+                surfaces_out.append(surface)
 
             self.outputs['Vertices'].sv_set(verts_out)
             self.outputs['Edges'].sv_set(edges_out)
