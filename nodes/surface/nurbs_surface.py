@@ -44,6 +44,8 @@ if geomdl_available:
         def update_sockets(self, context):
             self.inputs['USize'].hide_safe = self.input_mode == '2D'
             self.inputs['Weights'].hide_safe = self.surface_mode == 'BSPLINE'
+            self.outputs['Vertices'].hide_safe = not self.make_grid
+            self.outputs['Faces'].hide_safe = not self.make_grid
 
         input_mode : EnumProperty(
                 name = "Input mode",
@@ -68,6 +70,11 @@ if geomdl_available:
                 default = 'NURBS',
                 update = update_sockets)
 
+        make_grid : BoolProperty(
+                name = "Make grid",
+                default = True,
+                update = update_sockets)
+
         def sv_init(self, context):
             self.inputs.new('SvVerticesSocket', "ControlPoints")
             self.inputs.new('SvStringsSocket', "Weights")
@@ -76,10 +83,12 @@ if geomdl_available:
             self.outputs.new('SvVerticesSocket', "Vertices")
             self.outputs.new('SvStringsSocket', "Faces")
             self.outputs.new('SvExSurfaceSocket', "Surface").display_shape = 'DIAMOND'
+            self.update_socket(context)
 
         def draw_buttons(self, context, layout):
             layout.prop(self, "surface_mode", expand=True)
             layout.prop(self, "input_mode")
+            layout.prop(self, "make_grid")
 
         def process(self):
             vertices_s = self.inputs['ControlPoints'].sv_get()
@@ -135,17 +144,21 @@ if geomdl_available:
                 surf.knotvector_u = knotvector.generate(surf.degree_u, n_u)
                 surf.knotvector_v = knotvector.generate(surf.degree_v, n_v)
 
-                surf.sample_size = samples
-
-                surf.tessellate()
-                new_verts = [vert.data for vert in surf.vertices]
-                new_faces = [f.data for f in surf.faces]
+                if self.make_grid:
+                    surf.sample_size = samples
+                    surf.tessellate()
+                    new_verts = [vert.data for vert in surf.vertices]
+                    new_faces = [f.data for f in surf.faces]
+                else:
+                    new_verts = []
+                    new_faces = []
                 verts_out.append(new_verts)
                 faces_out.append(new_faces)
                 surfaces_out.append(surf)
 
-            self.outputs['Vertices'].sv_set(verts_out)
-            self.outputs['Faces'].sv_set(faces_out)
+            if self.make_grid:
+                self.outputs['Vertices'].sv_set(verts_out)
+                self.outputs['Faces'].sv_set(faces_out)
             self.outputs['Surface'].sv_set(surfaces_out)
 
 def register():

@@ -142,7 +142,7 @@ if geomdl_available:
 
             verts_out = []
             for surface, vertices in zip_long_repeat(surfaces_s, vertices_s):
-                new_vertices = self.evaluate(surface, vertices)
+                new_vertices = self.evaluate(surface, vertices).tolist()
                 verts_out.append(new_vertices)
 
             self.outputs['Vertices'].sv_set(verts_out)
