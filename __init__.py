@@ -27,6 +27,8 @@ from sverchok.ui.nodeview_space_menu import make_extra_category_menus
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat
 
+from . import sockets
+
 # make sverchok the root module name, (if sverchok dir not named exactly "sverchok") 
 if __name__ != "sverchok_extra":
     sys.modules["sverchok_extra"] = sys.modules[__name__]
@@ -39,7 +41,8 @@ def nodes_index():
                 ("surface.smooth_spline", "SvExBivariateSplineNode"),
                 ("surface.nurbs_surface", "SvExNurbsSurfaceNode"),
                 ("surface.bend_along_nurbs_surface", "SvExBendAlongGeomdlSurface"),
-                ("surface.marching_cubes", "SvExMarchingCubesNode")
+                ("surface.marching_cubes", "SvExMarchingCubesNode"),
+                ("surface.evaluate_min_surface", "SvExEvalMinimalSurfaceNode")
             ]),
             ("Curve", [
                 ("curve.nurbs_curve", "SvExNurbsCurveNode")
@@ -90,6 +93,8 @@ our_menu_classes = []
 def register():
     global our_menu_classes
 
+    sockets.register()
+
     register_nodes()
     extra_nodes = importlib.import_module(".nodes", "sverchok_extra")
     auto_gather_node_classes(extra_nodes)    
@@ -112,4 +117,6 @@ def unregister():
         bpy.utils.unregister_class(clazz)
     #unregister_node_add_operators()
     unregister_nodes()
+
+    sockets.unregister()
 

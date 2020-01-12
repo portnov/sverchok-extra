@@ -126,6 +126,7 @@ if scipy_available:
             self.outputs.new('SvVerticesSocket', "Vertices")
             self.outputs.new('SvStringsSocket', "Edges")
             self.outputs.new('SvStringsSocket', "Faces")
+            self.outputs.new('SvExSurfaceSocket', "Surface").display_shape = 'DIAMOND'
             self.update_sockets(context)
 
         def draw_buttons(self, context, layout):
@@ -192,10 +193,7 @@ if scipy_available:
 
         def process(self):
 
-            if not self.inputs['Vertices'].is_linked:
-                return
-
-            if not self.outputs['Vertices'].is_linked:
+            if not any(socket.is_linked for socket in self.outputs):
                 return
 
             vertices_s = self.inputs['Vertices'].sv_get()
@@ -213,6 +211,7 @@ if scipy_available:
             verts_out = []
             edges_out = []
             faces_out = []
+            surfaces_out = []
             inputs = zip_long_repeat(vertices_s, src_us_s, src_vs_s, matrices_s, points_s, target_us_s, target_vs_s, epsilon_s, smooth_s)
             for vertices, src_us, src_vs, matrix, grid_points, target_us, target_vs, epsilon, smooth in inputs:
                 if isinstance(epsilon, (list, int)):
@@ -321,10 +320,12 @@ if scipy_available:
                 verts_out.append(new_verts)
                 edges_out.append(new_edges)
                 faces_out.append(new_faces)
+                surfaces_out.append(rbf)
 
             self.outputs['Vertices'].sv_set(verts_out)
             self.outputs['Edges'].sv_set(edges_out)
             self.outputs['Faces'].sv_set(faces_out)
+            self.outputs['Surface'].sv_set(surfaces_out)
 
 def register():
     if scipy_available:
