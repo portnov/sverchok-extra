@@ -3,6 +3,7 @@ from sverchok.utils.logging import info, exception
 
 try:
     from geomdl import NURBS
+    from geomdl import BSpline
     from geomdl import tessellate
     from geomdl import knotvector
     geomdl_available = True
@@ -42,6 +43,7 @@ if geomdl_available:
         @throttled
         def update_sockets(self, context):
             self.inputs['USize'].hide_safe = self.input_mode == '2D'
+            self.inputs['Weights'].hide_safe = self.surface_mode == 'BSPLINE'
 
         input_mode : EnumProperty(
                 name = "Input mode",
@@ -55,6 +57,17 @@ if geomdl_available:
                 min = 3,
                 update = updateNode)
 
+        surface_modes = [
+            ('NURBS', "NURBS", "NURBS Surface", 0),
+            ('BSPLINE', "BSpline", "BSpline Surface", 1)
+        ]
+
+        surface_mode : EnumProperty(
+                name = "Surface mode",
+                items = surface_modes,
+                default = 'NURBS',
+                update = update_sockets)
+
         def sv_init(self, context):
             self.inputs.new('SvVerticesSocket', "ControlPoints")
             self.inputs.new('SvStringsSocket', "Weights")
@@ -65,6 +78,7 @@ if geomdl_available:
             self.outputs.new('SvExSurfaceSocket', "Surface").display_shape = 'DIAMOND'
 
         def draw_buttons(self, context, layout):
+            layout.prop(self, "surface_mode", expand=True)
             layout.prop(self, "input_mode")
 
         def process(self):
@@ -93,7 +107,10 @@ if geomdl_available:
                         fullList(weights_u, len(verts_u))
 
                 # Generate surface
-                surf = NURBS.Surface()
+                if self.surface_mode == 'NURBS':
+                    surf = NURBS.Surface()
+                else: # BSPLINE
+                    surf = BSpline.Surface()
                 surf.degree_u = 3
                 surf.degree_v = 3
 
@@ -104,10 +121,14 @@ if geomdl_available:
                     surf.ctrlpts_size_u = n_u
                     surf.ctrlpts_size_v = n_v
                     surf.ctrlpts = vertices
-                    surf.weights = weights
+                    if self.surface_mode == 'NURBS':
+                        surf.weights = weights
                 else:
                     # Control points
-                    surf.ctrlpts2d = list(map(convert_row, vertices, weights))
+                    if self.surface_mode == 'NURBS':
+                        surf.ctrlpts2d = list(map(convert_row, vertices, weights))
+                    else:
+                        surf.ctrlpts2d = vertices
                     n_u = len(verts_in)
                     n_v = len(verts_in[0])
 

@@ -66,7 +66,7 @@ if geomdl_available:
             self.outputs.new('SvVerticesSocket', 'Vertices')
 
         def draw_buttons(self, context, layout):
-            layout.prop(text="Object vertical axis:")
+            layout.label(text="Object vertical axis:")
             layout.prop(self, "orient_axis_", expand=True)
             layout.prop(self, "autoscale", toggle=True)
 
