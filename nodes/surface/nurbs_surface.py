@@ -62,6 +62,7 @@ if geomdl_available:
             self.inputs.new('SvStringsSocket', "USize").prop_name = 'u_size'
             self.outputs.new('SvVerticesSocket', "Vertices")
             self.outputs.new('SvStringsSocket', "Faces")
+            self.outputs.new('SvExSurfaceSocket', "Surface").display_shape = 'DIAMOND'
 
         def draw_buttons(self, context, layout):
             layout.prop(self, "input_mode")
@@ -79,6 +80,7 @@ if geomdl_available:
             verts_out = []
             edges_out = []
             faces_out = []
+            surfaces_out = []
             for vertices, weights, samples, u_size in zip_long_repeat(vertices_s, weights_s, samples_s, u_size_s):
                 if isinstance(samples, (list, tuple)):
                     samples = samples[0]
@@ -119,9 +121,11 @@ if geomdl_available:
                 new_faces = [f.data for f in surf.faces]
                 verts_out.append(new_verts)
                 faces_out.append(new_faces)
+                surfaces_out.append(surf)
 
             self.outputs['Vertices'].sv_set(verts_out)
             self.outputs['Faces'].sv_set(faces_out)
+            self.outputs['Surface'].sv_set(surfaces_out)
 
 def register():
     if geomdl_available:
