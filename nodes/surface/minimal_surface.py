@@ -19,6 +19,8 @@ import sverchok
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, get_data_nesting_level
 
+from sverchok_extra.data import SvExRbfSurface
+
 if scipy_available:
 
     TARGET_U_SOCKET = 6
@@ -130,6 +132,7 @@ if scipy_available:
             self.update_sockets(context)
 
         def draw_buttons(self, context, layout):
+            layout.label(text="Surface type:")
             layout.prop(self, "coord_mode", expand=True)
             layout.prop(self, "function")
             if self.coord_mode == 'XY':
@@ -320,7 +323,7 @@ if scipy_available:
                 verts_out.append(new_verts)
                 edges_out.append(new_edges)
                 faces_out.append(new_faces)
-                surfaces_out.append(rbf)
+                surfaces_out.append(SvExRbfSurface(rbf, self.coord_mode, self.orientation, matrix))
 
             self.outputs['Vertices'].sv_set(verts_out)
             self.outputs['Edges'].sv_set(edges_out)

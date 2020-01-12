@@ -28,6 +28,7 @@ from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat
 
 from . import sockets
+from . import data
 
 # make sverchok the root module name, (if sverchok dir not named exactly "sverchok") 
 if __name__ != "sverchok_extra":
@@ -94,6 +95,7 @@ def register():
     global our_menu_classes
 
     sockets.register()
+    data.register()
 
     register_nodes()
     extra_nodes = importlib.import_module(".nodes", "sverchok_extra")
@@ -118,5 +120,6 @@ def unregister():
     #unregister_node_add_operators()
     unregister_nodes()
 
+    data.unregister()
     sockets.unregister()
 
