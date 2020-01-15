@@ -45,8 +45,7 @@ something, otherwise Sverchok-Extra will just do nothing.
 One thing you will have to install anyway if you want to use Sverchok-Extra is
 [pip][6]. All libraries are installed with it.
 
-Install pip
-^^^^^^^^^^^
+### Install pip
 
 This I tested on latest Blender 2.81 builds. The similar instructions should
 work for other Blender 2.8x versions.
@@ -61,18 +60,15 @@ system's installation of python (python is usually installed by default on most
 Linux distros). In such cases, you may use just `pip install something` to
 install libraries.
 
-Install SciPy
-^^^^^^^^^^^^^
+### Install SciPy
 
     $ /path/to/blender/2.xx/python/bin/python3.7m -m pip install -U scipy
 
-Install SciKit-Image
-^^^^^^^^^^^^^^^^^^^^
+### Install SciKit-Image
 
     $ /path/to/blender/2.xx/python/bin/python3.7m -m pip install -U scikit-image
 
-Install PyMCubes
-^^^^^^^^^^^^^^^^
+### Install PyMCubes
 
 This is more complex. First, you have to install [Cython][7]:
 
@@ -99,8 +95,7 @@ After that, you can install PyMCubes by
 
     $ /path/to/blender/2.xx/python/bin/python3.7m -m pip install -U PyMCubes
 
-Install Geomdl
-^^^^^^^^^^^^^^
+### Install Geomdl
 
 In the simplest case, you can install Geomdl by
 
@@ -113,15 +108,13 @@ as it is described in [Geomdl instruction][9]:
 
     $ /path/to/blender/2.xx/python/bin/python3 -m pip install geomdl --install-option="--use-cython"
 
-Install Sverchok
-^^^^^^^^^^^^^^^^
+### Install Sverchok
 
 I hope you've done it already. The instuction is in Sverchok's README.
 Basically, you have to download the zip file from GitHub and install it in
 Blender's preferences dialog.
 
-Install Sverchok-Extra
-^^^^^^^^^^^^^^^^^^^^^^
+### Install Sverchok-Extra
 
 After you installed all of dependencies you've decided to install, installation
 of Sverchok-Extra by itself is simple:
