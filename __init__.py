@@ -51,7 +51,8 @@ def nodes_index():
                 ("curve.nurbs_curve", "SvExNurbsCurveNode")
             ]),
             ("Spatial", [
-                ("spatial.voronoi3d", "SvExVoronoi3DNode")
+                ("spatial.voronoi3d", "SvExVoronoi3DNode"),
+                ("spatial.voronoi_sphere", "SvExVoronoiSphereNode")
             ])
     ]
 
