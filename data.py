@@ -1,4 +1,5 @@
 
+import numpy as np
 from mathutils import Matrix
 
 class SvExRbfSurface(object):
@@ -21,6 +22,61 @@ class SvExRbfSurface(object):
     @property
     def has_matrix(self):
         return self.coord_mode == 'XY' and self.input_matrix is not None and self.input_matrix != Matrix()
+
+coordinate_modes = [
+    ('XYZ', "Carthesian", "Carthesian coordinates - x, y, z", 0),
+    ('CYL', "Cylindrical", "Cylindrical coordinates - rho, phi, z", 1),
+    ('SPH', "Spherical", "Spherical coordinates - rho, phi, theta", 2)
+]
+
+class SvExScalarField(object):
+    def evaluate(self, point):
+        raise Exception("not implemented")
+
+class SvExScalarFieldLambda(SvExScalarField):
+    def __init__(self, function, variables):
+        self.function = function
+        self.variables = variables
+
+    def evaluate_grid(self, *grid):
+        return np.vectorize(self.function)(*grid)
+
+    def evaluate(self, x, y, z):
+        return self.function(x, y, z)
+
+class SvExScalarFieldPointDistance(SvExScalarField):
+    def __init__(self, center, falloff=None):
+        self.center = center
+        self.falloff = falloff
+
+    def evaluate_grid(self, xs, ys, zs):
+        x0, y0, z0 = tuple(self.center)
+        xs = xs - x0
+        ys = ys - y0
+        zs = zs - z0
+        points = np.stack((xs, ys, zs))
+        norms = np.linalg.norm(points, axis=0)
+        if self.falloff is not None:
+            result = self.falloff(norms)
+            return result
+        else:
+            return norms
+
+    def evaluate(self, x, y, z):
+        return np.linalg.norm( np.array([x, y, z]) - self.center)
+
+class SvExScalarFieldBinOp(SvExScalarField):
+    def __init__(self, field1, field2, function):
+        self.function = function
+        self.field1 = field1
+        self.field2 = field2
+
+    def evaluate(self, x, y, z):
+        return self.function(self.field1.evaluate(x, y, z), self.field2.evaluate(x, y, z))
+
+    def evaluate_grid(self, *grid):
+        func = lambda xs, ys, zs : self.function(self.field1.evaluate_grid(xs, ys, zs), self.field2.evaluate_grid(xs, ys, zs))
+        return np.vectorize(func)(*grid)
 
 def register():
     pass
