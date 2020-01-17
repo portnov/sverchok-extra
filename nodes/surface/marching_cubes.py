@@ -55,10 +55,14 @@ if mcubes_available or skimage_available:
                 modes.append(("skimage", "SciKit-Image", "SciKit-Image", 2))
             return modes
 
+        @throttled
+        def update_sockets(self, context):
+            self.outputs['VertexNormals'].hide_safe = self.implementation != 'skimage'
+
         implementation : EnumProperty(
                 name = "Implementation",
                 items = get_modes,
-                update = updateNode)
+                update = update_sockets)
 
         def sv_init(self, context):
             self.inputs.new('SvExScalarFieldSocket', "Field").display_shape = 'CIRCLE_DOT'
@@ -67,6 +71,8 @@ if mcubes_available or skimage_available:
             self.inputs.new('SvStringsSocket', "Samples").prop_name = 'sample_size'
             self.outputs.new('SvVerticesSocket', "Vertices")
             self.outputs.new('SvStringsSocket', "Faces")
+            self.outputs.new('SvVerticesSocket', "VertexNormals")
+            self.update_sockets(context)
 
         def draw_buttons(self, context, layout):
             layout.prop(self, "implementation", text="")
@@ -93,6 +99,7 @@ if mcubes_available or skimage_available:
 
             verts_out = []
             faces_out = []
+            normals_out = []
             for field, vertices, value, samples in zip(*parameters):
                 if isinstance(samples, (list, tuple)):
                     samples = samples[0]
@@ -118,6 +125,7 @@ if mcubes_available or skimage_available:
 
                     new_verts = (new_verts / samples) * (b2n - b1n) + b1n
                     new_verts, new_faces = new_verts.tolist(), new_faces.tolist()
+                    new_normals = []
                 else: # skimage
                     spacing = tuple(1 / (b2n - b1n))
                     new_verts, new_faces, normals, values = measure.marching_cubes_lewiner(
@@ -126,11 +134,14 @@ if mcubes_available or skimage_available:
                             step_size = 1)
                     new_verts = (new_verts / samples) * (b2n - b1n) + b1n
                     new_verts, new_faces = new_verts.tolist(), new_faces.tolist()
+                    new_normals = normals.tolist()
                 verts_out.append(new_verts)
                 faces_out.append(new_faces)
+                normals_out.append(new_normals)
 
             self.outputs['Vertices'].sv_set(verts_out)
             self.outputs['Faces'].sv_set(faces_out)
+            self.outputs['VertexNormals'].sv_set(normals_out)
 
 def register():
     if mcubes_available:
