@@ -34,15 +34,24 @@ class SvExScalarField(object):
         raise Exception("not implemented")
 
 class SvExScalarFieldLambda(SvExScalarField):
-    def __init__(self, function, variables):
+    def __init__(self, function, variables, in_field):
         self.function = function
         self.variables = variables
+        self.in_field = in_field
 
-    def evaluate_grid(self, *grid):
-        return np.vectorize(self.function)(*grid)
+    def evaluate_grid(self, xs, ys, zs):
+        if self.in_field is None:
+            Vs = np.zeros((xs.shape[0], ys.shape[0], zs.shape[0]))
+        else:
+            Vs = self.in_field.evaluate_grid(xs, ys, zs)
+        return np.vectorize(self.function)(xs, ys, zs, Vs)
 
     def evaluate(self, x, y, z):
-        return self.function(x, y, z)
+        if self.in_field is None:
+            V = None
+        else:
+            V = self.in_field.evaluate(x, y, z)
+        return self.function(x, y, z, V)
 
 class SvExScalarFieldPointDistance(SvExScalarField):
     def __init__(self, center, falloff=None):
@@ -74,9 +83,9 @@ class SvExScalarFieldBinOp(SvExScalarField):
     def evaluate(self, x, y, z):
         return self.function(self.field1.evaluate(x, y, z), self.field2.evaluate(x, y, z))
 
-    def evaluate_grid(self, *grid):
+    def evaluate_grid(self, xs, ys, zs):
         func = lambda xs, ys, zs : self.function(self.field1.evaluate_grid(xs, ys, zs), self.field2.evaluate_grid(xs, ys, zs))
-        return np.vectorize(func)(*grid)
+        return np.vectorize(func, signature="(m,n,p),(m,n,p),(m,n,p)->(m,n,p)")(xs, ys, zs)
 
 def register():
     pass

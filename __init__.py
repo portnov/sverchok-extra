@@ -53,7 +53,8 @@ def nodes_index():
             ("Field", [
                 ("field.scalar_field_formula", "SvExScalarFieldFormulaNode"),
                 ("field.scalar_field_point", "SvExScalarFieldPointNode"),
-                ("field.scalar_field_math", "SvExScalarFieldMathNode")
+                ("field.scalar_field_math", "SvExScalarFieldMathNode"),
+                ("field.scalar_field_eval", "SvExScalarFieldEvaluateNode")
             ]),
             ("Spatial", [
                 ("spatial.voronoi3d", "SvExVoronoi3DNode"),

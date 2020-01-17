@@ -34,6 +34,7 @@ class SvExScalarFieldFormulaNode(bpy.types.Node, SverchCustomTreeNode):
         update = updateNode)
 
     def sv_init(self, context):
+        self.inputs.new('SvExScalarFieldSocket', "Field").display_shape = 'CIRCLE_DOT'
         self.outputs.new('SvExScalarFieldSocket', "Field").display_shape = 'CIRCLE_DOT'
 
     def draw_buttons(self, context, layout):
@@ -44,18 +45,18 @@ class SvExScalarFieldFormulaNode(bpy.types.Node, SverchCustomTreeNode):
     def make_function(self, variables):
         compiled = sv_compile(self.formula)
 
-        def carthesian(x, y, z):
-            variables.update(dict(x=x, y=y, z=z))
+        def carthesian(x, y, z, V):
+            variables.update(dict(x=x, y=y, z=z, V=V))
             return safe_eval_compiled(compiled, variables)
 
-        def cylindrical(x, y, z):
+        def cylindrical(x, y, z, V):
             rho, phi, z = to_cylindrical((x, y, z), mode='radians')
-            variables.update(dict(rho=rho, phi=phi, z=z))
+            variables.update(dict(rho=rho, phi=phi, z=z, V=V))
             return safe_eval_compiled(compiled, variables)
 
-        def spherical(x, y, z):
+        def spherical(x, y, z, V):
             rho, phi, theta = to_spherical((x, y, z), mode='radians')
-            variables.update(dict(rho=rho, phi=phi, theta=theta))
+            variables.update(dict(rho=rho, phi=phi, theta=theta, V=V))
             return safe_eval_compiled(compiled, variables)
 
         if self.input_mode == 'XYZ':
@@ -69,11 +70,11 @@ class SvExScalarFieldFormulaNode(bpy.types.Node, SverchCustomTreeNode):
 
     def get_coordinate_variables(self):
         if self.input_mode == 'XYZ':
-            return {'x', 'y', 'z'}
+            return {'x', 'y', 'z', 'V'}
         elif self.input_mode == 'CYL':
-            return {'rho', 'phi', 'z'}
+            return {'rho', 'phi', 'z', 'V'}
         else: # SPH
-            return {'rho', 'phi', 'theta'}
+            return {'rho', 'phi', 'theta', 'V'}
 
     def get_variables(self):
         variables = get_variables(self.formula)
@@ -83,7 +84,7 @@ class SvExScalarFieldFormulaNode(bpy.types.Node, SverchCustomTreeNode):
     def adjust_sockets(self):
         variables = self.get_variables()
         for key in self.inputs.keys():
-            if key not in variables:
+            if key not in variables and key not in ['Field']:
                 self.debug("Input {} not in variables {}, remove it".format(key, str(variables)))
                 self.inputs.remove(self.inputs[key])
         for v in variables:
@@ -108,21 +109,28 @@ class SvExScalarFieldFormulaNode(bpy.types.Node, SverchCustomTreeNode):
     def process(self):
         if not any(socket.is_linked for socket in self.outputs):
             return
+
+        fields_s = self.inputs['Field'].sv_get(default = [None])
+
         var_names = self.get_variables()
         inputs = self.get_input()
         input_values = [inputs.get(name, [[0]]) for name in var_names]
         if var_names:
-            parameters = match_long_repeat(input_values)
+            parameters = match_long_repeat([fields_s] + input_values)
         else:
-            parameters = [[[]]]
+            parameters = [fields_s]
 
         fields_out = []
-        for objects in zip(*parameters):
-            for var_values in zip_long_repeat(*objects):
+        for field_in, *objects in zip(*parameters):
+            if var_names:
+                var_values_s = zip_long_repeat(*objects)
+            else:
+                var_values_s = [[]]
+            for var_values in var_values_s:
                 variables = dict(zip(var_names, var_values))
                 function = self.make_function(variables.copy())
-                field = SvExScalarFieldLambda(function, variables)
-                fields_out.append(field)
+                new_field = SvExScalarFieldLambda(function, variables, field_in)
+                fields_out.append(new_field)
 
         self.outputs['Field'].sv_set(fields_out)
 

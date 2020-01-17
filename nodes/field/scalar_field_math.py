@@ -15,8 +15,8 @@ operations = [
     ('ADD', "Add", lambda x, y : x+y),
     ('SUB', "Sub", lambda x, y : x-y),
     ('MUL', "Multiply", lambda x, y : x * y),
-    ('MIN', "Minimum", lambda x, y : min(x,y)),
-    ('MAX', "Maximum", lambda x, y : max(x,y)),
+    ('MIN', "Minimum", lambda x, y : np.min([x,y],axis=0)),
+    ('MAX', "Maximum", lambda x, y : np.max([x,y],axis=0)),
     ('AVG', "Average", lambda x, y : (x+y)/2)
 ]
 
