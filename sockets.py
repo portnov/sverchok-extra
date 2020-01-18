@@ -37,7 +37,7 @@ class SvExScalarFieldSocket(NodeSocket, SvSocketCommon):
         return {}
 
     def draw_color(self, context, node):
-        return (0.9, 0.1, 0.1, 1.0)
+        return (0.9, 0.4, 0.1, 1.0)
 
     def sv_get(self, default=sentinel, deepcopy=True, implicit_conversions=None):
         if self.is_linked and not self.is_output:
@@ -52,8 +52,8 @@ class SvExScalarFieldSocket(NodeSocket, SvSocketCommon):
             return default
 
 class SvExVectorFieldSocket(NodeSocket, SvSocketCommon):
-    bl_idname = "SvExScalarFieldSocket"
-    bl_label = "Scalar Field Socket"
+    bl_idname = "SvExVectorFieldSocket"
+    bl_label = "Vector Field Socket"
 
     def get_prop_data(self):
         return {}

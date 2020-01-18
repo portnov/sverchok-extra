@@ -2,6 +2,18 @@
 import numpy as np
 from mathutils import Matrix
 
+coordinate_modes = [
+    ('XYZ', "Carthesian", "Carthesian coordinates - x, y, z", 0),
+    ('CYL', "Cylindrical", "Cylindrical coordinates - rho, phi, z", 1),
+    ('SPH', "Spherical", "Spherical coordinates - rho, phi, theta", 2)
+]
+
+##################
+#                #
+#  Surfaces      #
+#                #
+##################
+
 class SvExRbfSurface(object):
     def __init__(self, rbf, coord_mode, input_orientation, input_matrix):
         self.rbf = rbf
@@ -23,14 +35,17 @@ class SvExRbfSurface(object):
     def has_matrix(self):
         return self.coord_mode == 'XY' and self.input_matrix is not None and self.input_matrix != Matrix()
 
-coordinate_modes = [
-    ('XYZ', "Carthesian", "Carthesian coordinates - x, y, z", 0),
-    ('CYL', "Cylindrical", "Cylindrical coordinates - rho, phi, z", 1),
-    ('SPH', "Spherical", "Spherical coordinates - rho, phi, theta", 2)
-]
+##################
+#                #
+#  Scalar Fields #
+#                #
+##################
 
 class SvExScalarField(object):
     def evaluate(self, point):
+        raise Exception("not implemented")
+
+    def evaluate_grid(self, xs, ys, zs):
         raise Exception("not implemented")
 
 class SvExScalarFieldLambda(SvExScalarField):
@@ -86,6 +101,39 @@ class SvExScalarFieldBinOp(SvExScalarField):
     def evaluate_grid(self, xs, ys, zs):
         func = lambda xs, ys, zs : self.function(self.field1.evaluate_grid(xs, ys, zs), self.field2.evaluate_grid(xs, ys, zs))
         return np.vectorize(func, signature="(m,n,p),(m,n,p),(m,n,p)->(m,n,p)")(xs, ys, zs)
+
+##################
+#                #
+#  Vector Fields #
+#                #
+##################
+
+class SvExVectorField(object):
+    def evaluate(self, point):
+        raise Exception("not implemented")
+
+    def evaluate_grid(self, xs, ys, zs):
+        raise Exception("not implemented")
+
+class SvExVectorFieldLambda(SvExVectorField):
+    def __init__(self, function, variables, in_field):
+        self.function = function
+        self.variables = variables
+        self.in_field = in_field
+
+    def evaluate_grid(self, xs, ys, zs):
+        if self.in_field is None:
+            Vs = np.zeros((xs.shape[0], ys.shape[0], zs.shape[0]))
+        else:
+            Vs = self.in_field.evaluate_grid(xs, ys, zs)
+        return np.vectorize(self.function, signature="(m,n,p),(m,n,p),(m,n,p),(m,n,k)->(m,n,p),(m,n,p),(m,n,p)")(xs, ys, zs, Vs)
+
+    def evaluate(self, x, y, z):
+        if self.in_field is None:
+            V = None
+        else:
+            V = self.in_field.evaluate(x, y, z)
+        return self.function(x, y, z, V)
 
 def register():
     pass
