@@ -102,6 +102,24 @@ class SvExScalarFieldBinOp(SvExScalarField):
         func = lambda xs, ys, zs : self.function(self.field1.evaluate_grid(xs, ys, zs), self.field2.evaluate_grid(xs, ys, zs))
         return np.vectorize(func, signature="(m,n,p),(m,n,p),(m,n,p)->(m,n,p)")(xs, ys, zs)
 
+class SvExVectorFieldsScalarProduct(SvExScalarField):
+    def __init__(self, field1, field2):
+        self.field1 = field1
+        self.field2 = field2
+
+    def evaluate(self, x, y, z):
+        v1 = self.field1.evaluate(x, y, z)
+        v2 = self.field2.evaluate(x, y, z)
+        return np.dot(v1, v2)
+
+    def evaluate_grid(self, xs, ys, zs):
+        vx1, vy1, vz1 = self.field1.evaluate_grid(xs, ys, zs)
+        vx2, vy2, vz2 = self.field2.evaluate_grid(xs, ys, zs)
+        vectors1 = np.transpose( np.stack((vx1, vy1, vz1)), axes=(1,2,3,0))
+        vectors2 = np.transpose( np.stack((vx2, vy2, vz2)), axes=(1,2,3,0))
+        result = np.vectorize(np.dot, signature="(3),(3)->()")(vectors1, vectors2)
+        return result
+
 ##################
 #                #
 #  Vector Fields #

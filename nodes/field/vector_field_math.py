@@ -9,7 +9,7 @@ from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match
 from sverchok.utils.modules.eval_formula import get_variables, safe_eval
 from sverchok.utils.logging import info, exception
 
-from sverchok_extra.data import SvExVectorFieldBinOp, SvExVectorFieldMultipliedByScalar, SvExVectorFieldCrossProduct
+from sverchok_extra.data import SvExVectorFieldBinOp, SvExVectorFieldMultipliedByScalar, SvExVectorFieldCrossProduct, SvExVectorFieldsScalarProduct
 
 def add(x,y):
     r = x+y
@@ -108,6 +108,8 @@ class SvExVectorFieldMathNode(bpy.types.Node, SverchCustomTreeNode):
 
             if self.operation == 'MUL':
                 field_c = SvExVectorFieldMultipliedByScalar(vfield_a, sfield_b)
+            elif self.operation == 'DOT':
+                field_c = SvExVectorFieldsScalarProduct(vfield_a, vfield_b)
             elif self.operation == 'CROSS':
                 field_c = SvExVectorFieldCrossProduct(vfield_a, vfield_b)
             else:
