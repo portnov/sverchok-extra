@@ -9,7 +9,9 @@ from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match
 from sverchok.utils.modules.eval_formula import get_variables, safe_eval
 from sverchok.utils.logging import info, exception
 
-from sverchok_extra.data import SvExVectorFieldBinOp, SvExVectorFieldMultipliedByScalar, SvExVectorFieldCrossProduct, SvExVectorFieldsScalarProduct, SvExVectorFieldNorm
+from sverchok_extra.data import (SvExVectorFieldBinOp, SvExVectorFieldMultipliedByScalar,
+            SvExVectorFieldCrossProduct, SvExVectorFieldsScalarProduct,
+            SvExVectorFieldNorm, SvExVectorFieldTangent, SvExVectorFieldCotangent)
 
 def add(x,y):
     r = x+y
@@ -22,6 +24,7 @@ operations = [
     ('DOT', "Scalar Product", lambda x, y : x.dot(y), ["VFieldA", "VFieldB"], ["SFieldC"]),
     ('CROSS', "Vector Product", lambda x, y : np.cross(x, y), ["VFieldA", "VFieldB"], ["VFieldC"]),
     ('MUL', "Multiply Scalar", lambda x, y : x * y, ["VFieldA", "SFieldB"], ["VFieldC"]),
+    ('TANG', "Projection decomposition", None, ["VFieldA", "VFieldB"], ["VFieldC", "VFieldD"]),
     ('NORM', "Norm", None, ["VFieldA"], ["SFieldC"])
 ]
 
@@ -85,6 +88,7 @@ class SvExVectorFieldMathNode(bpy.types.Node, SverchCustomTreeNode):
         self.inputs.new('SvExScalarFieldSocket', "SFieldB").display_shape = 'CIRCLE_DOT'
         self.outputs.new('SvExVectorFieldSocket', "VFieldC").display_shape = 'CIRCLE_DOT'
         self.outputs.new('SvExScalarFieldSocket', "SFieldC").display_shape = 'CIRCLE_DOT'
+        self.outputs.new('SvExVectorFieldSocket', "VFieldD").display_shape = 'CIRCLE_DOT'
         self.update_sockets(context)
 
     def draw_buttons(self, context, layout):
@@ -98,11 +102,12 @@ class SvExVectorFieldMathNode(bpy.types.Node, SverchCustomTreeNode):
         vfield_b_s = self.inputs['VFieldB'].sv_get(default=[None])
         sfield_b_s = self.inputs['SFieldB'].sv_get(default=[None])
 
-        vfields_out = []
+        vfields_c_out = []
+        vfields_d_out = []
         sfields_out = []
         for vfield_a, vfield_b, sfield_b in zip_long_repeat(vfield_a_s, vfield_b_s, sfield_b_s):
             inputs = dict(VFieldA = vfield_a, VFieldB = vfield_b, SFieldB = sfield_b)
-            outputs = dict(VFieldC = vfields_out, SFieldC = sfields_out)
+            outputs = dict(VFieldC = vfields_c_out, VFieldD = vfields_d_out, SFieldC = sfields_out)
 
             actual_inputs, actual_outputs = get_sockets(self.operation)
             operation = get_operation(self.operation)
@@ -115,11 +120,16 @@ class SvExVectorFieldMathNode(bpy.types.Node, SverchCustomTreeNode):
                 field_c = SvExVectorFieldCrossProduct(vfield_a, vfield_b)
             elif self.operation == 'NORM':
                 field_c = SvExVectorFieldNorm(vfield_a)
+            elif self.operation == 'TANG':
+                field_c = SvExVectorFieldTangent(vfield_a, vfield_b)
+                field_d = SvExVectorFieldCotangent(vfield_a, vfield_b)
+                vfields_d_out.append(field_d)
             else:
                 field_c = SvExVectorFieldBinOp(inputs[actual_inputs[0]], inputs[actual_inputs[1]], vectorize(operation))
             outputs[actual_outputs[0]].append(field_c)
 
-        self.outputs['VFieldC'].sv_set(vfields_out)
+        self.outputs['VFieldC'].sv_set(vfields_c_out)
+        self.outputs['VFieldD'].sv_set(vfields_d_out)
         self.outputs['SFieldC'].sv_set(sfields_out)
 
 def register():

@@ -619,9 +619,10 @@ class SvExPlaneAttractorVectorField(SvExVectorField):
             R = vectors
             return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
 
-class SvExBvhAttractorVectorField(SvExScalarField):
-    def __init__(self, bvh=None, verts=None, faces=None, falloff=None):
+class SvExBvhAttractorVectorField(SvExVectorField):
+    def __init__(self, bvh=None, verts=None, faces=None, falloff=None, use_normal=False):
         self.falloff = falloff
+        self.use_normal = use_normal
         if bvh is not None:
             self.bvh = bvh
         elif verts is not None and faces is not None:
@@ -632,14 +633,20 @@ class SvExBvhAttractorVectorField(SvExScalarField):
     def evaluate(self, x, y, z):
         vertex = Vector((x,y,z))
         nearest, normal, idx, distance = self.bvh.find_nearest(vertex)
-        return np.array(nearest - vertex)
+        if self.use_normal:
+            return np.array(normal)
+        else:
+            return np.array(nearest - vertex)
 
     def evaluate_grid(self, xs, ys, zs):
         def find(v):
             nearest, normal, idx, distance = self.bvh.find_nearest(v)
             if nearest is None:
                 raise Exception("No nearest point on mesh found for vertex %s" % v)
-            return np.array(nearest) - v
+            if self.use_normal:
+                return np.array(normal)
+            else:
+                return np.array(nearest) - v
 
         points = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
         vectors = np.vectorize(find, signature='(3)->(3)')(points)
@@ -651,6 +658,55 @@ class SvExBvhAttractorVectorField(SvExScalarField):
         else:
             R = vectors
             return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
+
+class SvExVectorFieldTangent(SvExVectorField):
+    def __init__(self, field1, field2):
+        self.field1 = field1
+        self.field2 = field2
+
+    def evaluate(self, x, y, z):
+        v1 = self.field1.evaluate(x,y,z)
+        v2 = self.field2.evaluate(x,y,z)
+        projection = np.dot(v1, v2) * v2 / np.dot(v2, v2)
+        return projection
+    
+    def evaluate_grid(self, xs, ys, zs):
+        vx1, vy1, vz1 = self.field1.evaluate_grid(xs, ys, zs)
+        vx2, vy2, vz2 = self.field2.evaluate_grid(xs, ys, zs)
+        vectors1 = np.transpose( np.stack((vx1, vy1, vz1)), axes=(1,2,3,0))
+        vectors2 = np.transpose( np.stack((vx2, vy2, vz2)), axes=(1,2,3,0))
+
+        def project(v1, v2):
+            projection = np.dot(v1, v2) * v2 / np.dot(v2, v2)
+            vx, vy, vz = projection
+            return vx, vy, vz
+
+        return np.vectorize(project, signature="(3),(3)->(),(),()")(vectors1, vectors2)
+
+class SvExVectorFieldCotangent(SvExVectorField):
+    def __init__(self, field1, field2):
+        self.field1 = field1
+        self.field2 = field2
+
+    def evaluate(self, x, y, z):
+        v1 = self.field1.evaluate(x,y,z)
+        v2 = self.field2.evaluate(x,y,z)
+        projection = np.dot(v1, v2) * v2 / np.dot(v2, v2)
+        return v1 - projection
+    
+    def evaluate_grid(self, xs, ys, zs):
+        vx1, vy1, vz1 = self.field1.evaluate_grid(xs, ys, zs)
+        vx2, vy2, vz2 = self.field2.evaluate_grid(xs, ys, zs)
+        vectors1 = np.transpose( np.stack((vx1, vy1, vz1)), axes=(1,2,3,0))
+        vectors2 = np.transpose( np.stack((vx2, vy2, vz2)), axes=(1,2,3,0))
+
+        def project(v1, v2):
+            projection = np.dot(v1, v2) * v2 / np.dot(v2, v2)
+            coprojection = v1 - projection
+            vx, vy, vz = coprojection
+            return vx, vy, vz
+
+        return np.vectorize(project, signature="(3),(3)->(),(),()")(vectors1, vectors2)
 
 def register():
     pass
