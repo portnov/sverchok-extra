@@ -1,6 +1,6 @@
 
 import numpy as np
-from mathutils import Matrix
+from mathutils import Matrix, Vector
 from mathutils import noise
 from mathutils import kdtree
 
@@ -49,6 +49,17 @@ class SvExScalarField(object):
 
     def evaluate_grid(self, xs, ys, zs):
         raise Exception("not implemented")
+
+class SvExConstantScalarField(SvExScalarField):
+    def __init__(self, value):
+        self.value = value
+
+    def evaluate(self, x, y, z):
+        return self.value
+
+    def evaluate_grid(self, xs, ys, zs):
+        result = np.full_like(xs, self.value)
+        return result
 
 class SvExScalarFieldLambda(SvExScalarField):
     def __init__(self, function, variables, in_field):
@@ -277,6 +288,21 @@ class SvExVectorField(object):
 
     def evaluate_grid(self, xs, ys, zs):
         raise Exception("not implemented")
+
+class SvExMatrixVectorField(SvExVectorField):
+    def __init__(self, matrix):
+        self.matrix = matrix
+
+    def evaluate(self, x, y, z):
+        v = self.matrix @ Vector((x,y,z))
+        return np.array(v)
+
+    def evaluate_grid(self, xs, ys, zs):
+        matrix = np.array(self.matrix.to_3x3())
+        translation = np.array(self.matrix.translation)
+        points = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        R = np.apply_along_axis(lambda v : matrix @ v + translation, 3, points)
+        return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
 
 class SvExVectorFieldLambda(SvExVectorField):
     def __init__(self, function, variables, in_field):

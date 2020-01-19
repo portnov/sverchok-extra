@@ -9,7 +9,7 @@ from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match
 from sverchok.utils.modules.eval_formula import get_variables, safe_eval
 from sverchok.utils.logging import info, exception
 
-from sverchok_extra.data import SvExScalarFieldBinOp
+from sverchok_extra.data import SvExScalarFieldBinOp, SvExScalarField
 
 operations = [
     ('ADD', "Add", lambda x, y : x+y),
@@ -60,10 +60,15 @@ class SvExScalarFieldMathNode(bpy.types.Node, SverchCustomTreeNode):
         field_b_s = self.inputs['FieldB'].sv_get()
 
         fields_out = []
-        for field_a, field_b in zip_long_repeat(field_a_s, field_b_s):
-            operation = get_operation(self.operation)
-            field_c = SvExScalarFieldBinOp(field_a, field_b, operation)
-            fields_out.append(field_c)
+        for fields_a, fields_b in zip_long_repeat(field_a_s, field_b_s):
+            if isinstance(fields_a, SvExScalarField):
+                fields_a = [fields_a]
+            if isinstance(fields_b, SvExScalarField):
+                fields_b = [fields_b]
+            for field_a, field_b in zip_long_repeat(fields_a, fields_b):
+                operation = get_operation(self.operation)
+                field_c = SvExScalarFieldBinOp(field_a, field_b, operation)
+                fields_out.append(field_c)
 
         self.outputs['FieldC'].sv_set(fields_out)
 
