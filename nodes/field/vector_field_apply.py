@@ -8,54 +8,65 @@ from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match_long_repeat
 from sverchok.utils.logging import info, exception
 
-class SvExVectorFieldEvaluateNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExVectorFieldApplyNode(bpy.types.Node, SverchCustomTreeNode):
     """
-    Triggers: Vector Field Evaluate
-    Tooltip: Evaluate Vector Field at specific point(s)
+    Triggers: Vector Field Apply
+    Tooltip: Apply Vector Field to vertices
     """
-    bl_idname = 'SvExVectorFieldEvaluateNode'
-    bl_label = 'Evaluate Vector Field'
+    bl_idname = 'SvExVectorFieldApplyNode'
+    bl_label = 'Apply Vector Field'
     bl_icon = 'OUTLINER_OB_EMPTY'
     sv_icon = 'SV_VORONOI'
+
+    coefficient : FloatProperty(
+            name = "Coefficient",
+            default = 1.0,
+            update = updateNode)
 
     def sv_init(self, context):
         self.inputs.new('SvExVectorFieldSocket', "Field").display_shape = 'CIRCLE_DOT'
         d = self.inputs.new('SvVerticesSocket', "Vertices")
         d.use_prop = True
         d.prop = (0.0, 0.0, 0.0)
-        self.outputs.new('SvVerticesSocket', 'Vectors')
+        self.inputs.new('SvStringsSocket', "Coefficient").prop_name = 'coefficient'
+        self.outputs.new('SvVerticesSocket', 'Vertices')
 
     def process(self):
         if not any(socket.is_linked for socket in self.outputs):
             return
 
         vertices_s = self.inputs['Vertices'].sv_get()
+        coeffs_s = self.inputs['Coefficient'].sv_get()
         fields_s = self.inputs['Field'].sv_get()
 
-        values_out = []
-        for field, vertices in zip_long_repeat(fields_s, vertices_s):
+        verts_out = []
+        for field, vertices, coeffs in zip_long_repeat(fields_s, vertices_s, coeffs_s):
             if len(vertices) == 0:
-                new_values = []
+                new_verts = []
             elif len(vertices) == 1:
                 vertex = vertices[0]
-                value = field.evaluate(*vertex)
-                new_values = [value]
+                vector = field.evaluate(*vertex)
+                coeff = coeffs[0]
+                new_vertex = (coeff * np.array(vertex) + vector).tolist()
+                new_verts = [new_vertex]
             else:
+                fullList(coeffs, len(vertices))
                 XYZ = np.array(vertices)
                 xs = XYZ[:,0][np.newaxis][np.newaxis]
                 ys = XYZ[:,1][np.newaxis][np.newaxis]
                 zs = XYZ[:,2][np.newaxis][np.newaxis]
                 new_xs, new_ys, new_zs = field.evaluate_grid(xs, ys, zs)
                 new_vectors = np.dstack((new_xs[0,0,:], new_ys[0,0,:], new_zs[0,0,:]))
-                new_values = new_vectors[0].tolist()
+                new_vectors = np.array(coeffs)[np.newaxis].T * new_vectors[0]
+                new_verts = (XYZ + new_vectors).tolist()
 
-            values_out.append(new_values)
+            verts_out.append(new_verts)
 
-        self.outputs['Vectors'].sv_set(values_out)
+        self.outputs['Vertices'].sv_set(verts_out)
 
 def register():
-    bpy.utils.register_class(SvExVectorFieldEvaluateNode)
+    bpy.utils.register_class(SvExVectorFieldApplyNode)
 
 def unregister():
-    bpy.utils.unregister_class(SvExVectorFieldEvaluateNode)
+    bpy.utils.unregister_class(SvExVectorFieldApplyNode)
 

@@ -58,7 +58,9 @@ def nodes_index():
                 ("field.vector_field_formula", "SvExVectorFieldFormulaNode"),
                 ("field.minimal_vfield", "SvExMinimalVectorFieldNode"),
                 ("field.vector_field_eval", "SvExVectorFieldEvaluateNode"),
-                ("field.vector_field_math", "SvExVectorFieldMathNode")
+                ("field.vector_field_apply", "SvExVectorFieldApplyNode"),
+                ("field.vector_field_math", "SvExVectorFieldMathNode"),
+                ("field.noise_vfield", "SvExNoiseVectorFieldNode")
             ]),
             ("Spatial", [
                 ("spatial.voronoi3d", "SvExVoronoi3DNode"),

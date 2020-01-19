@@ -1,6 +1,7 @@
 
 import numpy as np
 from mathutils import Matrix
+from mathutils import noise
 
 coordinate_modes = [
     ('XYZ', "Carthesian", "Carthesian coordinates - x, y, z", 0),
@@ -211,14 +212,35 @@ class SvExRbfVectorField(SvExVectorField):
         self.rbf = rbf
 
     def evaluate(self, x, y, z):
-        return self.rbf(x, y, z)
+        return self.rbf(x, y, z) - np.array([x, y, z])
 
     def evaluate_grid(self, xs, ys, zs):
         value = self.rbf(xs, ys, zs)
         vx = value[:,:,:,0]
         vy = value[:,:,:,1]
         vz = value[:,:,:,2]
+        vx = vx - xs
+        vy = vy - ys
+        vz = vz - zs
         return vx, vy, vz
+
+class SvExNoiseVectorField(SvExVectorField):
+    def __init__(self, noise_type, seed):
+        self.noise_type = noise_type
+        self.seed = seed
+
+    def evaluate(self, x, y, z):
+        noise.seed_set(self.seed)
+        return noise.noise_vector((x, y, z), noise_basis=self.noise_type)
+
+    def evaluate_grid(self, xs, ys, zs):
+        noise.seed_set(self.seed)
+        def mk_noise(v):
+            r = noise.noise_vector(v, noise_basis=self.noise_type)
+            return r[0], r[1], r[2]
+        vectors = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        return np.vectorize(mk_noise, signature="(3)->(),(),()")(vectors)
+
 
 def register():
     pass
