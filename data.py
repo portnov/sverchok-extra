@@ -121,6 +121,20 @@ class SvExVectorFieldsScalarProduct(SvExScalarField):
         result = np.vectorize(np.dot, signature="(3),(3)->()")(vectors1, vectors2)
         return result
 
+class SvExVectorFieldNorm(SvExScalarField):
+    def __init__(self, field):
+        self.field = field
+
+    def evaluate(self, x, y, z):
+        v = self.field.evaluate(x, y, z)
+        return np.norm(v)
+
+    def evaluate_grid(self, xs, ys, zs):
+        vx, vy, vz = self.field.evaluate_grid(xs, ys, zs)
+        vectors = np.transpose( np.stack((vx, vy, vz)), axes=(1,2,3,0))
+        result = np.vectorize(np.linalg.norm, signature="(3)->()")(vectors)
+        return result
+
 ##################
 #                #
 #  Vector Fields #

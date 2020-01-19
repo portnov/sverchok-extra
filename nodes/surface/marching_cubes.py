@@ -22,7 +22,6 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, St
 
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match_long_repeat
-from sverchok.utils.modules.eval_formula import get_variables, safe_eval
 
 if mcubes_available or skimage_available:
 
@@ -144,10 +143,10 @@ if mcubes_available or skimage_available:
             self.outputs['VertexNormals'].sv_set(normals_out)
 
 def register():
-    if mcubes_available:
+    if mcubes_available or skimage_available:
         bpy.utils.register_class(SvExMarchingCubesNode)
 
 def unregister():
-    if mcubes_available:
+    if mcubes_available or skimage_available:
         bpy.utils.unregister_class(SvExMarchingCubesNode)
 

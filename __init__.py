@@ -48,7 +48,8 @@ def nodes_index():
                 ("surface.evaluate_nurbs_surface", "SvExEvalNurbsSurfaceNode")
             ]),
             ("Curve", [
-                ("curve.nurbs_curve", "SvExNurbsCurveNode")
+                ("curve.nurbs_curve", "SvExNurbsCurveNode"),
+                ("curve.marching_squares", "SvExMarchingSquaresNode")
             ]),
             ("Field", [
                 ("field.scalar_field_formula", "SvExScalarFieldFormulaNode"),

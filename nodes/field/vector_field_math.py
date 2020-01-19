@@ -9,7 +9,7 @@ from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match
 from sverchok.utils.modules.eval_formula import get_variables, safe_eval
 from sverchok.utils.logging import info, exception
 
-from sverchok_extra.data import SvExVectorFieldBinOp, SvExVectorFieldMultipliedByScalar, SvExVectorFieldCrossProduct, SvExVectorFieldsScalarProduct
+from sverchok_extra.data import SvExVectorFieldBinOp, SvExVectorFieldMultipliedByScalar, SvExVectorFieldCrossProduct, SvExVectorFieldsScalarProduct, SvExVectorFieldNorm
 
 def add(x,y):
     r = x+y
@@ -21,7 +21,8 @@ operations = [
     ('AVG', "Average", lambda x, y : (x+y)/2, ["VFieldA", "VFieldB"], ["VFieldC"]),
     ('DOT', "Scalar Product", lambda x, y : x.dot(y), ["VFieldA", "VFieldB"], ["SFieldC"]),
     ('CROSS', "Vector Product", lambda x, y : np.cross(x, y), ["VFieldA", "VFieldB"], ["VFieldC"]),
-    ('MUL', "Multiply Scalar", lambda x, y : x * y, ["VFieldA", "SFieldB"], ["VFieldC"])
+    ('MUL', "Multiply Scalar", lambda x, y : x * y, ["VFieldA", "SFieldB"], ["VFieldC"]),
+    ('NORM', "Norm", None, ["VFieldA"], ["SFieldC"])
 ]
 
 operation_modes = [ (id, name, name, i) for i, (id, name, fn, _, _) in enumerate(operations) ]
@@ -112,6 +113,8 @@ class SvExVectorFieldMathNode(bpy.types.Node, SverchCustomTreeNode):
                 field_c = SvExVectorFieldsScalarProduct(vfield_a, vfield_b)
             elif self.operation == 'CROSS':
                 field_c = SvExVectorFieldCrossProduct(vfield_a, vfield_b)
+            elif self.operation == 'NORM':
+                field_c = SvExVectorFieldNorm(vfield_a)
             else:
                 field_c = SvExVectorFieldBinOp(inputs[actual_inputs[0]], inputs[actual_inputs[1]], vectorize(operation))
             outputs[actual_outputs[0]].append(field_c)
