@@ -2,6 +2,7 @@
 import numpy as np
 from mathutils import Matrix
 from mathutils import noise
+from mathutils import kdtree
 
 coordinate_modes = [
     ('XYZ', "Carthesian", "Carthesian coordinates - x, y, z", 0),
@@ -155,10 +156,6 @@ class SvExMergedScalarField(SvExScalarField):
         return value
 
     def evaluate_grid(self, xs, ys, zs):
-#         def get_values(field, xs, ys, zs):
-#             vx, vy, vz = field.evaluate_grid(xs, ys, zs)
-#             vectors = np.transpose( np.stack((vx, vy, vz)), axes=(1,2,3,0))
-#             return vectors
         values = np.array([field.evaluate_grid(xs, ys, zs) for field in self.fields])
         if self.mode == 'MIN':
             value = np.min(values, axis=0)
@@ -171,6 +168,102 @@ class SvExMergedScalarField(SvExScalarField):
         else:
             raise Exception("unsupported operation")
         return value
+
+class SvExKdtScalarField(SvExScalarField):
+    def __init__(self, vertices=None, kdt=None, falloff=None):
+        self.falloff = falloff
+        if kdt is not None:
+            self.kdt = kdt
+        elif vertices is not None:
+            self.kdt = kdtree.KDTree(len(vertices))
+            for i, v in enumerate(vertices):
+                self.kdt.insert(v, i)
+            self.kdt.balance()
+        else:
+            raise Exception("Either kdt or vertices must be provided")
+
+    def evaluate(self, x, y, z):
+        nearest, i, distance = self.kdt.find((x, y, z))
+        if self.falloff is not None:
+            value = self.falloff(np.array([distance]))[0]
+            return value
+        else:
+            return distance
+
+    def evaluate_grid(self, xs, ys, zs):
+        def find(v):
+            nearest, i, distance = self.kdt.find(v)
+            return distance
+
+        points = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        norms = np.vectorize(find, signature='(3)->()')(points)
+        if self.falloff is not None:
+            result = self.falloff(norms)
+            return result
+        else:
+            return norms
+
+class SvExLineAttractorScalarField(SvExScalarField):
+    def __init__(self, center, direction, falloff=None):
+        self.center = center
+        self.direction = direction
+        self.falloff = falloff
+
+    def evaluate(self, x, y, z):
+        vertex = np.array([x,y,z])
+        direction = self.direction
+        to_center = self.center - vertex
+        projection = np.dot(to_center, direction) * direction / np.dot(direction, direction)
+        dv = to_center - projection
+        return np.linalg.norm(dv)
+
+    def evaluate_grid(self, xs, ys, zs):
+        direction = self.direction
+        direction2 = np.dot(direction, direction)
+
+        def func(vertex):
+            to_center = self.center - vertex
+            projection = np.dot(to_center, direction) * direction / direction2
+            dv = to_center - projection
+            return np.linalg.norm(dv)
+
+        points = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        norms = np.vectorize(func, signature='(3)->()')(points)
+        if self.falloff is not None:
+            result = self.falloff(norms)
+            return result
+        else:
+            return norms
+
+class SvExPlaneAttractorScalarField(SvExScalarField):
+    def __init__(self, center, direction, falloff=None):
+        self.center = center
+        self.direction = direction
+        self.falloff = falloff
+
+    def evaluate(self, x, y, z):
+        vertex = np.array([x,y,z])
+        direction = self.direction
+        to_center = self.center - vertex
+        projection = np.dot(to_center, direction) * direction / np.dot(direction, direction)
+        return np.linalg.norm(projection)
+
+    def evaluate_grid(self, xs, ys, zs):
+        direction = self.direction
+        direction2 = np.dot(direction, direction)
+
+        def func(vertex):
+            to_center = self.center - vertex
+            projection = np.dot(to_center, direction) * direction / direction2
+            return np.linalg.norm(projection)
+
+        points = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        norms = np.vectorize(func, signature='(3)->()')(points)
+        if self.falloff is not None:
+            result = self.falloff(norms)
+            return result
+        else:
+            return norms
 
 ##################
 #                #
@@ -217,6 +310,29 @@ class SvExVectorFieldBinOp(SvExVectorField):
 
     def evaluate_grid(self, xs, ys, zs):
         func = lambda xs, ys, zs : self.function(self.field1.evaluate_grid(xs, ys, zs), self.field2.evaluate_grid(xs, ys, zs))
+        return np.vectorize(func, signature="(m,n,p),(m,n,p),(m,n,p)->(m,n,p),(m,n,p),(m,n,p)")(xs, ys, zs)
+
+class SvExAverageVectorField(SvExVectorField):
+    def __init__(self, fields):
+        self.fields = fields
+
+    def evaluate(self, x, y, z):
+        vectors = np.array([field.evaluate(x, y, z) for field in self.fields])
+        return np.mean(vectors, axis=0)
+
+    def evaluate_grid(self, xs, ys, zs):
+        def func(xs, ys, zs):
+            #vectors = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+            #v = np.stack((xs, ys, zs)).T
+            data = []
+            for field in self.fields:
+                vx, vy, vz = field.evaluate_grid(xs, ys, zs)
+                vectors = np.transpose( np.stack((vx, vy, vz)), axes=(1,2,3,0))
+                data.append(vectors)
+            data = np.array(data)
+            mean = np.mean(data, axis=0)
+            #print(mean[:,:,0].shape)
+            return mean[:,:,:,0],mean[:,:,:,1],mean[:,:,:,2]
         return np.vectorize(func, signature="(m,n,p),(m,n,p),(m,n,p)->(m,n,p),(m,n,p),(m,n,p)")(xs, ys, zs)
 
 class SvExVectorFieldCrossProduct(SvExVectorField):
@@ -292,6 +408,150 @@ class SvExNoiseVectorField(SvExVectorField):
         vectors = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
         return np.vectorize(mk_noise, signature="(3)->(),(),()")(vectors)
 
+class SvExKdtVectorField(SvExVectorField):
+    def __init__(self, vertices=None, kdt=None, falloff=None, negate=False):
+        self.falloff = falloff
+        self.negate = negate
+        if kdt is not None:
+            self.kdt = kdt
+        elif vertices is not None:
+            self.kdt = kdtree.KDTree(len(vertices))
+            for i, v in enumerate(vertices):
+                self.kdt.insert(v, i)
+            self.kdt.balance()
+        else:
+            raise Exception("Either kdt or vertices must be provided")
+
+    def evaluate(self, x, y, z):
+        nearest, i, distance = self.kdt.find((x, y, z))
+        vector = np.array(nearest) - np.array([x, y, z])
+        if self.falloff is not None:
+            value = self.falloff(np.array([distance]))[0]
+            if self.negate:
+                value = - value
+            norm = np.linalg.norm(vector)
+            return value * vector / norm
+        else:
+            if self.negate:
+                return - vector
+            else:
+                return vector
+
+    def evaluate_grid(self, xs, ys, zs):
+        def find(v):
+            nearest, i, distance = self.kdt.find(v)
+            dx, dy, dz = np.array(nearest) - np.array(v)
+            if self.negate:
+                return (-dx, -dy, -dz)
+            else:
+                return (dx, dy, dz)
+
+        points = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        vectors = np.vectorize(find, signature='(3)->(),(),()')(points)
+        if self.falloff is not None:
+            norms = np.linalg.norm(vectors, axis=0)
+            lens = self.falloff(norms)
+            R = lens * vectors
+            return R[0,:,:], R[1,:,:], R[2,:,:]
+        else:
+            return vectors
+
+class SvExVectorFieldPointDistance(SvExVectorField):
+    def __init__(self, center, falloff=None):
+        self.center = center
+        self.falloff = falloff
+
+    def evaluate_grid(self, xs, ys, zs):
+        x0, y0, z0 = tuple(self.center)
+        xs = x0 - xs
+        ys = y0 - ys
+        zs = z0 - zs
+        vectors = np.stack((xs, ys, zs))
+        if self.falloff is not None:
+            norms = np.linalg.norm(vectors, axis=0)
+            lens = self.falloff(norms)
+            R = lens * vectors
+            return R[0,:,:], R[1,:,:], R[2,:,:]
+        else:
+            R = vectors
+            return R[0,:,:], R[1,:,:], R[2,:,:]
+
+    def evaluate(self, x, y, z):
+        vector = np.array([x, y, z]) - self.center
+        if self.fallof is not None:
+            norm = np.norm(vector)
+            value = self.falloff(np.array([distance]))[0]
+            return value * vector / norm
+        else:
+            return vector
+
+class SvExLineAttractorVectorField(SvExVectorField):
+    def __init__(self, center, direction, falloff=None):
+        self.center = center
+        self.direction = direction
+        self.falloff = falloff
+
+    def evaluate(self, x, y, z):
+        vertex = np.array([x,y,z])
+        direction = self.direction
+        to_center = self.center - vertex
+        projection = np.dot(to_center, direction) * direction / np.dot(direction, direction)
+        dv = to_center - projection
+        return dv
+
+    def evaluate_grid(self, xs, ys, zs):
+        direction = self.direction
+        direction2 = np.dot(direction, direction)
+
+        def func(vertex):
+            to_center = self.center - vertex
+            projection = np.dot(to_center, direction) * direction / direction2
+            dv = to_center - projection
+            return dv
+
+        points = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        vectors = np.vectorize(func, signature='(3)->(3)')(points)
+        if self.falloff is not None:
+            norms = np.linalg.norm(vectors, axis=0)
+            lens = self.falloff(norms)
+            R = lens * vectors
+            return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
+        else:
+            R = vectors
+            return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
+
+class SvExPlaneAttractorVectorField(SvExVectorField):
+    def __init__(self, center, direction, falloff=None):
+        self.center = center
+        self.direction = direction
+        self.falloff = falloff
+
+    def evaluate(self, x, y, z):
+        vertex = np.array([x,y,z])
+        direction = self.direction
+        to_center = self.center - vertex
+        projection = np.dot(to_center, direction) * direction / np.dot(direction, direction)
+        return projection
+
+    def evaluate_grid(self, xs, ys, zs):
+        direction = self.direction
+        direction2 = np.dot(direction, direction)
+
+        def func(vertex):
+            to_center = self.center - vertex
+            projection = np.dot(to_center, direction) * direction / direction2
+            return projection
+
+        points = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        vectors = np.vectorize(func, signature='(3)->(3)')(points)
+        if self.falloff is not None:
+            norms = np.linalg.norm(vectors, axis=0)
+            lens = self.falloff(norms)
+            R = lens * vectors
+            return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
+        else:
+            R = vectors
+            return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
 
 def register():
     pass

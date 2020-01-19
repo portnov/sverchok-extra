@@ -7,15 +7,9 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, St
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match_long_repeat
 from sverchok.utils.logging import info, exception
-from sverchok.utils.math import inverse, inverse_square, inverse_cubic
 
 from sverchok_extra.data import SvExScalarFieldPointDistance
-
-def inverse_exp(c, x):
-    return np.exp(-c*x)
-
-def gauss(c, x):
-    return np.exp(-c*x*x/2.0)
+from sverchok_extra.utils import falloff_types, falloff
 
 class SvExScalarFieldPointNode(bpy.types.Node, SverchCustomTreeNode):
     """
@@ -26,15 +20,6 @@ class SvExScalarFieldPointNode(bpy.types.Node, SverchCustomTreeNode):
     bl_label = 'Distance from a point'
     bl_icon = 'OUTLINER_OB_EMPTY'
     sv_icon = 'SV_VORONOI'
-
-    falloff_types = [
-            ('NONE', "None - R", "Output distance", 0),
-            ("inverse", "Inverse - 1/R", "", 1),
-            ("inverse_square", "Inverse square - 1/R^2", "Similar to gravitation or electromagnetizm", 2),
-            ("inverse_cubic", "Inverse cubic - 1/R^3", "", 3),
-            ("inverse_exp", "Inverse exponent - Exp(-R)", "", 4),
-            ("gauss", "Gauss - Exp(-R^2/2)", "", 5)
-        ]
 
     @throttled
     def update_type(self, context):
@@ -68,24 +53,6 @@ class SvExScalarFieldPointNode(bpy.types.Node, SverchCustomTreeNode):
         layout.prop(self, 'falloff_type')
         layout.prop(self, 'clamp')
 
-    def falloff(self, amplitude, coefficient):
-        falloff_func = globals()[self.falloff_type]
-
-        def function(rho_array):
-            zero_idxs = (rho_array == 0)
-            nonzero = (rho_array != 0)
-            result = np.empty_like(rho_array)
-            result[zero_idxs] = amplitude
-            result[nonzero] = amplitude * falloff_func(coefficient, rho_array[nonzero])
-            negative = result <= 0
-            result[negative] = 0.0
-
-            if self.clamp:
-                high = result >= rho_array
-                result[high] = rho_array[high]
-            return result
-        return function
-
     def process(self):
         if not any(socket.is_linked for socket in self.outputs):
             return
@@ -100,7 +67,7 @@ class SvExScalarFieldPointNode(bpy.types.Node, SverchCustomTreeNode):
                 if self.falloff_type == 'NONE':
                     falloff = None
                 else:
-                    falloff = self.falloff(amplitude, coefficient)
+                    falloff = falloff(self.falloff_type, amplitude, coefficient, self.clamp)
                 field = SvExScalarFieldPointDistance(np.array(center), falloff)
                 fields_out.append(field)
 
