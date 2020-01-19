@@ -4,12 +4,18 @@ import numpy as np
 import bpy
 from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, StringProperty
 from mathutils import kdtree
+from mathutils import bvhtree
 
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match_long_repeat
 from sverchok.utils.logging import info, exception
 
-from sverchok_extra.data import SvExScalarFieldPointDistance, SvExVectorFieldPointDistance, SvExAverageVectorField, SvExMergedScalarField, SvExKdtVectorField, SvExKdtScalarField, SvExLineAttractorScalarField, SvExLineAttractorVectorField, SvExPlaneAttractorScalarField, SvExPlaneAttractorVectorField
+from sverchok_extra.data import (SvExScalarFieldPointDistance, SvExVectorFieldPointDistance,
+            SvExAverageVectorField, SvExMergedScalarField,
+            SvExKdtVectorField, SvExKdtScalarField,
+            SvExLineAttractorScalarField, SvExLineAttractorVectorField,
+            SvExPlaneAttractorScalarField, SvExPlaneAttractorVectorField,
+            SvExBvhAttractorScalarField, SvExBvhAttractorVectorField)
 from sverchok_extra.utils import falloff_types, falloff
 
 class SvExAttractorFieldNode(bpy.types.Node, SverchCustomTreeNode):
@@ -24,9 +30,10 @@ class SvExAttractorFieldNode(bpy.types.Node, SverchCustomTreeNode):
 
     @throttled
     def update_type(self, context):
-        self.inputs['Direction'].hide_safe = (self.attractor_type == 'Point')
+        self.inputs['Direction'].hide_safe = (self.attractor_type in ['Point', 'Mesh'])
         self.inputs['Amplitude'].hide_safe = (self.falloff_type != 'NONE')
         self.inputs['Coefficient'].hide_safe = (self.falloff_type not in ['NONE', 'inverse_exp', 'gauss'])
+        self.inputs['Faces'].hide_safe = (self.attractor_type != 'Mesh')
 
     falloff_type: EnumProperty(
         name="Falloff type", items=falloff_types, default='NONE', update=update_type)
@@ -43,7 +50,8 @@ class SvExAttractorFieldNode(bpy.types.Node, SverchCustomTreeNode):
     types = [
             ("Point", "Point", "Attraction to single or multiple points", 0),
             ("Line", "Line", "Attraction to straight line", 1),
-            ("Plane", "Plane", "Attraction to plane", 2)
+            ("Plane", "Plane", "Attraction to plane", 2),
+            ("Mesh", "Mesh", "Attraction to mesh", 3)
         ]
 
     attractor_type: EnumProperty(
@@ -70,6 +78,7 @@ class SvExAttractorFieldNode(bpy.types.Node, SverchCustomTreeNode):
         d.use_prop = True
         d.prop = (0.0, 0.0, 1.0)
 
+        self.inputs.new('SvStringsSocket', 'Faces')
         self.inputs.new('SvStringsSocket', 'Amplitude').prop_name = 'amplitude'
         self.inputs.new('SvStringsSocket', 'Coefficient').prop_name = 'coefficient'
 
@@ -113,11 +122,18 @@ class SvExAttractorFieldNode(bpy.types.Node, SverchCustomTreeNode):
         vfield = SvExPlaneAttractorVectorField(np.array(center), np.array(direction), falloff)
         return vfield, sfield
 
+    def to_mesh(self, verts, faces, falloff):
+        bvh = bvhtree.BVHTree.FromPolygons(verts, faces)
+        sfield = SvExBvhAttractorScalarField(bvh=bvh, falloff=falloff)
+        vfield = SvExBvhAttractorVectorField(bvh=bvh, falloff=falloff)
+        return vfield, sfield
+
     def process(self):
         if not any(socket.is_linked for socket in self.outputs):
             return
 
         center_s = self.inputs['Center'].sv_get()
+        faces_s = self.inputs['Faces'].sv_get(default=[[]])
         directions_s = self.inputs['Direction'].sv_get()
         amplitudes_s = self.inputs['Amplitude'].sv_get()
         coefficients_s = self.inputs['Coefficient'].sv_get()
@@ -125,8 +141,8 @@ class SvExAttractorFieldNode(bpy.types.Node, SverchCustomTreeNode):
         vfields_out = []
         sfields_out = []
 
-        objects = zip_long_repeat(center_s, directions_s, amplitudes_s, coefficients_s)
-        for centers, direction, amplitude, coefficient in objects:
+        objects = zip_long_repeat(center_s, faces_s, directions_s, amplitudes_s, coefficients_s)
+        for centers, faces, direction, amplitude, coefficient in objects:
             if isinstance(amplitude, (list, tuple)):
                 amplitude = amplitude[0]
             if isinstance(coefficient, (list, tuple)):
@@ -143,6 +159,8 @@ class SvExAttractorFieldNode(bpy.types.Node, SverchCustomTreeNode):
                 vfield, sfield = self.to_line(centers[0], direction[0], falloff_func)
             elif self.attractor_type == 'Plane':
                 vfield, sfield = self.to_plane(centers[0], direction[0], falloff_func)
+            elif self.attractor_type == 'Mesh':
+                vfield, sfield = self.to_mesh(centers, faces, falloff_func)
             else:
                 raise Exception("not implemented yet")
 

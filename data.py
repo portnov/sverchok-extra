@@ -3,6 +3,7 @@ import numpy as np
 from mathutils import Matrix, Vector
 from mathutils import noise
 from mathutils import kdtree
+from mathutils import bvhtree
 
 coordinate_modes = [
     ('XYZ', "Carthesian", "Carthesian coordinates - x, y, z", 0),
@@ -276,6 +277,35 @@ class SvExPlaneAttractorScalarField(SvExScalarField):
         else:
             return norms
 
+class SvExBvhAttractorScalarField(SvExScalarField):
+    def __init__(self, bvh=None, verts=None, faces=None, falloff=None):
+        self.falloff = falloff
+        if bvh is not None:
+            self.bvh = bvh
+        elif verts is not None and faces is not None:
+            self.bvh = bvhtree.BVHTree.FromPolygons(verts, faces)
+        else:
+            raise Exception("Either bvh or verts and faces must be provided!")
+
+    def evaluate(self, x, y, z):
+        nearest, normal, idx, distance = self.bvh.find_nearest((x,y,z))
+        return distance
+
+    def evaluate_grid(self, xs, ys, zs):
+        def find(v):
+            nearest, normal, idx, distance = self.bvh.find_nearest(v)
+            if nearest is None:
+                raise Exception("No nearest point on mesh found for vertex %s" % v)
+            return distance
+
+        points = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        norms = np.vectorize(find, signature='(3)->()')(points)
+        if self.falloff is not None:
+            result = self.falloff(norms)
+            return result
+        else:
+            return norms
+
 ##################
 #                #
 #  Vector Fields #
@@ -348,8 +378,6 @@ class SvExAverageVectorField(SvExVectorField):
 
     def evaluate_grid(self, xs, ys, zs):
         def func(xs, ys, zs):
-            #vectors = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
-            #v = np.stack((xs, ys, zs)).T
             data = []
             for field in self.fields:
                 vx, vy, vz = field.evaluate_grid(xs, ys, zs)
@@ -357,7 +385,6 @@ class SvExAverageVectorField(SvExVectorField):
                 data.append(vectors)
             data = np.array(data)
             mean = np.mean(data, axis=0)
-            #print(mean[:,:,0].shape)
             return mean[:,:,:,0],mean[:,:,:,1],mean[:,:,:,2]
         return np.vectorize(func, signature="(m,n,p),(m,n,p),(m,n,p)->(m,n,p),(m,n,p),(m,n,p)")(xs, ys, zs)
 
@@ -570,6 +597,39 @@ class SvExPlaneAttractorVectorField(SvExVectorField):
 
         points = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
         vectors = np.vectorize(func, signature='(3)->(3)')(points)
+        if self.falloff is not None:
+            norms = np.linalg.norm(vectors, axis=0)
+            lens = self.falloff(norms)
+            R = lens * vectors
+            return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
+        else:
+            R = vectors
+            return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
+
+class SvExBvhAttractorVectorField(SvExScalarField):
+    def __init__(self, bvh=None, verts=None, faces=None, falloff=None):
+        self.falloff = falloff
+        if bvh is not None:
+            self.bvh = bvh
+        elif verts is not None and faces is not None:
+            self.bvh = bvhtree.BVHTree.FromPolygons(verts, faces)
+        else:
+            raise Exception("Either bvh or verts and faces must be provided!")
+
+    def evaluate(self, x, y, z):
+        vertex = Vector((x,y,z))
+        nearest, normal, idx, distance = self.bvh.find_nearest(vertex)
+        return np.array(nearest - vertex)
+
+    def evaluate_grid(self, xs, ys, zs):
+        def find(v):
+            nearest, normal, idx, distance = self.bvh.find_nearest(v)
+            if nearest is None:
+                raise Exception("No nearest point on mesh found for vertex %s" % v)
+            return np.array(nearest) - v
+
+        points = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        vectors = np.vectorize(find, signature='(3)->(3)')(points)
         if self.falloff is not None:
             norms = np.linalg.norm(vectors, axis=0)
             lens = self.falloff(norms)
