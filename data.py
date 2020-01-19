@@ -708,6 +708,20 @@ class SvExVectorFieldCotangent(SvExVectorField):
 
         return np.vectorize(project, signature="(3),(3)->(),(),()")(vectors1, vectors2)
 
+class SvExVectorFieldComposition(SvExVectorField):
+    def __init__(self, field1, field2):
+        self.field1 = field1
+        self.field2 = field2
+
+    def evaluate(self, x, y, z):
+        x1, y1, z1 = self.field1.evaluate(x,y,z)
+        v2 = self.field2.evaluate(x1,y1,z1)
+        return v2
+    
+    def evaluate_grid(self, xs, ys, zs):
+        vx1, vy1, vz1 = self.field1.evaluate_grid(xs, ys, zs)
+        return self.field2.evaluate_grid(vx1, vy1, vz1)
+
 def register():
     pass
 

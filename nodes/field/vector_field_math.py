@@ -11,7 +11,8 @@ from sverchok.utils.logging import info, exception
 
 from sverchok_extra.data import (SvExVectorFieldBinOp, SvExVectorFieldMultipliedByScalar,
             SvExVectorFieldCrossProduct, SvExVectorFieldsScalarProduct,
-            SvExVectorFieldNorm, SvExVectorFieldTangent, SvExVectorFieldCotangent)
+            SvExVectorFieldNorm, SvExVectorFieldTangent, SvExVectorFieldCotangent,
+            SvExVectorFieldComposition)
 
 def add(x,y):
     r = x+y
@@ -25,6 +26,7 @@ operations = [
     ('CROSS', "Vector Product", lambda x, y : np.cross(x, y), ["VFieldA", "VFieldB"], ["VFieldC"]),
     ('MUL', "Multiply Scalar", lambda x, y : x * y, ["VFieldA", "SFieldB"], ["VFieldC"]),
     ('TANG', "Projection decomposition", None, ["VFieldA", "VFieldB"], ["VFieldC", "VFieldD"]),
+    ('COMPOSE', "Composition B(A(x))", None, ["VFieldA", "VFieldB"], ["VFieldC"]),
     ('NORM', "Norm", None, ["VFieldA"], ["SFieldC"])
 ]
 
@@ -124,6 +126,8 @@ class SvExVectorFieldMathNode(bpy.types.Node, SverchCustomTreeNode):
                 field_c = SvExVectorFieldTangent(vfield_a, vfield_b)
                 field_d = SvExVectorFieldCotangent(vfield_a, vfield_b)
                 vfields_d_out.append(field_d)
+            elif self.operation == 'COMPOSE':
+                field_c = SvExVectorFieldComposition(vfield_a, vfield_b)
             else:
                 field_c = SvExVectorFieldBinOp(inputs[actual_inputs[0]], inputs[actual_inputs[1]], vectorize(operation))
             outputs[actual_outputs[0]].append(field_c)
