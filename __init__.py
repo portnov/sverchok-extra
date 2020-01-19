@@ -55,6 +55,7 @@ def nodes_index():
                 ("field.scalar_field_formula", "SvExScalarFieldFormulaNode"),
                 ("field.scalar_field_point", "SvExScalarFieldPointNode"),
                 ("field.scalar_field_math", "SvExScalarFieldMathNode"),
+                ("field.merge_scalar_fields", "SvExMergeScalarFieldsNode"),
                 ("field.scalar_field_eval", "SvExScalarFieldEvaluateNode"),
                 ("field.vector_field_formula", "SvExVectorFieldFormulaNode"),
                 ("field.minimal_vfield", "SvExMinimalVectorFieldNode"),

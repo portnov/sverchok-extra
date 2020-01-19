@@ -135,6 +135,43 @@ class SvExVectorFieldNorm(SvExScalarField):
         result = np.vectorize(np.linalg.norm, signature="(3)->()")(vectors)
         return result
 
+class SvExMergedScalarField(SvExScalarField):
+    def __init__(self, mode, fields):
+        self.mode = mode
+        self.fields = fields
+
+    def evaluate(self, x, y, z):
+        values = np.array([field.evaluate(x, y, z) for field in self.fields])
+        if self.mode == 'MIN':
+            value = np.min(values)
+        elif self.mode == 'MAX':
+            value = np.max(values)
+        elif self.mode == 'SUM':
+            value = np.sum(values)
+        elif self.mode == 'AVG':
+            value = np.mean(values)
+        else:
+            raise Exception("unsupported operation")
+        return value
+
+    def evaluate_grid(self, xs, ys, zs):
+#         def get_values(field, xs, ys, zs):
+#             vx, vy, vz = field.evaluate_grid(xs, ys, zs)
+#             vectors = np.transpose( np.stack((vx, vy, vz)), axes=(1,2,3,0))
+#             return vectors
+        values = np.array([field.evaluate_grid(xs, ys, zs) for field in self.fields])
+        if self.mode == 'MIN':
+            value = np.min(values, axis=0)
+        elif self.mode == 'MAX':
+            value = np.max(values, axis=0)
+        elif self.mode == 'SUM':
+            value = np.sum(values, axis=0)
+        elif self.mode == 'AVG':
+            value = np.mean(values, axis=0)
+        else:
+            raise Exception("unsupported operation")
+        return value
+
 ##################
 #                #
 #  Vector Fields #
