@@ -31,8 +31,8 @@ class SvExAttractorFieldNode(bpy.types.Node, SverchCustomTreeNode):
     @throttled
     def update_type(self, context):
         self.inputs['Direction'].hide_safe = (self.attractor_type in ['Point', 'Mesh'])
-        self.inputs['Amplitude'].hide_safe = (self.falloff_type != 'NONE')
-        self.inputs['Coefficient'].hide_safe = (self.falloff_type not in ['NONE', 'inverse_exp', 'gauss'])
+        self.inputs['Amplitude'].hide_safe = (self.falloff_type == 'NONE')
+        self.inputs['Coefficient'].hide_safe = (self.falloff_type not in ['inverse_exp', 'gauss'])
         self.inputs['Faces'].hide_safe = (self.attractor_type != 'Mesh')
 
     falloff_type: EnumProperty(

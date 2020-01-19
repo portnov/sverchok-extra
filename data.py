@@ -116,6 +116,19 @@ class SvExScalarFieldBinOp(SvExScalarField):
         func = lambda xs, ys, zs : self.function(self.field1.evaluate_grid(xs, ys, zs), self.field2.evaluate_grid(xs, ys, zs))
         return np.vectorize(func, signature="(m,n,p),(m,n,p),(m,n,p)->(m,n,p)")(xs, ys, zs)
 
+class SvExNegatedScalarField(SvExScalarField):
+    def __init__(self, field):
+        self.field = field
+
+    def evaluate(self, x, y, z):
+        v = self.field.evaluate(x, y, z)
+        return -x
+
+    def evaluate_grid(self, xs, ys, zs):
+        def func(xs, ys, zs):
+            return - self.field.evaluate_grid(xs, ys, zs)
+        return np.vectorize(func, signature="(m,n,p),(m,n,p),(m,n,p)->(m,n,p)")(xs, ys, zs)
+
 class SvExVectorFieldsScalarProduct(SvExScalarField):
     def __init__(self, field1, field2):
         self.field1 = field1

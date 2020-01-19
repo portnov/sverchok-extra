@@ -9,7 +9,7 @@ from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match
 from sverchok.utils.modules.eval_formula import get_variables, safe_eval
 from sverchok.utils.logging import info, exception
 
-from sverchok_extra.data import SvExScalarFieldBinOp, SvExScalarField
+from sverchok_extra.data import SvExScalarFieldBinOp, SvExScalarField, SvExNegatedScalarField
 
 operations = [
     ('ADD', "Add", lambda x, y : x+y),
@@ -17,7 +17,8 @@ operations = [
     ('MUL', "Multiply", lambda x, y : x * y),
     ('MIN', "Minimum", lambda x, y : np.min([x,y],axis=0)),
     ('MAX', "Maximum", lambda x, y : np.max([x,y],axis=0)),
-    ('AVG', "Average", lambda x, y : (x+y)/2)
+    ('AVG', "Average", lambda x, y : (x+y)/2),
+    ('NEG', "Negate", lambda x : -x)
 ]
 
 operation_modes = [ (id, name, name, i) for i, (id, name, fn) in enumerate(operations) ]
@@ -38,16 +39,21 @@ class SvExScalarFieldMathNode(bpy.types.Node, SverchCustomTreeNode):
     bl_icon = 'OUTLINER_OB_EMPTY'
     sv_icon = 'SV_VORONOI'
 
+    @throttled
+    def update_sockets(self, context):
+        self.inputs['FieldB'].hide_safe = self.operation == 'NEG'
+
     operation : EnumProperty(
         name = "Operation",
         items = operation_modes,
         default = 'ADD',
-        update = updateNode)
+        update = update_sockets)
 
     def sv_init(self, context):
         self.inputs.new('SvExScalarFieldSocket', "FieldA").display_shape = 'CIRCLE_DOT'
         self.inputs.new('SvExScalarFieldSocket', "FieldB").display_shape = 'CIRCLE_DOT'
         self.outputs.new('SvExScalarFieldSocket', "FieldC").display_shape = 'CIRCLE_DOT'
+        self.update_sockets(context)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'operation', text='')
@@ -57,7 +63,7 @@ class SvExScalarFieldMathNode(bpy.types.Node, SverchCustomTreeNode):
             return
 
         field_a_s = self.inputs['FieldA'].sv_get()
-        field_b_s = self.inputs['FieldB'].sv_get()
+        field_b_s = self.inputs['FieldB'].sv_get(default=[[None]])
 
         fields_out = []
         for fields_a, fields_b in zip_long_repeat(field_a_s, field_b_s):
@@ -67,7 +73,10 @@ class SvExScalarFieldMathNode(bpy.types.Node, SverchCustomTreeNode):
                 fields_b = [fields_b]
             for field_a, field_b in zip_long_repeat(fields_a, fields_b):
                 operation = get_operation(self.operation)
-                field_c = SvExScalarFieldBinOp(field_a, field_b, operation)
+                if self.operation == 'NEG':
+                    field_c = SvExNegatedScalarField(field_a)
+                else:
+                    field_c = SvExScalarFieldBinOp(field_a, field_b, operation)
                 fields_out.append(field_c)
 
         self.outputs['FieldC'].sv_set(fields_out)
