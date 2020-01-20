@@ -64,6 +64,15 @@ if skimage_available:
                 default = 1.0,
                 update = updateNode)
 
+        @throttled
+        def update_sockets(self, context):
+            self.outputs['Faces'].hide_safe = not self.make_faces
+
+        make_faces : BoolProperty(
+                name = "Make faces",
+                default = False,
+                update = update_sockets)
+
         def sv_init(self, context):
             self.inputs.new('SvExScalarFieldSocket', "Field").display_shape = 'CIRCLE_DOT'
             self.inputs.new('SvStringsSocket', "Value").prop_name = 'iso_value'
@@ -76,6 +85,10 @@ if skimage_available:
             self.outputs.new('SvVerticesSocket', "Vertices")
             self.outputs.new('SvStringsSocket', "Edges")
             self.outputs.new('SvStringsSocket', "Faces")
+            self.update_sockets(context)
+
+        def draw_buttons(self, context, layout):
+            layout.prop(self, 'make_faces', toggle=True)
 
         def make_contour(self, samples, min_x, x_size, min_y, y_size, z, contour):
             n = len(contour)
@@ -84,33 +97,34 @@ if skimage_available:
             vert_n_bound = None
             for i, (x0, y0) in enumerate(contour):
 
-                if x0 <= 0:
-                    if i == 0:
-                        vert_0_bound = 'A'
-                    elif i == n-1:
-                        vert_n_bound = 'A'
-                elif y0 <= 0:
-                    if i == 0:
-                        vert_0_bound = 'D'
-                    elif i == n-1:
-                        vert_n_bound = 'D'
-                elif x0 >= samples-1:
-                    if i == 0:
-                        vert_0_bound = 'C'
-                    elif i == n-1:
-                        vert_n_bound = 'C'
-                elif y0 >= samples-1:
-                    if i == 0:
-                        vert_0_bound = 'B'
-                    elif i == n-1:
-                        vert_n_bound = 'B'
+                if self.make_faces:
+                    if x0 <= 0:
+                        if i == 0:
+                            vert_0_bound = 'A'
+                        elif i == n-1:
+                            vert_n_bound = 'A'
+                    elif y0 <= 0:
+                        if i == 0:
+                            vert_0_bound = 'D'
+                        elif i == n-1:
+                            vert_n_bound = 'D'
+                    elif x0 >= samples-1:
+                        if i == 0:
+                            vert_0_bound = 'C'
+                        elif i == n-1:
+                            vert_n_bound = 'C'
+                    elif y0 >= samples-1:
+                        if i == 0:
+                            vert_0_bound = 'B'
+                        elif i == n-1:
+                            vert_n_bound = 'B'
 
                 x = min_x + x_size * x0
                 y = min_y + y_size * y0
                 vertex = (x, y, z)
                 verts.append(vertex)
 
-            make_face = vert_0_bound == vert_n_bound
+            make_face = self.make_faces and vert_0_bound == vert_n_bound
 
             edges = [(i, i+1) for i in range(n-1)]
             if make_face:
