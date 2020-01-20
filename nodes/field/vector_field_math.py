@@ -9,7 +9,8 @@ from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match
 from sverchok.utils.modules.eval_formula import get_variables, safe_eval
 from sverchok.utils.logging import info, exception
 
-from sverchok_extra.data import (SvExVectorFieldBinOp, SvExVectorFieldMultipliedByScalar,
+from sverchok_extra.data import (SvExScalarField, SvExVectorField,
+            SvExVectorFieldBinOp, SvExVectorFieldMultipliedByScalar,
             SvExVectorFieldCrossProduct, SvExVectorFieldsScalarProduct,
             SvExVectorFieldNorm, SvExVectorFieldTangent, SvExVectorFieldCotangent,
             SvExVectorFieldComposition)
@@ -101,36 +102,46 @@ class SvExVectorFieldMathNode(bpy.types.Node, SverchCustomTreeNode):
             return
 
         vfield_a_s = self.inputs['VFieldA'].sv_get()
-        vfield_b_s = self.inputs['VFieldB'].sv_get(default=[None])
-        sfield_b_s = self.inputs['SFieldB'].sv_get(default=[None])
+        vfield_b_s = self.inputs['VFieldB'].sv_get(default=[[None]])
+        sfield_b_s = self.inputs['SFieldB'].sv_get(default=[[None]])
 
         vfields_c_out = []
         vfields_d_out = []
         sfields_out = []
-        for vfield_a, vfield_b, sfield_b in zip_long_repeat(vfield_a_s, vfield_b_s, sfield_b_s):
-            inputs = dict(VFieldA = vfield_a, VFieldB = vfield_b, SFieldB = sfield_b)
+        for vfields_a, vfields_b, sfields_b in zip_long_repeat(vfield_a_s, vfield_b_s, sfield_b_s):
             outputs = dict(VFieldC = vfields_c_out, VFieldD = vfields_d_out, SFieldC = sfields_out)
 
             actual_inputs, actual_outputs = get_sockets(self.operation)
             operation = get_operation(self.operation)
 
-            if self.operation == 'MUL':
-                field_c = SvExVectorFieldMultipliedByScalar(vfield_a, sfield_b)
-            elif self.operation == 'DOT':
-                field_c = SvExVectorFieldsScalarProduct(vfield_a, vfield_b)
-            elif self.operation == 'CROSS':
-                field_c = SvExVectorFieldCrossProduct(vfield_a, vfield_b)
-            elif self.operation == 'NORM':
-                field_c = SvExVectorFieldNorm(vfield_a)
-            elif self.operation == 'TANG':
-                field_c = SvExVectorFieldTangent(vfield_a, vfield_b)
-                field_d = SvExVectorFieldCotangent(vfield_a, vfield_b)
-                vfields_d_out.append(field_d)
-            elif self.operation == 'COMPOSE':
-                field_c = SvExVectorFieldComposition(vfield_a, vfield_b)
-            else:
-                field_c = SvExVectorFieldBinOp(inputs[actual_inputs[0]], inputs[actual_inputs[1]], vectorize(operation))
-            outputs[actual_outputs[0]].append(field_c)
+            if not isinstance(vfields_a, (list, tuple)):
+                vfields_a = [vfields_a]
+            if not isinstance(vfields_b, (list, tuple)):
+                vfields_b = [vfields_b]
+            if not isinstance(sfields_b, (list, tuple)):
+                sfields_b = [sfields_b]
+
+            for vfield_a, vfield_b, sfield_b in zip_long_repeat(vfields_a, vfields_b, sfields_b):
+
+                inputs = dict(VFieldA = vfield_a, VFieldB = vfield_b, SFieldB = sfield_b)
+
+                if self.operation == 'MUL':
+                    field_c = SvExVectorFieldMultipliedByScalar(vfield_a, sfield_b)
+                elif self.operation == 'DOT':
+                    field_c = SvExVectorFieldsScalarProduct(vfield_a, vfield_b)
+                elif self.operation == 'CROSS':
+                    field_c = SvExVectorFieldCrossProduct(vfield_a, vfield_b)
+                elif self.operation == 'NORM':
+                    field_c = SvExVectorFieldNorm(vfield_a)
+                elif self.operation == 'TANG':
+                    field_c = SvExVectorFieldTangent(vfield_a, vfield_b)
+                    field_d = SvExVectorFieldCotangent(vfield_a, vfield_b)
+                    vfields_d_out.append(field_d)
+                elif self.operation == 'COMPOSE':
+                    field_c = SvExVectorFieldComposition(vfield_a, vfield_b)
+                else:
+                    field_c = SvExVectorFieldBinOp(inputs[actual_inputs[0]], inputs[actual_inputs[1]], vectorize(operation))
+                outputs[actual_outputs[0]].append(field_c)
 
         self.outputs['VFieldC'].sv_set(vfields_c_out)
         self.outputs['VFieldD'].sv_set(vfields_d_out)
