@@ -158,7 +158,7 @@ class SvExVectorFieldNorm(SvExScalarField):
     def evaluate_grid(self, xs, ys, zs):
         vx, vy, vz = self.field.evaluate_grid(xs, ys, zs)
         vectors = np.transpose( np.stack((vx, vy, vz)), axes=(1,2,3,0))
-        result = np.vectorize(np.linalg.norm, signature="(3)->()")(vectors)
+        result = np.linalg.norm(vectors, axis=3)
         return result
 
 class SvExMergedScalarField(SvExScalarField):
