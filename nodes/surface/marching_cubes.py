@@ -48,10 +48,10 @@ if mcubes_available or skimage_available:
 
         def get_modes(self, context):
             modes = []
+            if skimage_available:
+                modes.append(("skimage", "SciKit-Image", "SciKit-Image", 0))
             if mcubes_available:
                 modes.append(("mcubes", "PyMCubes", "PyMCubes", 1))
-            if skimage_available:
-                modes.append(("skimage", "SciKit-Image", "SciKit-Image", 2))
             return modes
 
         @throttled
