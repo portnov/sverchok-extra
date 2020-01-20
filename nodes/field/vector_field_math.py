@@ -13,21 +13,18 @@ from sverchok_extra.data import (SvExScalarField, SvExVectorField,
             SvExVectorFieldBinOp, SvExVectorFieldMultipliedByScalar,
             SvExVectorFieldCrossProduct, SvExVectorFieldsScalarProduct,
             SvExVectorFieldNorm, SvExVectorFieldTangent, SvExVectorFieldCotangent,
-            SvExVectorFieldComposition)
-
-def add(x,y):
-    r = x+y
-    return r
+            SvExVectorFieldComposition, SvExVectorScalarFieldComposition)
 
 operations = [
-    ('ADD', "Add", add, ["VFieldA", "VFieldB"], ["VFieldC"]),
+    ('ADD', "Add", lambda x,y : x+y, ["VFieldA", "VFieldB"], ["VFieldC"]),
     ('SUB', "Sub", lambda x, y : x-y, ["VFieldA", 'VFieldB'], ["VFieldC"]),
     ('AVG', "Average", lambda x, y : (x+y)/2, ["VFieldA", "VFieldB"], ["VFieldC"]),
     ('DOT', "Scalar Product", lambda x, y : x.dot(y), ["VFieldA", "VFieldB"], ["SFieldC"]),
     ('CROSS', "Vector Product", lambda x, y : np.cross(x, y), ["VFieldA", "VFieldB"], ["VFieldC"]),
     ('MUL', "Multiply Scalar", lambda x, y : x * y, ["VFieldA", "SFieldB"], ["VFieldC"]),
     ('TANG', "Projection decomposition", None, ["VFieldA", "VFieldB"], ["VFieldC", "VFieldD"]),
-    ('COMPOSE', "Composition B(A(x))", None, ["VFieldA", "VFieldB"], ["VFieldC"]),
+    ('COMPOSE', "Composition VB(VA(x))", None, ["VFieldA", "VFieldB"], ["VFieldC"]),
+    ('COMPOSES', "Composition SB(VA(x))", None, ["VFieldA", "SFieldB"], ["SFieldC"]),
     ('NORM', "Norm", None, ["VFieldA"], ["SFieldC"])
 ]
 
@@ -139,8 +136,10 @@ class SvExVectorFieldMathNode(bpy.types.Node, SverchCustomTreeNode):
                     vfields_d_out.append(field_d)
                 elif self.operation == 'COMPOSE':
                     field_c = SvExVectorFieldComposition(vfield_a, vfield_b)
+                elif self.operation == 'COMPOSES':
+                    field_c = SvExVectorScalarFieldComposition(vfield_a, sfield_b)
                 else:
-                    field_c = SvExVectorFieldBinOp(inputs[actual_inputs[0]], inputs[actual_inputs[1]], vectorize(operation))
+                    field_c = SvExVectorFieldBinOp(inputs[actual_inputs[0]], inputs[actual_inputs[1]], operation)
                 outputs[actual_outputs[0]].append(field_c)
 
         self.outputs['VFieldC'].sv_set(vfields_c_out)

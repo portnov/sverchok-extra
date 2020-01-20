@@ -319,6 +319,20 @@ class SvExBvhAttractorScalarField(SvExScalarField):
         else:
             return norms
 
+class SvExVectorScalarFieldComposition(SvExScalarField):
+    def __init__(self, vfield, sfield):
+        self.sfield = sfield
+        self.vfield = vfield
+
+    def evaluate(self, x, y, z):
+        x1, y1, z1 = self.vfield.evaluate(x,y,z)
+        v2 = self.sfield.evaluate(x1,y1,z1)
+        return v2
+    
+    def evaluate_grid(self, xs, ys, zs):
+        vx1, vy1, vz1 = self.vfield.evaluate_grid(xs, ys, zs)
+        return self.sfield.evaluate_grid(vx1, vy1, vz1)
+
 ##################
 #                #
 #  Vector Fields #
@@ -378,7 +392,11 @@ class SvExVectorFieldBinOp(SvExVectorField):
         return self.function(self.field1.evaluate(x, y, z), self.field2.evaluate(x, y, z))
 
     def evaluate_grid(self, xs, ys, zs):
-        func = lambda xs, ys, zs : self.function(self.field1.evaluate_grid(xs, ys, zs), self.field2.evaluate_grid(xs, ys, zs))
+        def func(xs, ys, zs):
+            vx1, vy1, vz1 = self.field1.evaluate_grid(xs, ys, zs)
+            vx2, vy2, vz2 = self.field2.evaluate_grid(xs, ys, zs)
+            R = self.function(np.array([vx1, vy1, vz1]), np.array([vx2, vy2, vz2]))
+            return R[0], R[1], R[2]
         return np.vectorize(func, signature="(m,n,p),(m,n,p),(m,n,p)->(m,n,p),(m,n,p),(m,n,p)")(xs, ys, zs)
 
 class SvExAverageVectorField(SvExVectorField):
@@ -435,9 +453,11 @@ class SvExVectorFieldMultipliedByScalar(SvExVectorField):
         def product(xs, ys, zs):
             scalars = self.scalar_field.evaluate_grid(xs, ys, zs)
             vx, vy, vz = self.vector_field.evaluate_grid(xs, ys, zs)
-            vectors = np.vstack((vx, vy, vz))
+            vectors = np.stack((vx, vy, vz))
+            #vectors = np.transpose( np.stack((vx, vy, vz)), axes=(1,2,3,0))
             R = scalars * vectors
-            return R[0,:,:][np.newaxis], R[1,:,:][np.newaxis], R[2,:,:][np.newaxis]
+            return R[0,:,:], R[1,:,:], R[2,:,:]
+            #return R[0,:,:][np.newaxis], R[1,:,:][np.newaxis], R[2,:,:][np.newaxis]
         return np.vectorize(product, signature="(m,n,p),(m,n,p),(m,n,p)->(m,n,p),(m,n,p),(m,n,p)")(xs, ys, zs)
 
 class SvExRbfVectorField(SvExVectorField):

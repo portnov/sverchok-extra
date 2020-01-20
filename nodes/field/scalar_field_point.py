@@ -65,10 +65,10 @@ class SvExScalarFieldPointNode(bpy.types.Node, SverchCustomTreeNode):
         for centers, amplitudes, coefficients in zip_long_repeat(center_s, amplitudes_s, coefficients_s):
             for center, amplitude, coefficient in zip_long_repeat(centers, amplitudes, coefficients):
                 if self.falloff_type == 'NONE':
-                    falloff = None
+                    falloff_func = None
                 else:
-                    falloff = falloff(self.falloff_type, amplitude, coefficient, self.clamp)
-                field = SvExScalarFieldPointDistance(np.array(center), falloff)
+                    falloff_func = falloff(self.falloff_type, amplitude, coefficient, self.clamp)
+                field = SvExScalarFieldPointDistance(np.array(center), falloff_func)
                 fields_out.append(field)
 
         self.outputs['Field'].sv_set(fields_out)
