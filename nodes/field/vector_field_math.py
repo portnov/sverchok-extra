@@ -130,9 +130,9 @@ class SvExVectorFieldMathNode(bpy.types.Node, SverchCustomTreeNode):
         update = update_sockets)
 
     def sv_init(self, context):
-        for socket in inputs_registry:
+        for socket in inputs_registry.values():
             self.inputs.new(socket.type, socket.id).display_shape = 'CIRCLE_DOT'
-        for socket in outputs_registry:
+        for socket in outputs_registry.values():
             self.outputs.new(socket.type, socket.id).display_shape = 'CIRCLE_DOT'
         self.update_sockets(context)
 
