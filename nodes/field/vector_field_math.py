@@ -15,17 +15,42 @@ from sverchok_extra.data import (SvExScalarField, SvExVectorField,
             SvExVectorFieldNorm, SvExVectorFieldTangent, SvExVectorFieldCotangent,
             SvExVectorFieldComposition, SvExVectorScalarFieldComposition)
 
+class Socket(object):
+    def __init__(self, type, id, idx=None):
+        self.type = type
+        self.id = id
+        self.idx = idx
+
+inputs_registry = dict()
+outputs_registry = dict()
+
+V_FIELD_A = Socket("SvExVectorFieldSocket", "VFieldA")
+V_FIELD_B =  Socket("SvExVectorFieldSocket", "VFieldB")
+S_FIELD_B =  Socket("SvExScalarFieldSocket", "SFieldB")
+
+V_FIELD_C = Socket("SvExVectorFieldSocket", "VFieldC")
+S_FIELD_C = Socket("SvExScalarFieldSocket", "SFieldC")
+V_FIELD_D = Socket("SvExVectorFieldSocket", "VFieldD")
+
+for idx, socket in enumerate([V_FIELD_A, V_FIELD_B, S_FIELD_B]):
+    socket.idx = idx
+    inputs_registry[socket.id] = socket
+
+for idx, socket in enumerate([V_FIELD_C, S_FIELD_C, V_FIELD_D]):
+    socket.idx = idx
+    outputs_registry[socket.id] = socket
+
 operations = [
-    ('ADD', "Add", lambda x,y : x+y, ["VFieldA", "VFieldB"], ["VFieldC"]),
-    ('SUB', "Sub", lambda x, y : x-y, ["VFieldA", 'VFieldB'], ["VFieldC"]),
-    ('AVG', "Average", lambda x, y : (x+y)/2, ["VFieldA", "VFieldB"], ["VFieldC"]),
-    ('DOT', "Scalar Product", lambda x, y : x.dot(y), ["VFieldA", "VFieldB"], ["SFieldC"]),
-    ('CROSS', "Vector Product", lambda x, y : np.cross(x, y), ["VFieldA", "VFieldB"], ["VFieldC"]),
-    ('MUL', "Multiply Scalar", lambda x, y : x * y, ["VFieldA", "SFieldB"], ["VFieldC"]),
-    ('TANG', "Projection decomposition", None, ["VFieldA", "VFieldB"], ["VFieldC", "VFieldD"]),
-    ('COMPOSE', "Composition VB(VA(x))", None, ["VFieldA", "VFieldB"], ["VFieldC"]),
-    ('COMPOSES', "Composition SB(VA(x))", None, ["VFieldA", "SFieldB"], ["SFieldC"]),
-    ('NORM', "Norm", None, ["VFieldA"], ["SFieldC"])
+    ('ADD', "Add", lambda x,y : x+y, [("VFieldA", "A"), ("VFieldB", "B")], [("VFieldC", "Sum")]),
+    ('SUB', "Sub", lambda x, y : x-y, [("VFieldA", "A"), ('VFieldB', "B")], [("VFieldC", "Difference")]),
+    ('AVG', "Average", lambda x, y : (x+y)/2, [("VFieldA", "A"), ("VFieldB", "B")], [("VFieldC", "Average")]),
+    ('DOT', "Scalar Product", None, [("VFieldA", "A"), ("VFieldB", "B")], [("SFieldC", "Product")]),
+    ('CROSS', "Vector Product", None, [("VFieldA", "A"), ("VFieldB","B")], [("VFieldC", "Product")]),
+    ('MUL', "Multiply Scalar", None, [("VFieldA", "VField"), ("SFieldB", "Scalar")], [("VFieldC", "Product")]),
+    ('TANG', "Projection decomposition", None, [("VFieldA", "VField"), ("VFieldB","Basis")], [("VFieldC", "Projection"), ("VFieldD", "Coprojection")]),
+    ('COMPOSE', "Composition VB(VA(x))", None, [("VFieldA", "VA"), ("VFieldB", "VB")], [("VFieldC", "VC")]),
+    ('COMPOSES', "Composition SB(VA(x))", None, [("VFieldA", "VA"), ("SFieldB", "SB")], [("SFieldC", "SC")]),
+    ('NORM', "Norm", None, [("VFieldA", "VField")], [("SFieldC", "Norm")])
 ]
 
 operation_modes = [ (id, name, name, i) for i, (id, name, fn, _, _) in enumerate(operations) ]
@@ -43,6 +68,18 @@ def get_sockets(op_id):
         if id == op_id:
             return inputs, outputs
     raise Exception("unsupported operation")
+
+def get_input_by_idx(idx):
+    for socket in inputs_registry.values():
+        if socket.idx == idx:
+            return socket
+    raise Exception("unsupported input idx")
+    
+def get_output_by_idx(idx):
+    for socket in outputs_registry.values():
+        if socket.idx == idx:
+            return socket
+    raise Exception("unsupported output idx")
 
 def vectorize(operation):
     def go(X, Y):
@@ -71,10 +108,19 @@ class SvExVectorFieldMathNode(bpy.types.Node, SverchCustomTreeNode):
     @throttled
     def update_sockets(self, context):
         actual_inputs, actual_outputs = get_sockets(self.operation)
+        actual_inputs = dict(actual_inputs)
+        actual_outputs = dict(actual_outputs)
         for socket in self.inputs:
-            socket.hide_safe = socket.name not in actual_inputs
+            registered = get_input_by_idx(socket.index)
+            socket.hide_safe = registered.id not in actual_inputs
+            if not socket.hide_safe:
+                socket.name = actual_inputs[registered.id]
+
         for socket in self.outputs:
-            socket.hide_safe = socket.name not in actual_outputs
+            registered = get_output_by_idx(socket.index)
+            socket.hide_safe = registered.id not in actual_outputs
+            if not socket.hide_safe:
+                socket.name = actual_outputs[registered.id]
 
     operation : EnumProperty(
         name = "Operation",
@@ -83,12 +129,10 @@ class SvExVectorFieldMathNode(bpy.types.Node, SverchCustomTreeNode):
         update = update_sockets)
 
     def sv_init(self, context):
-        self.inputs.new('SvExVectorFieldSocket', "VFieldA").display_shape = 'CIRCLE_DOT'
-        self.inputs.new('SvExVectorFieldSocket', "VFieldB").display_shape = 'CIRCLE_DOT'
-        self.inputs.new('SvExScalarFieldSocket', "SFieldB").display_shape = 'CIRCLE_DOT'
-        self.outputs.new('SvExVectorFieldSocket', "VFieldC").display_shape = 'CIRCLE_DOT'
-        self.outputs.new('SvExScalarFieldSocket', "SFieldC").display_shape = 'CIRCLE_DOT'
-        self.outputs.new('SvExVectorFieldSocket', "VFieldD").display_shape = 'CIRCLE_DOT'
+        for socket in inputs_registry:
+            self.inputs.new(socket.type, socket.id).display_shape = 'CIRCLE_DOT'
+        for socket in outputs_registry:
+            self.outputs.new(socket.type, socket.id).display_shape = 'CIRCLE_DOT'
         self.update_sockets(context)
 
     def draw_buttons(self, context, layout):
@@ -98,18 +142,14 @@ class SvExVectorFieldMathNode(bpy.types.Node, SverchCustomTreeNode):
         if not any(socket.is_linked for socket in self.outputs):
             return
 
-        vfield_a_s = self.inputs['VFieldA'].sv_get()
-        vfield_b_s = self.inputs['VFieldB'].sv_get(default=[[None]])
-        sfield_b_s = self.inputs['SFieldB'].sv_get(default=[[None]])
+        vfield_a_s = self.inputs[V_FIELD_A.idx].sv_get()
+        vfield_b_s = self.inputs[V_FIELD_B.idx].sv_get(default=[[None]])
+        sfield_b_s = self.inputs[S_FIELD_B.idx].sv_get(default=[[None]])
 
         vfields_c_out = []
         vfields_d_out = []
         sfields_out = []
         for vfields_a, vfields_b, sfields_b in zip_long_repeat(vfield_a_s, vfield_b_s, sfield_b_s):
-            outputs = dict(VFieldC = vfields_c_out, VFieldD = vfields_d_out, SFieldC = sfields_out)
-
-            actual_inputs, actual_outputs = get_sockets(self.operation)
-            operation = get_operation(self.operation)
 
             if not isinstance(vfields_a, (list, tuple)):
                 vfields_a = [vfields_a]
@@ -124,27 +164,35 @@ class SvExVectorFieldMathNode(bpy.types.Node, SverchCustomTreeNode):
 
                 if self.operation == 'MUL':
                     field_c = SvExVectorFieldMultipliedByScalar(vfield_a, sfield_b)
+                    vfields_c_out.append(field_c)
                 elif self.operation == 'DOT':
                     field_c = SvExVectorFieldsScalarProduct(vfield_a, vfield_b)
+                    sfields_out.append(field_c)
                 elif self.operation == 'CROSS':
                     field_c = SvExVectorFieldCrossProduct(vfield_a, vfield_b)
+                    vfields_c_out.append(field_c)
                 elif self.operation == 'NORM':
                     field_c = SvExVectorFieldNorm(vfield_a)
+                    sfields_out.append(field_c)
                 elif self.operation == 'TANG':
                     field_c = SvExVectorFieldTangent(vfield_a, vfield_b)
                     field_d = SvExVectorFieldCotangent(vfield_a, vfield_b)
+                    vfields_c_out.append(field_c)
                     vfields_d_out.append(field_d)
                 elif self.operation == 'COMPOSE':
                     field_c = SvExVectorFieldComposition(vfield_a, vfield_b)
+                    vfields_c_out.append(field_c)
                 elif self.operation == 'COMPOSES':
                     field_c = SvExVectorScalarFieldComposition(vfield_a, sfield_b)
+                    sfields_out.append(field_c)
                 else:
-                    field_c = SvExVectorFieldBinOp(inputs[actual_inputs[0]], inputs[actual_inputs[1]], operation)
-                outputs[actual_outputs[0]].append(field_c)
+                    operation = get_operation(self.operation)
+                    field_c = SvExVectorFieldBinOp(vfield_a, vfield_b, operation)
+                    vfields_c_out.append(field_c)
 
-        self.outputs['VFieldC'].sv_set(vfields_c_out)
-        self.outputs['VFieldD'].sv_set(vfields_d_out)
-        self.outputs['SFieldC'].sv_set(sfields_out)
+        self.outputs[V_FIELD_C.idx].sv_set(vfields_c_out)
+        self.outputs[V_FIELD_D.idx].sv_set(vfields_d_out)
+        self.outputs[S_FIELD_C.idx].sv_set(sfields_out)
 
 def register():
     bpy.utils.register_class(SvExVectorFieldMathNode)
