@@ -21,11 +21,12 @@ import bl_operators
 
 import sverchok
 from sverchok.core import sv_registration_utils, make_node_list
-from sverchok.utils import auto_gather_node_classes
+from sverchok.utils import auto_gather_node_classes, get_node_class_reference
 from sverchok.menu import SverchNodeItem, node_add_operators, SverchNodeCategory, register_node_panels, unregister_node_panels, unregister_node_add_operators, register_extra_category_provider
 from sverchok.ui.nodeview_space_menu import make_extra_category_menus
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat
+from sverchok.utils.logging import info
 
 from . import sockets
 from . import data
@@ -92,10 +93,20 @@ def make_menu():
     index = nodes_index()
     for category, items in index:
         identifier = "SVERCHOK_EXTRA_" + category
+        node_items = []
+        for item in items:
+            nodetype = item[1]
+            rna = get_node_class_reference(nodetype)
+            if not rna:
+                info("Node `%s' is not available (probably due to missing dependencies).", nodetype)
+            else:
+                node_item = SverchNodeItem.new(nodetype) 
+                node_items.append(node_item)
+
         cat = SverchNodeCategory(
                     identifier,
                     category,
-                    items = [SverchNodeItem.new(item[1]) for item in items]
+                    items = node_items
                 )
         menu.append(cat)
     return menu
