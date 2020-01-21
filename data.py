@@ -454,10 +454,31 @@ class SvExVectorFieldMultipliedByScalar(SvExVectorField):
             scalars = self.scalar_field.evaluate_grid(xs, ys, zs)
             vx, vy, vz = self.vector_field.evaluate_grid(xs, ys, zs)
             vectors = np.stack((vx, vy, vz))
-            #vectors = np.transpose( np.stack((vx, vy, vz)), axes=(1,2,3,0))
             R = scalars * vectors
             return R[0,:,:], R[1,:,:], R[2,:,:]
-            #return R[0,:,:][np.newaxis], R[1,:,:][np.newaxis], R[2,:,:][np.newaxis]
+        return np.vectorize(product, signature="(m,n,p),(m,n,p),(m,n,p)->(m,n,p),(m,n,p),(m,n,p)")(xs, ys, zs)
+
+class SvExVectorFieldsLerp(SvExVectorField):
+    def __init__(self, vfield1, vfield2, scalar_field):
+        self.vfield1 = vfield1
+        self.vfield2 = vfield2
+        self.scalar_field = scalar_field
+
+    def evaluate(self, x, y, z):
+        scalar = self.scalar_field.evaluate(x, y, z)
+        vector1 = self.vfield1.evaluate(x, y, z)
+        vector2 = self.vfield2.evaluate(x, y, z)
+        return (1 - scalar) * vector1 + scalar * vector2
+
+    def evaluate_grid(self, xs, ys, zs):
+        def product(xs, ys, zs):
+            scalars = self.scalar_field.evaluate_grid(xs, ys, zs)
+            vx1, vy1, vz1 = self.vfield1.evaluate_grid(xs, ys, zs)
+            vectors1 = np.stack((vx1, vy1, vz1))
+            vx2, vy2, vz2 = self.vfield2.evaluate_grid(xs, ys, zs)
+            vectors2 = np.stack((vx2, vy2, vz2))
+            R = (1 - scalars) * vectors1 + scalars * vectors2
+            return R[0,:,:], R[1,:,:], R[2,:,:]
         return np.vectorize(product, signature="(m,n,p),(m,n,p),(m,n,p)->(m,n,p),(m,n,p),(m,n,p)")(xs, ys, zs)
 
 class SvExRbfVectorField(SvExVectorField):

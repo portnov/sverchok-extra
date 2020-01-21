@@ -6,11 +6,11 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, St
 
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match_long_repeat
-from sverchok.utils.modules.eval_formula import get_variables, safe_eval
 from sverchok.utils.logging import info, exception
 
 from sverchok_extra.data import (SvExScalarField, SvExVectorField,
             SvExVectorFieldBinOp, SvExVectorFieldMultipliedByScalar,
+            SvExVectorFieldsLerp,
             SvExVectorFieldCrossProduct, SvExVectorFieldsScalarProduct,
             SvExVectorFieldNorm, SvExVectorFieldTangent, SvExVectorFieldCotangent,
             SvExVectorFieldComposition, SvExVectorScalarFieldComposition)
@@ -50,7 +50,8 @@ operations = [
     ('TANG', "Projection decomposition", None, [("VFieldA", "VField"), ("VFieldB","Basis")], [("VFieldC", "Projection"), ("VFieldD", "Coprojection")]),
     ('COMPOSE', "Composition VB(VA(x))", None, [("VFieldA", "VA"), ("VFieldB", "VB")], [("VFieldC", "VC")]),
     ('COMPOSES', "Composition SB(VA(x))", None, [("VFieldA", "VA"), ("SFieldB", "SB")], [("SFieldC", "SC")]),
-    ('NORM', "Norm", None, [("VFieldA", "VField")], [("SFieldC", "Norm")])
+    ('NORM', "Norm", None, [("VFieldA", "VField")], [("SFieldC", "Norm")]),
+    ('LERP', "Lerp A -> B", None, [("VFieldA", "A"), ("VFieldB", "B"), ("SFieldB", "Coefficient")], [("VFieldC", "VField")]),
 ]
 
 operation_modes = [ (id, name, name, i) for i, (id, name, fn, _, _) in enumerate(operations) ]
@@ -185,6 +186,9 @@ class SvExVectorFieldMathNode(bpy.types.Node, SverchCustomTreeNode):
                 elif self.operation == 'COMPOSES':
                     field_c = SvExVectorScalarFieldComposition(vfield_a, sfield_b)
                     sfields_out.append(field_c)
+                elif self.operation == 'LERP':
+                    field_c = SvExVectorFieldsLerp(vfield_a, vfield_b, sfield_b)
+                    vfields_c_out.append(field_c)
                 else:
                     operation = get_operation(self.operation)
                     field_c = SvExVectorFieldBinOp(vfield_a, vfield_b, operation)
