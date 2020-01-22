@@ -65,7 +65,8 @@ def nodes_index():
                 ("field.vector_field_eval", "SvExVectorFieldEvaluateNode"),
                 ("field.vector_field_apply", "SvExVectorFieldApplyNode"),
                 ("field.vector_field_math", "SvExVectorFieldMathNode"),
-                ("field.noise_vfield", "SvExNoiseVectorFieldNode")
+                ("field.noise_vfield", "SvExNoiseVectorFieldNode"),
+                ("field.differential_operations", "SvExFieldDiffOpsNode")
             ]),
             ("Spatial", [
                 ("spatial.voronoi3d", "SvExVoronoi3DNode"),

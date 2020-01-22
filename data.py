@@ -333,6 +333,41 @@ class SvExVectorScalarFieldComposition(SvExScalarField):
         vx1, vy1, vz1 = self.vfield.evaluate_grid(xs, ys, zs)
         return self.sfield.evaluate_grid(vx1, vy1, vz1)
 
+class SvExVectorFieldDivergence(SvExScalarField):
+    def __init__(self, field, step):
+        self.field = field
+        self.step = step
+
+    def evaluate(self, x, y, z):
+        step = self.step
+        xs_dx_plus, _, _ = self.field.evaluate(x+step,y,z)
+        xs_dx_minus, _, _ = self.field.evaluate(x-step,y,z)
+        _, ys_dy_plus, _ = self.field.evaluate(x, y+step, z)
+        _, ys_dy_minus, _ = self.field.evaluate(x, y-step, z)
+        _, _, zs_dz_plus = self.field.evaluate(x, y, z+step)
+        _, _, zs_dz_minus = self.field.evaluate(x, y, z-step)
+
+        dx_dx = (xs_dx_plus - xs_dx_minus) / (2*step)
+        dy_dy = (ys_dy_plus - ys_dy_minus) / (2*step)
+        dz_dz = (zs_dz_plus - zs_dz_minus) / (2*step)
+
+        return dx_dx + dy_dy + dz_dz
+    
+    def evaluate_grid(self, xs, ys, zs):
+        step = self.step
+        xs_dx_plus, _, _ = self.field.evaluate_grid(xs+step, ys,zs)
+        xs_dx_minus, _, _ = self.field.evaluate_grid(xs-step,ys,zs)
+        _, ys_dy_plus, _ = self.field.evaluate_grid(xs, ys+step, zs)
+        _, ys_dy_minus, _ = self.field.evaluate_grid(xs, ys-step, zs)
+        _, _, zs_dz_plus = self.field.evaluate_grid(xs, ys, zs+step)
+        _, _, zs_dz_minus = self.field.evaluate_grid(xs, ys, zs-step)
+
+        dx_dx = (xs_dx_plus - xs_dx_minus) / (2*step)
+        dy_dy = (ys_dy_plus - ys_dy_minus) / (2*step)
+        dz_dz = (zs_dz_plus - zs_dz_minus) / (2*step)
+
+        return dx_dx + dy_dy + dz_dz
+
 ##################
 #                #
 #  Vector Fields #
@@ -762,6 +797,41 @@ class SvExVectorFieldComposition(SvExVectorField):
     def evaluate_grid(self, xs, ys, zs):
         vx1, vy1, vz1 = self.field1.evaluate_grid(xs, ys, zs)
         return self.field2.evaluate_grid(vx1, vy1, vz1)
+
+class SvExScalarFieldGradient(SvExVectorField):
+    def __init__(self, field, step):
+        self.field = field
+        self.step = step
+
+    def evaluate(self, x, y, z):
+        step = self.step
+        v_dx_plus = self.field.evaluate(x+step,y,z)
+        v_dx_minus = self.field.evaluate(x-step,y,z)
+        v_dy_plus = self.field.evaluate(x, y+step, z)
+        v_dy_minus = self.field.evaluate(x, y-step, z)
+        v_dz_plus = self.field.evaluate(x, y, z+step)
+        v_dz_minus = self.field.evaluate(x, y, z-step)
+
+        dv_dx = (v_dx_plus - v_dx_minus) / (2*step)
+        dv_dy = (v_dy_plus - v_dy_minus) / (2*step)
+        dv_dz = (v_dz_plus - v_dz_minus) / (2*step)
+        return np.array([dv_dx, dv_dy, dv_dz])
+    
+    def evaluate_grid(self, xs, ys, zs):
+        step = self.step
+        v_dx_plus = self.field.evaluate_grid(xs+step, ys,zs)
+        v_dx_minus = self.field.evaluate_grid(xs-step,ys,zs)
+        v_dy_plus = self.field.evaluate_grid(xs, ys+step, zs)
+        v_dy_minus = self.field.evaluate_grid(xs, ys-step, zs)
+        v_dz_plus = self.field.evaluate_grid(xs, ys, zs+step)
+        v_dz_minus = self.field.evaluate_grid(xs, ys, zs-step)
+
+        dv_dx = (v_dx_plus - v_dx_minus) / (2*step)
+        dv_dy = (v_dy_plus - v_dy_minus) / (2*step)
+        dv_dz = (v_dz_plus - v_dz_minus) / (2*step)
+
+        R = np.stack((dv_dx, dv_dy, dv_dz))
+        return R[0,:,:], R[1,:,:], R[2,:,:]
 
 def register():
     pass

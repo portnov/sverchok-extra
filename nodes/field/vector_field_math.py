@@ -14,31 +14,21 @@ from sverchok_extra.data import (SvExScalarField, SvExVectorField,
             SvExVectorFieldCrossProduct, SvExVectorFieldsScalarProduct,
             SvExVectorFieldNorm, SvExVectorFieldTangent, SvExVectorFieldCotangent,
             SvExVectorFieldComposition, SvExVectorScalarFieldComposition)
+from sverchok_extra.sockets import SvExDynamicSocketsHandler, SocketInfo
 
-class Socket(object):
-    def __init__(self, type, id, idx=None):
-        self.type = type
-        self.id = id
-        self.idx = idx
+sockets_handler = SvExDynamicSocketsHandler()
 
-inputs_registry = dict()
-outputs_registry = dict()
+V_FIELD_A, V_FIELD_B, S_FIELD_B = sockets_handler.register_inputs(
+        SocketInfo("SvExVectorFieldSocket", "VFieldA", "CIRCLE_DOT"),
+        SocketInfo("SvExVectorFieldSocket", "VFieldB", "CIRCLE_DOT"),
+        SocketInfo("SvExScalarFieldSocket", "SFieldB", "CIRCLE_DOT")
+    )
 
-V_FIELD_A = Socket("SvExVectorFieldSocket", "VFieldA")
-V_FIELD_B =  Socket("SvExVectorFieldSocket", "VFieldB")
-S_FIELD_B =  Socket("SvExScalarFieldSocket", "SFieldB")
-
-V_FIELD_C = Socket("SvExVectorFieldSocket", "VFieldC")
-S_FIELD_C = Socket("SvExScalarFieldSocket", "SFieldC")
-V_FIELD_D = Socket("SvExVectorFieldSocket", "VFieldD")
-
-for idx, socket in enumerate([V_FIELD_A, V_FIELD_B, S_FIELD_B]):
-    socket.idx = idx
-    inputs_registry[socket.id] = socket
-
-for idx, socket in enumerate([V_FIELD_C, S_FIELD_C, V_FIELD_D]):
-    socket.idx = idx
-    outputs_registry[socket.id] = socket
+V_FIELD_C, S_FIELD_C, V_FIELD_D = sockets_handler.register_outputs(
+        SocketInfo("SvExVectorFieldSocket", "VFieldC", "CIRCLE_DOT"),
+        SocketInfo("SvExScalarFieldSocket", "SFieldC", "CIRCLE_DOT"),
+        SocketInfo("SvExVectorFieldSocket", "VFieldD", "CIRCLE_DOT")
+    )
 
 operations = [
     ('ADD', "Add", lambda x,y : x+y, [("VFieldA", "A"), ("VFieldB", "B")], [("VFieldC", "Sum")]),
@@ -70,32 +60,6 @@ def get_sockets(op_id):
             return inputs, outputs
     raise Exception("unsupported operation")
 
-def get_input_by_idx(idx):
-    for socket in inputs_registry.values():
-        if socket.idx == idx:
-            return socket
-    raise Exception("unsupported input idx")
-    
-def get_output_by_idx(idx):
-    for socket in outputs_registry.values():
-        if socket.idx == idx:
-            return socket
-    raise Exception("unsupported output idx")
-
-def vectorize(operation):
-    def go(X, Y):
-        xs1, ys1, zs1 = X
-        xs2, ys2, zs2 = Y
-        X1 = np.vstack((xs1, ys1, zs1))
-        Y1 = np.vstack((xs2, ys2, zs2))
-        R = operation(X1, Y1)
-        return R[0,:,:][np.newaxis], R[1,:,:][np.newaxis], R[2,:,:][np.newaxis]
-#         X1 = np.stack((xs1, ys1, zs1)).T
-#         Y1 = np.stack((xs2, ys2, zs2)).T
-#         R = operation(X1, Y1)
-#         return R[:,:,:,0].T, R[:,:,:,1].T, R[:,:,:,2].T
-    return go
-
 class SvExVectorFieldMathNode(bpy.types.Node, SverchCustomTreeNode):
     """
     Triggers: Vector Field Math
@@ -112,13 +76,13 @@ class SvExVectorFieldMathNode(bpy.types.Node, SverchCustomTreeNode):
         actual_inputs = dict(actual_inputs)
         actual_outputs = dict(actual_outputs)
         for socket in self.inputs:
-            registered = get_input_by_idx(socket.index)
+            registered = sockets_handler.get_input_by_idx(socket.index)
             socket.hide_safe = registered.id not in actual_inputs
             if not socket.hide_safe:
                 socket.name = actual_inputs[registered.id]
 
         for socket in self.outputs:
-            registered = get_output_by_idx(socket.index)
+            registered = sockets_handler.get_output_by_idx(socket.index)
             socket.hide_safe = registered.id not in actual_outputs
             if not socket.hide_safe:
                 socket.name = actual_outputs[registered.id]
@@ -130,10 +94,7 @@ class SvExVectorFieldMathNode(bpy.types.Node, SverchCustomTreeNode):
         update = update_sockets)
 
     def sv_init(self, context):
-        for socket in inputs_registry.values():
-            self.inputs.new(socket.type, socket.id).display_shape = 'CIRCLE_DOT'
-        for socket in outputs_registry.values():
-            self.outputs.new(socket.type, socket.id).display_shape = 'CIRCLE_DOT'
+        sockets_handler.init_sockets(self)
         self.update_sockets(context)
 
     def draw_buttons(self, context, layout):
