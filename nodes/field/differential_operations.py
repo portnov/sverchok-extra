@@ -10,7 +10,7 @@ from sverchok.utils.logging import info, exception
 
 from sverchok_extra.data import (SvExScalarField, SvExVectorField,
                 SvExScalarFieldGradient,
-                SvExVectorFieldDivergence
+                SvExVectorFieldDivergence, SvExScalarFieldLaplacian
             )
 from sverchok_extra.sockets import SvExDynamicSocketsHandler, SocketInfo
 
@@ -28,7 +28,8 @@ S_FIELD_B, V_FIELD_B = sockets_handler.register_outputs(
 
 operations = [
     ('GRAD', "Gradient", [("SFieldA", "SField")], [("VFieldB", "Gradient")]),
-    ('DIV', "Divergence", [("VFieldA", "VField")], [("SFieldB", "Divergence")])
+    ('DIV', "Divergence", [("VFieldA", "VField")], [("SFieldB", "Divergence")]),
+    ('LAPLACE', "Laplacian", [("SFieldA", "SField")], [("SFieldB", "Laplacian")])
 ]
 
 operation_modes = [ (id, name, name, i) for i, (id, name, _, _) in enumerate(operations) ]
@@ -112,6 +113,9 @@ class SvExFieldDiffOpsNode(bpy.types.Node, SverchCustomTreeNode):
                     vfields_out.append(vfield)
                 elif self.operation == 'DIV':
                     sfield = SvExVectorFieldDivergence(vfield, self.step)
+                    sfields_out.append(sfield)
+                elif self.operation == 'LAPLACE':
+                    sfield = SvExScalarFieldLaplacian(sfield, self.step)
                     sfields_out.append(sfield)
                 else:
                     raise Exception("Unsupported operation")

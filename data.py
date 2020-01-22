@@ -153,7 +153,7 @@ class SvExVectorFieldNorm(SvExScalarField):
 
     def evaluate(self, x, y, z):
         v = self.field.evaluate(x, y, z)
-        return np.norm(v)
+        return np.linalg.norm(v)
 
     def evaluate_grid(self, xs, ys, zs):
         vx, vy, vz = self.field.evaluate_grid(xs, ys, zs)
@@ -367,6 +367,39 @@ class SvExVectorFieldDivergence(SvExScalarField):
         dz_dz = (zs_dz_plus - zs_dz_minus) / (2*step)
 
         return dx_dx + dy_dy + dz_dz
+
+class SvExScalarFieldLaplacian(SvExScalarField):
+    def __init__(self, field, step):
+        self.field = field
+        self.step = step
+
+    def evaluate(self, x, y, z):
+        step = self.step
+        v_dx_plus = self.field.evaluate(x+step,y,z)
+        v_dx_minus = self.field.evaluate(x-step,y,z)
+        v_dy_plus = self.field.evaluate(x, y+step, z)
+        v_dy_minus = self.field.evaluate(x, y-step, z)
+        v_dz_plus = self.field.evaluate(x, y, z+step)
+        v_dz_minus = self.field.evaluate(x, y, z-step)
+        v0 = self.field.evaluate(x, y, z)
+
+        sides = v_dx_plus + v_dx_minus + v_dy_plus + v_dy_minus + v_dz_plus + v_dz_minus
+        result = (sides - 6*v0) / (8 * step * step * step)
+        return result
+    
+    def evaluate_grid(self, xs, ys, zs):
+        step = self.step
+        v_dx_plus = self.field.evaluate_grid(xs+step, ys,zs)
+        v_dx_minus = self.field.evaluate_grid(xs-step,ys,zs)
+        v_dy_plus = self.field.evaluate_grid(xs, ys+step, zs)
+        v_dy_minus = self.field.evaluate_grid(xs, ys-step, zs)
+        v_dz_plus = self.field.evaluate_grid(xs, ys, zs+step)
+        v_dz_minus = self.field.evaluate_grid(xs, ys, zs-step)
+        v0 = self.field.evaluate_grid(xs, ys, zs)
+
+        sides = v_dx_plus + v_dx_minus + v_dy_plus + v_dy_minus + v_dz_plus + v_dz_minus
+        result = (sides - 6*v0) / (8 * step * step * step)
+        return result
 
 ##################
 #                #
