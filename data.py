@@ -495,7 +495,7 @@ class SvExVectorFieldCrossProduct(SvExVectorField):
 
     def evaluate(self, x, y, z):
         v1 = self.field1.evaluate(x, y, z)
-        v2 = self.field1.evaluate(x, y, z)
+        v2 = self.field2.evaluate(x, y, z)
         return np.cross(v1, v2)
 
     def evaluate_grid(self, xs, ys, zs):
@@ -503,10 +503,12 @@ class SvExVectorFieldCrossProduct(SvExVectorField):
         vx2, vy2, vz2 = self.field2.evaluate_grid(xs, ys, zs)
         vectors1 = np.transpose( np.stack((vx1, vy1, vz1)), axes=(1,2,3,0))
         vectors2 = np.transpose( np.stack((vx2, vy2, vz2)), axes=(1,2,3,0))
-        def cross(v1, v2):
-            v = np.cross(v1, v2)
-            return v[0], v[1], v[2]
-        return np.vectorize(cross, signature="(3),(3)->(),(),()")(vectors1, vectors2)
+        R = np.cross(vectors1, vectors2)
+        return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
+#         def cross(v1, v2):
+#             v = np.cross(v1, v2)
+#             return v[0], v[1], v[2]
+#         return np.vectorize(cross, signature="(3),(3)->(),(),()")(vectors1, vectors2)
 
 class SvExVectorFieldMultipliedByScalar(SvExVectorField):
     def __init__(self, vector_field, scalar_field):

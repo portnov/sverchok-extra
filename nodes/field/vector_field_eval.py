@@ -39,7 +39,7 @@ class SvExVectorFieldEvaluateNode(bpy.types.Node, SverchCustomTreeNode):
             elif len(vertices) == 1:
                 vertex = vertices[0]
                 value = field.evaluate(*vertex)
-                new_values = [value]
+                new_values = [tuple(value)]
             else:
                 XYZ = np.array(vertices)
                 xs = XYZ[:,0][np.newaxis][np.newaxis]
