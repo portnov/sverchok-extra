@@ -9,7 +9,7 @@ from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match
 from sverchok.utils.logging import info, exception
 
 from sverchok_extra.data import (SvExScalarField, SvExVectorField,
-                SvExScalarFieldGradient,
+                SvExScalarFieldGradient, SvExVectorFieldRotor,
                 SvExVectorFieldDivergence, SvExScalarFieldLaplacian
             )
 from sverchok_extra.sockets import SvExDynamicSocketsHandler, SocketInfo
@@ -29,7 +29,8 @@ S_FIELD_B, V_FIELD_B = sockets_handler.register_outputs(
 operations = [
     ('GRAD', "Gradient", [("SFieldA", "SField")], [("VFieldB", "Gradient")]),
     ('DIV', "Divergence", [("VFieldA", "VField")], [("SFieldB", "Divergence")]),
-    ('LAPLACE', "Laplacian", [("SFieldA", "SField")], [("SFieldB", "Laplacian")])
+    ('LAPLACE', "Laplacian", [("SFieldA", "SField")], [("SFieldB", "Laplacian")]),
+    ('ROTOR', "Rotor", [("VFieldA", "VField")], [("VFieldB", "Rotor")])
 ]
 
 operation_modes = [ (id, name, name, i) for i, (id, name, _, _) in enumerate(operations) ]
@@ -117,6 +118,9 @@ class SvExFieldDiffOpsNode(bpy.types.Node, SverchCustomTreeNode):
                 elif self.operation == 'LAPLACE':
                     sfield = SvExScalarFieldLaplacian(sfield, self.step)
                     sfields_out.append(sfield)
+                elif self.operation == 'ROTOR':
+                    vfield = SvExVectorFieldRotor(vfield, self.step)
+                    vfields_out.append(vfield)
                 else:
                     raise Exception("Unsupported operation")
 

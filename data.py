@@ -869,6 +869,55 @@ class SvExScalarFieldGradient(SvExVectorField):
         R = np.stack((dv_dx, dv_dy, dv_dz))
         return R[0,:,:], R[1,:,:], R[2,:,:]
 
+class SvExVectorFieldRotor(SvExVectorField):
+    def __init__(self, field, step):
+        self.field = field
+        self.step = step
+
+    def evaluate(self, x, y, z):
+        step = self.step
+        _, y_dx_plus, z_dx_plus = self.field.evaluate(x+step,y,z)
+        _, y_dx_minus, z_dx_minus = self.field.evaluate(x-step,y,z)
+        x_dy_plus, _, z_dy_plus = self.field.evaluate(x, y+step, z)
+        x_dy_minus, _, z_dy_minus = self.field.evaluate(x, y-step, z)
+        x_dz_plus, y_dz_plus, _ = self.field.evaluate(x, y, z+step)
+        x_dz_minus, y_dz_minus, _ = self.field.evaluate(x, y, z-step)
+
+        dy_dx = (y_dx_plus - y_dx_minus) / (2*step)
+        dz_dx = (z_dx_plus - z_dx_minus) / (2*step)
+        dx_dy = (x_dy_plus - x_dy_minus) / (2*step)
+        dz_dy = (z_dy_plus - z_dy_minus) / (2*step)
+        dx_dz = (x_dz_plus - x_dz_minus) / (2*step)
+        dy_dz = (y_dz_plus - y_dz_minus) / (2*step)
+
+        rx = dz_dy - dy_dz
+        ry = - (dz_dx - dx_dz)
+        rz = dy_dx - dx_dy
+
+        return np.array([rx, ry, rz])
+
+    def evaluate_grid(self, xs, ys, zs):
+        step = self.step
+        _, y_dx_plus, z_dx_plus = self.field.evaluate_grid(xs+step,ys,zs)
+        _, y_dx_minus, z_dx_minus = self.field.evaluate_grid(xs-step,ys,zs)
+        x_dy_plus, _, z_dy_plus = self.field.evaluate_grid(xs, ys+step, zs)
+        x_dy_minus, _, z_dy_minus = self.field.evaluate_grid(xs, ys-step, zs)
+        x_dz_plus, y_dz_plus, _ = self.field.evaluate_grid(xs, ys, zs+step)
+        x_dz_minus, y_dz_minus, _ = self.field.evaluate_grid(xs, ys, zs-step)
+
+        dy_dx = (y_dx_plus - y_dx_minus) / (2*step)
+        dz_dx = (z_dx_plus - z_dx_minus) / (2*step)
+        dx_dy = (x_dy_plus - x_dy_minus) / (2*step)
+        dz_dy = (z_dy_plus - z_dy_minus) / (2*step)
+        dx_dz = (x_dz_plus - x_dz_minus) / (2*step)
+        dy_dz = (y_dz_plus - y_dz_minus) / (2*step)
+
+        rx = dz_dy - dy_dz
+        ry = - (dz_dx - dx_dz)
+        rz = dy_dx - dx_dy
+        R = np.transpose( np.stack((rx, ry, rz)), axes=(1,2,3,0))
+        return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
+
 def register():
     pass
 
