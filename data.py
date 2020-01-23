@@ -419,14 +419,15 @@ class SvExMatrixVectorField(SvExVectorField):
         self.matrix = matrix
 
     def evaluate(self, x, y, z):
-        v = self.matrix @ Vector((x,y,z))
+        v = Vector((x, y, z))
+        v = (self.matrix @ v) - v
         return np.array(v)
 
     def evaluate_grid(self, xs, ys, zs):
         matrix = np.array(self.matrix.to_3x3())
         translation = np.array(self.matrix.translation)
         points = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
-        R = np.apply_along_axis(lambda v : matrix @ v + translation, 3, points)
+        R = np.apply_along_axis(lambda v : matrix @ v + translation - v, 3, points)
         return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
 
 class SvExVectorFieldLambda(SvExVectorField):
