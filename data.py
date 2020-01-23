@@ -654,9 +654,9 @@ class SvExVectorFieldPointDistance(SvExVectorField):
 
     def evaluate(self, x, y, z):
         vector = np.array([x, y, z]) - self.center
-        if self.fallof is not None:
-            norm = np.norm(vector)
-            value = self.falloff(np.array([distance]))[0]
+        if self.falloff is not None:
+            norm = np.linalg.norm(vector)
+            value = self.falloff(np.array([norm]))[0]
             return value * vector / norm
         else:
             return vector
