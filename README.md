@@ -20,6 +20,7 @@ At the moment, this addon includes the following nodes for Sverchok:
 
 * *Curve* category:
   * NURBS Curve (uses [Geomdl][3] library)
+  * Marching Squares (uses [Scikit-Image][5] library)
 * *Surface* category:
   * Marching Cubes (uses either [PyMCubes][8] or [Scikit-Image][5])
   * Smooth Bivariate Spline (uses [SciPy][4])
@@ -31,6 +32,22 @@ At the moment, this addon includes the following nodes for Sverchok:
   * Bend object along Minimal Surface (uses SciPy)
 * *Spatial* category:
   * Voronoi 3D (uses SciPy)
+  * Spherical Voronoi (uses SciPy)
+* *Field* category (please refer to the [wiki page][11] about used concept of the field; most of these nodes do not use external libraries, except for numpy):
+  * Attractor Field
+  * Field differential operators
+  * Merge Scalar Fields
+  * Mesh Nearest Normals Field
+  * Minimal Vector Field (uses SciPy)
+  * Noise Vector Field
+  * Generate Scalar field by formula
+  * Generate Vector field by formula
+  * Scalar field math
+  * Vector field math
+  * Scalar field of a point
+  * Apply vector field
+  * Evaluate vector field
+  * Evaluate scalar field
 
 There will be more.
 
@@ -136,4 +153,5 @@ LICENSE: GPL-3.
 [8]: https://github.com/pmneila/PyMCubes
 [9]: https://nurbs-python.readthedocs.io/en/latest/install.html
 [10]: https://github.com/portnov/sverchok-extra/archive/master.zip
+[11]: https://github.com/portnov/sverchok-extra/wiki/Fields
 
