@@ -10,7 +10,8 @@ from sverchok.core.socket_data import (
 from sverchok.core.socket_conversions import DefaultImplicitConversionPolicy
 from sverchok.data_structure import get_other_socket, get_data_nesting_level
 
-from .data import SvExMatrixVectorField, SvExConstantScalarField
+from .data.field.scalar import SvExConstantScalarField
+from .data.field.vector import SvExMatrixVectorField
 
 def is_matrix_to_vfield(socket):
     other = get_other_socket(socket)

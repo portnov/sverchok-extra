@@ -10,7 +10,8 @@ from sverchok.utils.modules.eval_formula import get_variables, sv_compile, safe_
 from sverchok.utils.logging import info, exception
 from sverchok.utils.math import from_cylindrical, from_spherical, to_cylindrical, to_spherical
 
-from sverchok_extra.data import coordinate_modes, SvExScalarFieldLambda
+from sverchok_extra.data import coordinate_modes
+from sverchok_extra.data.field.scalar import SvExScalarFieldLambda
 
 class SvExScalarFieldFormulaNode(bpy.types.Node, SverchCustomTreeNode):
     """

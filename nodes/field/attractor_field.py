@@ -10,12 +10,14 @@ from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match_long_repeat
 from sverchok.utils.logging import info, exception
 
-from sverchok_extra.data import (SvExScalarFieldPointDistance, SvExVectorFieldPointDistance,
-            SvExAverageVectorField, SvExMergedScalarField,
-            SvExKdtVectorField, SvExKdtScalarField,
-            SvExLineAttractorScalarField, SvExLineAttractorVectorField,
-            SvExPlaneAttractorScalarField, SvExPlaneAttractorVectorField,
-            SvExBvhAttractorScalarField, SvExBvhAttractorVectorField)
+from sverchok_extra.data.field.scalar import (SvExScalarFieldPointDistance,
+            SvExMergedScalarField, SvExKdtScalarField,
+            SvExLineAttractorScalarField, SvExPlaneAttractorScalarField, 
+            SvExBvhAttractorScalarField)
+from sverchok_extra.data.field.vector import (SvExVectorFieldPointDistance,
+            SvExAverageVectorField, SvExKdtVectorField, 
+            SvExLineAttractorVectorField, SvExPlaneAttractorVectorField,
+            SvExBvhAttractorVectorField)
 from sverchok_extra.utils import falloff_types, falloff
 
 class SvExAttractorFieldNode(bpy.types.Node, SverchCustomTreeNode):

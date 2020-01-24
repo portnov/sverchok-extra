@@ -8,12 +8,15 @@ from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match_long_repeat
 from sverchok.utils.logging import info, exception
 
-from sverchok_extra.data import (SvExScalarField, SvExVectorField,
+from sverchok_extra.data.field.scalar import (SvExScalarField,
+            SvExVectorFieldsScalarProduct,
+            SvExVectorFieldNorm,
+            SvExVectorScalarFieldComposition)
+from sverchok_extra.data.field.vector import (SvExVectorField,
             SvExVectorFieldBinOp, SvExVectorFieldMultipliedByScalar,
-            SvExVectorFieldsLerp,
-            SvExVectorFieldCrossProduct, SvExVectorFieldsScalarProduct,
-            SvExVectorFieldNorm, SvExVectorFieldTangent, SvExVectorFieldCotangent,
-            SvExVectorFieldComposition, SvExVectorScalarFieldComposition)
+            SvExVectorFieldsLerp, SvExVectorFieldCrossProduct, 
+            SvExVectorFieldTangent, SvExVectorFieldCotangent,
+            SvExVectorFieldComposition)
 from sverchok_extra.sockets import SvExDynamicSocketsHandler, SocketInfo
 
 sockets_handler = SvExDynamicSocketsHandler()

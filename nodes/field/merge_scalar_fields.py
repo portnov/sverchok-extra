@@ -8,7 +8,7 @@ from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match_long_repeat, ensure_nesting_level
 from sverchok.utils.logging import info, exception
 
-from sverchok_extra.data import SvExMergedScalarField, SvExScalarField
+from sverchok_extra.data.field.scalar import SvExMergedScalarField, SvExScalarField
 
 class SvExMergeScalarFieldsNode(bpy.types.Node, SverchCustomTreeNode):
     """

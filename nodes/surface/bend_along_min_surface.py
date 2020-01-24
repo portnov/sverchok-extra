@@ -19,7 +19,7 @@ from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, ensure_nesting_level
 from sverchok.utils.geom import diameter
 
-from sverchok_extra.data import SvExRbfSurface
+from sverchok_extra.data.surface import SvExRbfSurface
 
 if scipy_available:
 

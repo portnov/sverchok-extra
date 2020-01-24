@@ -8,10 +8,10 @@ from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match_long_repeat
 from sverchok.utils.logging import info, exception
 
-from sverchok_extra.data import (SvExScalarField, SvExVectorField,
-                SvExScalarFieldGradient, SvExVectorFieldRotor,
-                SvExVectorFieldDivergence, SvExScalarFieldLaplacian
-            )
+from sverchok_extra.data.field.scalar import (SvExScalarField,
+                SvExVectorFieldDivergence, SvExScalarFieldLaplacian)
+from sverchok_extra.data.field.vector import ( SvExVectorField,
+                SvExScalarFieldGradient, SvExVectorFieldRotor)
 from sverchok_extra.sockets import SvExDynamicSocketsHandler, SocketInfo
 
 sockets_handler = SvExDynamicSocketsHandler()

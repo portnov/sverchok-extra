@@ -6,7 +6,7 @@ import bpy
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match_long_repeat
 from sverchok.utils.logging import info, exception
-from sverchok_extra.data import SvExBvhAttractorVectorField
+from sverchok_extra.data.field.vector import SvExBvhAttractorVectorField
 
 class SvExMeshNormalFieldNode(bpy.types.Node, SverchCustomTreeNode):
     """

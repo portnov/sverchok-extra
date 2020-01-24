@@ -10,7 +10,7 @@ from sverchok.utils.modules.eval_formula import get_variables, safe_eval
 from sverchok.utils.logging import info, exception
 from sverchok.utils.sv_noise_utils import noise_options, PERLIN_ORIGINAL
 
-from sverchok_extra.data import SvExNoiseVectorField
+from sverchok_extra.data.field.vector import SvExNoiseVectorField
 
 avail_noise = [(t[0], t[0].title(), t[0].title(), '', t[1]) for t in noise_options]
 

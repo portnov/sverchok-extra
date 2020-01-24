@@ -9,7 +9,7 @@ from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match
 from sverchok.utils.modules.eval_formula import get_variables, safe_eval
 from sverchok.utils.logging import info, exception
 
-from sverchok_extra.data import SvExScalarFieldBinOp, SvExScalarField, SvExNegatedScalarField
+from sverchok_extra.data.field.scalar import SvExScalarFieldBinOp, SvExScalarField, SvExNegatedScalarField
 
 operations = [
     ('ADD', "Add", lambda x, y : x+y),

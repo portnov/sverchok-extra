@@ -8,7 +8,7 @@ from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match_long_repeat
 from sverchok.utils.logging import info, exception
 
-from sverchok_extra.data import SvExScalarFieldPointDistance
+from sverchok_extra.data.field.scalar import SvExScalarFieldPointDistance
 from sverchok_extra.utils import falloff_types, falloff
 
 class SvExScalarFieldPointNode(bpy.types.Node, SverchCustomTreeNode):
