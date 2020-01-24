@@ -31,7 +31,6 @@ if scipy_available:
         bl_idname = 'SvExMinimalVectorFieldNode'
         bl_label = 'Minimal Vector Field'
         bl_icon = 'OUTLINER_OB_EMPTY'
-        sv_icon = 'SV_VORONOI'
 
         functions = [
             ('multiquadric', "Multi Quadric", "Multi Quadric", 0),

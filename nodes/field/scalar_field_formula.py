@@ -21,7 +21,6 @@ class SvExScalarFieldFormulaNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExScalarFieldFormulaNode'
     bl_label = 'Scalar Field'
     bl_icon = 'OUTLINER_OB_EMPTY'
-    sv_icon = 'SV_VORONOI'
 
     formula: StringProperty(
             name = "Formula",

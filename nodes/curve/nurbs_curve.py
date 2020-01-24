@@ -24,8 +24,7 @@ if geomdl_available:
         """
         bl_idname = 'SvExNurbsCurveNode'
         bl_label = 'NURBS Curve'
-        bl_icon = 'OUTLINER_OB_EMPTY'
-        sv_icon = 'SV_VORONOI'
+        bl_icon = 'CURVE_NCURVE'
 
         sample_size : IntProperty(
                 name = "Samples",

@@ -71,7 +71,6 @@ class SvExVectorFieldMathNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExVectorFieldMathNode'
     bl_label = 'Vector Field Math'
     bl_icon = 'OUTLINER_OB_EMPTY'
-    sv_icon = 'SV_VORONOI'
 
     @throttled
     def update_sockets(self, context):

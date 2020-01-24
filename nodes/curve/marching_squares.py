@@ -26,7 +26,7 @@ if skimage_available:
         bl_idname = 'SvExMarchingSquaresNode'
         bl_label = 'Marching Squares'
         bl_icon = 'OUTLINER_OB_EMPTY'
-        sv_icon = 'SV_VORONOI'
+        sv_icon = 'SV_EX_MSQUARES'
 
         iso_value : FloatProperty(
                 name = "Value",

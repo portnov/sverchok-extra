@@ -26,8 +26,7 @@ if geomdl_available:
         """
         bl_idname = 'SvExNurbsSurfaceNode'
         bl_label = 'NURBS Surface'
-        bl_icon = 'OUTLINER_OB_EMPTY'
-        sv_icon = 'SV_VORONOI'
+        bl_icon = 'SURFACE_NSURFACE'
 
         sample_size : IntProperty(
                 name = "Samples",

@@ -31,7 +31,6 @@ if scipy_available:
         bl_idname = 'SvExBendAlongMinSurfaceNode'
         bl_label = 'Bend Along Minimal Surface'
         bl_icon = 'OUTLINER_OB_EMPTY'
-        sv_icon = 'SV_VORONOI'
 
         axes = [
                 ("X", "X", "X axis", 1),

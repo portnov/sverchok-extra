@@ -29,7 +29,6 @@ if geomdl_available:
         bl_idname = 'SvExEvalNurbsSurfaceNode'
         bl_label = 'Evaluate NURBS Surface'
         bl_icon = 'OUTLINER_OB_EMPTY'
-        sv_icon = 'SV_VORONOI'
 
         @throttled
         def update_sockets(self, context):

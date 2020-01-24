@@ -16,7 +16,6 @@ class SvExVectorFieldApplyNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExVectorFieldApplyNode'
     bl_label = 'Apply Vector Field'
     bl_icon = 'OUTLINER_OB_EMPTY'
-    sv_icon = 'SV_VORONOI'
 
     coefficient : FloatProperty(
             name = "Coefficient",

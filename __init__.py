@@ -30,6 +30,7 @@ from sverchok.utils.logging import info
 
 from . import sockets
 from . import data
+from . import icons
 
 # make sverchok the root module name, (if sverchok dir not named exactly "sverchok") 
 if __name__ != "sverchok_extra":
@@ -127,6 +128,7 @@ def register():
 
     sockets.register()
     data.register()
+    icons.register()
 
     register_nodes()
     extra_nodes = importlib.import_module(".nodes", "sverchok_extra")
@@ -151,6 +153,7 @@ def unregister():
     #unregister_node_add_operators()
     unregister_nodes()
 
+    icons.unregister()
     data.unregister()
     sockets.unregister()
 

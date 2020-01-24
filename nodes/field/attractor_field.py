@@ -28,7 +28,7 @@ class SvExAttractorFieldNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExAttractorFieldNode'
     bl_label = 'Attractor Field'
     bl_icon = 'OUTLINER_OB_EMPTY'
-    sv_icon = 'SV_VORONOI'
+    sv_icon = 'SV_EX_ATTRACT'
 
     @throttled
     def update_type(self, context):

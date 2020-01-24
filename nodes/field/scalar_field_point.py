@@ -19,7 +19,6 @@ class SvExScalarFieldPointNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExScalarFieldPointNode'
     bl_label = 'Distance from a point'
     bl_icon = 'OUTLINER_OB_EMPTY'
-    sv_icon = 'SV_VORONOI'
 
     @throttled
     def update_type(self, context):

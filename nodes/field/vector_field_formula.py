@@ -21,7 +21,6 @@ class SvExVectorFieldFormulaNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExVectorFieldFormulaNode'
     bl_label = 'Vector Field'
     bl_icon = 'OUTLINER_OB_EMPTY'
-    sv_icon = 'SV_VORONOI'
 
     formula1: StringProperty(
             name = "Formula",

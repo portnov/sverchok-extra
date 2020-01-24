@@ -28,7 +28,7 @@ if scipy_available:
         bl_idname = 'SvExBivariateSplineNode'
         bl_label = 'Smooth Weighted Surface Spline'
         bl_icon = 'OUTLINER_OB_EMPTY'
-        sv_icon = 'SV_VORONOI'
+        sv_icon = 'SV_EX_BVSPLINE'
 
         grid_points : IntProperty(
                 name = "Points",

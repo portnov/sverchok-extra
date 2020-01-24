@@ -16,7 +16,6 @@ class SvExMeshNormalFieldNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExMeshNormalFieldNode'
     bl_label = 'Mesh Nearest Normal'
     bl_icon = 'OUTLINER_OB_EMPTY'
-    sv_icon = 'SV_VORONOI'
 
     def sv_init(self, context):
         self.inputs.new('SvVerticesSocket', 'Vertices')

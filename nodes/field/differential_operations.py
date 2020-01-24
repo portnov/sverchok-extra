@@ -51,7 +51,7 @@ class SvExFieldDiffOpsNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExFieldDiffOpsNode'
     bl_label = 'Field Differential Operation'
     bl_icon = 'OUTLINER_OB_EMPTY'
-    sv_icon = 'SV_VORONOI'
+    sv_icon = 'SV_EX_NABLA'
 
     step : FloatProperty(
             name = "Step",

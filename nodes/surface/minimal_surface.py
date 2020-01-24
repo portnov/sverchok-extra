@@ -34,7 +34,7 @@ if scipy_available:
         bl_idname = 'SvExMinimalSurfaceNode'
         bl_label = 'Minimal Surface'
         bl_icon = 'OUTLINER_OB_EMPTY'
-        sv_icon = 'SV_VORONOI'
+        sv_icon = 'SV_EX_MINSURFACE'
 
         @throttled
         def update_sockets(self, context):

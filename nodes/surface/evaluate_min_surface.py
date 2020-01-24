@@ -30,7 +30,6 @@ if scipy_available:
         bl_idname = 'SvExEvalMinimalSurfaceNode'
         bl_label = 'Evaluate Minimal Surface'
         bl_icon = 'OUTLINER_OB_EMPTY'
-        sv_icon = 'SV_VORONOI'
 
         coord_modes = [
             ('XY', "X Y -> Z", "XY -> Z function", 0),

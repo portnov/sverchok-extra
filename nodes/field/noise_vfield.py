@@ -22,7 +22,6 @@ class SvExNoiseVectorFieldNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExNoiseVectorFieldNode'
     bl_label = 'Noise Vector Field'
     bl_icon = 'OUTLINER_OB_EMPTY'
-    sv_icon = 'SV_VORONOI'
 
     noise_type: EnumProperty(
         items=avail_noise,

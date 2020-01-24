@@ -18,7 +18,6 @@ class SvExMergeScalarFieldsNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExMergeScalarFieldsNode'
     bl_label = 'Join Scalar Fields'
     bl_icon = 'OUTLINER_OB_EMPTY'
-    sv_icon = 'SV_VORONOI'
 
     modes = [
         ('MIN', "Minimum", "Minimal value of all fields", 0),

@@ -33,7 +33,7 @@ if mcubes_available or skimage_available:
         bl_idname = 'SvExMarchingCubesNode'
         bl_label = 'Marching Cubes'
         bl_icon = 'OUTLINER_OB_EMPTY'
-        sv_icon = 'SV_VORONOI'
+        sv_icon = 'SV_EX_MCUBES'
 
         iso_value : FloatProperty(
                 name = "Value",
