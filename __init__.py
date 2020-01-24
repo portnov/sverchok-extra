@@ -15,7 +15,6 @@ bl_info = {
 import sys
 import importlib
 
-import bpy
 import nodeitems_utils
 import bl_operators
 
@@ -26,17 +25,15 @@ from sverchok.menu import SverchNodeItem, node_add_operators, SverchNodeCategory
 from sverchok.ui.nodeview_space_menu import make_extra_category_menus
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat
-from sverchok.utils.logging import info
-
-from . import sockets
-from . import data
-from . import icons
+from sverchok.utils.logging import info, debug
 
 # make sverchok the root module name, (if sverchok dir not named exactly "sverchok") 
 if __name__ != "sverchok_extra":
     sys.modules["sverchok_extra"] = sys.modules[__name__]
 
-imported_modules = []
+from sverchok_extra import sockets
+from sverchok_extra import data
+from sverchok_extra import icons
 
 def nodes_index():
     return [("Surface", [
@@ -75,15 +72,30 @@ def nodes_index():
             ])
     ]
 
-def register_nodes():
-    global imported_modules
+def make_node_list():
+    modules = []
     base_name = "sverchok_extra.nodes"
     index = nodes_index()
     for category, items in index:
         for module_name, node_name in items:
             module = importlib.import_module(f".{module_name}", base_name)
-            imported_modules.append(module)
-            module.register()
+            modules.append(module)
+    return modules
+
+imported_modules = [sockets, data, icons] + make_node_list()
+
+reload_event = False
+
+if "bpy" in locals():
+    reload_event = True
+    info("Reloading sverchok-extra...")
+    reload_modules()
+
+import bpy
+
+def register_nodes():
+    for module in make_node_list():
+        module.register()
 
 def unregister_nodes():
     global imported_modules
@@ -123,7 +135,14 @@ class SvExCategoryProvider(object):
 
 our_menu_classes = []
 
+def reload_modules():
+    global imported_modules
+    for im in imported_modules:
+        debug("Reloading: %s", im)
+        importlib.reload(im)
+
 def register():
+    info("Registering sverchok-extra")
     global our_menu_classes
 
     sockets.register()

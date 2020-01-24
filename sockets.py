@@ -9,6 +9,7 @@ from sverchok.core.socket_data import (
     SvNoDataError, sentinel)
 from sverchok.core.socket_conversions import DefaultImplicitConversionPolicy
 from sverchok.data_structure import get_other_socket, get_data_nesting_level
+from sverchok.utils.logging import debug, info
 
 from .data.field.scalar import SvExConstantScalarField
 from .data.field.vector import SvExMatrixVectorField
@@ -193,5 +194,8 @@ def register():
 
 def unregister():
     for cls in reversed(classes):
-        bpy.utils.unregister_class(cls)
+        try:
+            bpy.utils.unregister_class(cls)
+        except Exception:
+            pass
 
