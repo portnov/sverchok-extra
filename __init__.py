@@ -21,7 +21,8 @@ import bl_operators
 import sverchok
 from sverchok.core import sv_registration_utils, make_node_list
 from sverchok.utils import auto_gather_node_classes, get_node_class_reference
-from sverchok.menu import SverchNodeItem, node_add_operators, SverchNodeCategory, register_node_panels, unregister_node_panels, unregister_node_add_operators, register_extra_category_provider
+from sverchok.menu import SverchNodeItem, node_add_operators, SverchNodeCategory, register_node_panels, unregister_node_panels, unregister_node_add_operators
+from sverchok.utils.extra_categories import register_extra_category_provider
 from sverchok.ui.nodeview_space_menu import make_extra_category_menus
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat
