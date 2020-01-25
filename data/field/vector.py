@@ -5,6 +5,8 @@ from mathutils import noise
 from mathutils import kdtree
 from mathutils import bvhtree
 
+from sverchok.utils.geom import autorotate_householder, autorotate_track, autorotate_diff
+
 ##################
 #                #
 #  Vector Fields #
@@ -558,6 +560,88 @@ class SvExVectorFieldRotor(SvExVectorField):
         ry = - (dz_dx - dx_dz)
         rz = dy_dx - dx_dy
         R = np.transpose( np.stack((rx, ry, rz)), axes=(1,2,3,0))
+        return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
+
+class SvExBendAlongCurveField(SvExVectorField):
+    def __init__(self, curve, algorithm, scale_all, axis, t_min, t_max, up_axis=None):
+        self.curve = curve
+        self.axis = axis
+        self.t_min = t_min
+        self.t_max = t_max
+        self.algorithm = algorithm
+        self.scale_all = scale_all
+        self.up_axis = up_axis
+
+    def get_matrix(self, tangent, scale):
+        x = Vector((1.0, 0.0, 0.0))
+        y = Vector((0.0, 1.0, 0.0))
+        z = Vector((0.0, 0.0, 1.0))
+
+        if self.axis == 0:
+            ax1, ax2, ax3 = x, y, z
+        elif self.axis == 1:
+            ax1, ax2, ax3 = y, x, z
+        else:
+            ax1, ax2, ax3 = z, x, y
+
+        if self.scale_all:
+            scale_matrix = Matrix.Scale(1/scale, 4, ax1) @ Matrix.Scale(scale, 4, ax2) @ Matrix.Scale(scale, 4, ax3)
+        else:
+            scale_matrix = Matrix.Identity(4)
+        scale_matrix = np.array(scale_matrix.to_3x3())
+
+        tangent = Vector(tangent)
+        if self.algorithm == 'householder':
+            rot = autorotate_householder(ax1, tangent).inverted()
+        elif self.algorithm == 'track':
+            axis = "XYZ"[self.axis]
+            rot = autorotate_track(axis, tangent, self.up_axis)
+        elif self.algorithm == 'diff':
+            rot = autorotate_diff(tangent, ax1)
+        else:
+            raise Exception("Unsupported algorithm")
+        rot = np.array(rot.to_3x3())
+
+        return np.matmul(rot, scale_matrix)
+
+    def get_t_value(self, x, y, z):
+        t = [x, y, z][self.axis]
+        t = (t - self.t_min) / (self.t_max - self.t_min)
+        return t
+
+    def get_t_values(self, xs, ys, zs):
+        ts = [xs, ys, zs][self.axis]
+        ts = (ts - self.t_min) / (self.t_max - self.t_min)
+        return ts
+
+    def get_scale(self):
+        return 1.0 / (self.t_max - self.t_min)
+
+    def evaluate(self, x, y, z):
+        t = self.get_t_value(x, y, z)
+        spline_tangent = self.curve.tangent(t)
+        spline_vertex = self.curve.evaluate(t)
+        scale = self.get_scale()
+        matrix = self.get_matrix(spline_tangent, scale)
+        src_vector_projection = np.array([x, y, z])
+        src_vector_projection[self.axis] = 0
+        new_vertex = np.matmul(matrix, src_vertex_projection) + spline_vertex
+        vector = new_vertex - np.array([x, y, z])
+        return vector
+
+    def evaluate_grid(self, xs, ys, zs):
+        ts = self.get_t_values(xs, ys, zs).flatten()
+        spline_tangents = self.curve.tangent_array(ts)
+        spline_vertices = self.curve.evaluate_array(ts)
+        scale = self.get_scale()
+        matrices = np.vectorize(lambda t : self.get_matrix(t, scale), signature='(3)->(3,3)')(spline_tangents)
+        src_vectors = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        src_vector_projections = src_vectors.copy()
+        src_vector_projections[:,:,:, self.axis] = 0
+        matrices = matrices[np.newaxis][np.newaxis]
+        multiply = np.vectorize(lambda m, v: m @ v, signature='(3,3),(3)->(3)')
+        new_vertices = multiply(matrices, src_vector_projections) + spline_vertices
+        R = new_vertices - src_vectors
         return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
 
 def register():

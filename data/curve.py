@@ -42,7 +42,7 @@ class SvExGeomdlCurve(SvExCurve):
 
     def tangent_array(self, ts):
         vs = self.curve.tangent(list(ts))
-        return np.array(vs)
+        return np.array([t[1] for t in vs])
 
 class SvExSplineCurve(SvExCurve):
     def __init__(self, spline):
