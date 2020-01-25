@@ -35,6 +35,7 @@ if __name__ != "sverchok_extra":
 from sverchok_extra import sockets
 from sverchok_extra import data
 from sverchok_extra import icons
+from sverchok_extra.utils import show_welcome
 
 def nodes_index():
     return [("Surface", [
@@ -98,8 +99,10 @@ if "bpy" in locals():
 import bpy
 
 def register_nodes():
-    for module in make_node_list():
+    node_modules = make_node_list()
+    for module in node_modules:
         module.register()
+    info("Registered %s nodes", len(node_modules))
 
 def unregister_nodes():
     global imported_modules
@@ -146,7 +149,7 @@ def reload_modules():
         importlib.reload(im)
 
 def register():
-    info("Registering sverchok-extra")
+    debug("Registering sverchok-extra")
     global our_menu_classes
 
     sockets.register()
@@ -165,6 +168,7 @@ def register():
     nodeitems_utils.register_node_categories("SVERCHOK_EXTRA", menu)
     our_menu_classes = make_extra_category_menus()
     #register_node_panels("SVERCHOK_EXTRA", menu)
+    show_welcome()
 
 def unregister():
     global our_menu_classes
