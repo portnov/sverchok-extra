@@ -34,6 +34,20 @@ class SvExMatrixVectorField(SvExVectorField):
         R = np.apply_along_axis(lambda v : matrix @ v + translation - v, 3, points)
         return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
 
+class SvExConstantVectorField(SvExVectorField):
+    def __init__(self, vector):
+        self.vector = vector
+
+    def evaluate(self, x, y, z):
+        return self.vector
+    
+    def evaluate_grid(self, xs, ys, zs):
+        x, y, z = self.vector
+        rx = np.full_like(xs, x)
+        ry = np.full_like(ys, y)
+        rz = np.full_like(zs, z)
+        return rx, ry, rz
+
 class SvExVectorFieldLambda(SvExVectorField):
     def __init__(self, function, variables, in_field):
         self.function = function

@@ -12,7 +12,7 @@ from sverchok.data_structure import get_other_socket, get_data_nesting_level
 from sverchok.utils.logging import debug, info
 
 from .data.field.scalar import SvExConstantScalarField
-from .data.field.vector import SvExMatrixVectorField
+from .data.field.vector import SvExMatrixVectorField, SvExConstantVectorField
 
 def is_matrix_to_vfield(socket):
     other = get_other_socket(socket)
@@ -36,7 +36,7 @@ def matrices_to_vfield(data):
 
 def vertices_to_vfield(data):
     if isinstance(data, (tuple, list)) and len(data) == 3 and isinstance(data[0], (float, int)):
-        return SvExMatrixVectorField(Matrix.Translation(data))
+        return SvExConstantVectorField(data)
     elif isinstance(data, (list, tuple)):
         return [vertices_to_vfield(item) for item in data]
     else:

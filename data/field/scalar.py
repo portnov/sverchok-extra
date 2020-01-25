@@ -368,6 +368,16 @@ class SvExScalarFieldLaplacian(SvExScalarField):
         result = (sides - 6*v0) / (8 * step * step * step)
         return result
 
+class SvExRbfScalarField(SvExScalarField):
+    def __init__(self, rbf):
+        self.rbf = rbf
+
+    def evaluate(self, x, y, z):
+        return self.rbf(x, y, z)
+
+    def evaluate_grid(self, xs, ys, zs):
+        value = self.rbf(xs, ys, zs)
+        return value
 
 def register():
     pass
