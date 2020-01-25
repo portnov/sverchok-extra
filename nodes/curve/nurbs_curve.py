@@ -15,6 +15,8 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList
 
+from sverchok_extra.data.curve import SvExGeomdlCurve
+
 if geomdl_available:
     
     class SvExNurbsCurveNode(bpy.types.Node, SverchCustomTreeNode):
@@ -26,30 +28,21 @@ if geomdl_available:
         bl_label = 'NURBS Curve'
         bl_icon = 'CURVE_NCURVE'
 
-        sample_size : IntProperty(
-                name = "Samples",
-                default = 50,
-                min = 4,
-                update = updateNode)
-
         def sv_init(self, context):
             self.inputs.new('SvVerticesSocket', "ControlPoints")
             self.inputs.new('SvStringsSocket', "Weights")
-            self.inputs.new('SvStringsSocket', "Samples").prop_name = 'sample_size'
-            self.outputs.new('SvVerticesSocket', "Vertices")
-            self.outputs.new('SvStringsSocket', "Edges")
+            self.outputs.new('SvExCurveSocket', "Curve").display_shape = 'DIAMOND'
 
         def process(self):
+            if not any(socket.is_linked for socket in self.outputs):
+                return
+
             vertices_s = self.inputs['ControlPoints'].sv_get()
             has_weights = self.inputs['Weights'].is_linked
             weights_s = self.inputs['Weights'].sv_get(default = [[1.0]])
-            samples_s = self.inputs['Samples'].sv_get()
 
-            verts_out = []
-            edges_out = []
-            for vertices, weights, samples in zip_long_repeat(vertices_s, weights_s, samples_s):
-                if isinstance(samples, (list, tuple)):
-                    samples = samples[0]
+            curves_out = []
+            for vertices, weights in zip_long_repeat(vertices_s, weights_s):
                 fullList(weights, len(vertices))
 
                 # Create a 3-dimensional B-spline Curve
@@ -67,16 +60,10 @@ if geomdl_available:
                 # Set knot vector
                 curve.knotvector = utilities.generate_knot_vector(curve.degree, len(curve.ctrlpts))
 
-                # Set evaluation delta (controls the number of curve points)
-                curve.sample_size = samples
+                curve = SvExGeomdlCurve(curve)
+                curves_out.append(curve)
 
-                # Get curve points (the curve will be automatically evaluated)
-                verts_out.append(curve.evalpts)
-                new_edges = [(i,i+1) for i in range(len(verts_out[0])-1)]
-                edges_out.append(new_edges)
-
-            self.outputs['Vertices'].sv_set(verts_out)
-            self.outputs['Edges'].sv_set(edges_out)
+            self.outputs['Curve'].sv_set(curves_out)
 
 def register():
     if geomdl_available:

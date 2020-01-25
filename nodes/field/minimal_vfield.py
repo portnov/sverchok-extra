@@ -20,6 +20,7 @@ from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, get_data_nesting_level
 
 from sverchok_extra.data.field.vector import SvExRbfVectorField
+from sverchok_extra.utils import rbf_functions
 
 if scipy_available:
 
@@ -32,18 +33,9 @@ if scipy_available:
         bl_label = 'Minimal Vector Field'
         bl_icon = 'OUTLINER_OB_EMPTY'
 
-        functions = [
-            ('multiquadric', "Multi Quadric", "Multi Quadric", 0),
-            ('inverse', "Inverse", "Inverse", 1),
-            ('gaussian', "Gaussian", "Gaussian", 2),
-            ('cubic', "Cubic", "Cubic", 3),
-            ('quintic', "Quintic", "Qunitic", 4),
-            ('thin_plate', "Thin Plate", "Thin Plate", 5)
-        ]
-
         function : EnumProperty(
                 name = "Function",
-                items = functions,
+                items = rbf_functions,
                 default = 'multiquadric',
                 update = updateNode)
 

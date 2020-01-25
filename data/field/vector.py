@@ -389,6 +389,30 @@ class SvExBvhAttractorVectorField(SvExVectorField):
             R = vectors
             return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
 
+class SvExBvhRbfNormalVectorField(SvExVectorField):
+    def __init__(self, bvh, rbf):
+        self.bvh = bvh
+        self.rbf = rbf
+
+    def evaluate(self, x, y, z):
+        vertex = Vector((x,y,z))
+        nearest, normal, idx, distance = self.bvh.find_nearest(vertex)
+        x0, y0, z0 = nearest
+        return self.rbf(x0, y0, z0)
+    
+    def evaluate_grid(self, xs, ys, zs):
+        def find(v):
+            nearest, normal, idx, distance = self.bvh.find_nearest(v)
+            if nearest is None:
+                raise Exception("No nearest point on mesh found for vertex %s" % v)
+            x0, y0, z0 = nearest
+            return self.rbf(x0, y0, z0)
+
+        points = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        vectors = np.vectorize(find, signature='(3)->(3)')(points)
+        R = vectors
+        return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
+
 class SvExVectorFieldTangent(SvExVectorField):
     def __init__(self, field1, field2):
         self.field1 = field1

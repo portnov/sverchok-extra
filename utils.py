@@ -12,6 +12,15 @@ falloff_types = [
         ("gauss", "Gauss - Exp(-R^2/2)", "", 5)
     ]
 
+rbf_functions = [
+    ('multiquadric', "Multi Quadric", "Multi Quadric", 0),
+    ('inverse', "Inverse", "Inverse", 1),
+    ('gaussian', "Gaussian", "Gaussian", 2),
+    ('cubic', "Cubic", "Cubic", 3),
+    ('quintic', "Quintic", "Qunitic", 4),
+    ('thin_plate', "Thin Plate", "Thin Plate", 5)
+]
+
 def inverse_exp(c, x):
     return np.exp(-c*x)
 
@@ -35,3 +44,4 @@ def falloff(falloff_type, amplitude, coefficient, clamp=False):
             result[high] = rho_array[high]
         return result
     return function
+
