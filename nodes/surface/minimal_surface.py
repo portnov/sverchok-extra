@@ -41,13 +41,14 @@ if scipy_available:
             self.inputs['Matrix'].hide_safe = self.coord_mode == 'UV'
             self.inputs['SrcU'].hide_safe = self.coord_mode != 'UV' or not self.explicit_src_uv
             self.inputs['SrcV'].hide_safe = self.coord_mode != 'UV' or not self.explicit_src_uv
-            self.inputs[TARGET_U_SOCKET].hide_safe = not self.explicit_target_uv
-            self.inputs[TARGET_V_SOCKET].hide_safe = not self.explicit_target_uv
+            self.inputs[TARGET_U_SOCKET].hide_safe = self.generate_mode != 'EXPLICIT'
+            self.inputs[TARGET_V_SOCKET].hide_safe = self.generate_mode != 'EXPLICIT'
             self.inputs[TARGET_U_SOCKET].name = "TargetU" if self.coord_mode == 'UV' else "TargetX"
             self.inputs[TARGET_V_SOCKET].name = "TargetV" if self.coord_mode == 'UV' else "TargetY"
-            self.inputs['GridPoints'].hide_safe = self.explicit_target_uv
-            self.outputs['Edges'].hide_safe = self.explicit_target_uv
-            self.outputs['Faces'].hide_safe = self.explicit_target_uv
+            self.inputs['GridPoints'].hide_safe = self.generate_mode != 'GRID'
+            self.outputs['Vertices'].hide_safe = self.generate_mode == 'NONE'
+            self.outputs['Edges'].hide_safe = self.generate_mode != 'GRID'
+            self.outputs['Faces'].hide_safe = self.generate_mode != 'GRID'
 
         coord_modes = [
             ('XY', "X Y -> Z", "XY -> Z function", 0),
@@ -110,9 +111,16 @@ if scipy_available:
                 default = False,
                 update = update_sockets)
 
-        explicit_target_uv : BoolProperty(
-                name = "Explicit target UV",
-                default = False,
+        generate_modes = [
+            ('NONE', "None", "Do not generate surface vertices / faces", 0),
+            ('GRID', "Grid", "Generate automatic grid", 1),
+            ('EXPLICIT', "Explicit", "Generate vertices at provided U/V coordinates", 2)
+        ]
+
+        generate_mode : EnumProperty(
+                name = "Evaluate",
+                items = generate_modes,
+                default = 'NONE',
                 update = update_sockets)
 
         def sv_init(self, context):
@@ -139,9 +147,8 @@ if scipy_available:
                 layout.prop(self, "orientation", expand=True)
             if self.coord_mode == 'UV':
                 layout.prop(self, "explicit_src_uv")
-                layout.prop(self, "explicit_target_uv", text = "Explicit target UV")
-            else:
-                layout.prop(self, "explicit_target_uv", text = "Explicit target XY")
+            layout.label(text='Generate:')
+            layout.prop(self, 'generate_mode', text='')
 
         def make_edges_xy(self, n_points):
             edges = []
@@ -241,8 +248,6 @@ if scipy_available:
                 if has_matrix:
                     np_matrix = np.array(matrix.to_3x3())
                     inv_matrix = np.linalg.inv(np_matrix)
-                    #print(matrix)
-                    #print(XYZ)
                     translation = np.array(matrix.translation)
                     XYZ = np.matmul(inv_matrix, XYZ.T).T + translation
 
@@ -268,22 +273,25 @@ if scipy_available:
                     u_bounds = (x_min, x_max)
                     v_bounds = (y_min, y_max)
 
-                    if not self.explicit_target_uv:
-                        target_x_range = np.linspace(x_min, x_max, grid_points)
-                        target_y_range = np.linspace(y_min, y_max, grid_points)
-                        XI, YI = np.meshgrid(target_x_range, target_y_range)
+                    if self.generate_mode == 'NONE':
+                        new_verts = np.array([])
                     else:
-                        XI, YI = np.array(target_us), np.array(target_vs)
-                    ZI = rbf(XI, YI)
+                        if self.generate_mode == 'GRID':
+                            target_x_range = np.linspace(x_min, x_max, grid_points)
+                            target_y_range = np.linspace(y_min, y_max, grid_points)
+                            XI, YI = np.meshgrid(target_x_range, target_y_range)
+                        else: # EXPLICIT
+                            XI, YI = np.array(target_us), np.array(target_vs)
+                        ZI = rbf(XI, YI)
 
-                    if self.orientation == 'X':
-                        YI, ZI, XI = XI, YI, ZI
-                    elif self.orientation == 'Y':
-                        ZI, XI, YI = XI, YI, ZI
-                    else: # Z
-                        pass
+                        if self.orientation == 'X':
+                            YI, ZI, XI = XI, YI, ZI
+                        elif self.orientation == 'Y':
+                            ZI, XI, YI = XI, YI, ZI
+                        else: # Z
+                            pass
 
-                    new_verts = np.dstack((XI,YI,ZI))
+                        new_verts = np.dstack((XI,YI,ZI))
                 else: # UV
                     if not self.explicit_src_uv:
                         src_us, src_vs = self.make_uv(vertices)
@@ -304,24 +312,23 @@ if scipy_available:
                     u_bounds = (u_min, u_max)
                     v_bounds = (v_min, v_max)
 
-                    if not self.explicit_target_uv:
-                        target_u_range = np.linspace(u_min, u_max, grid_points)
-                        target_v_range = np.linspace(v_min, v_max, grid_points)
-                        target_us, target_vs = np.meshgrid(target_u_range, target_v_range)
+                    if self.generate_mode == 'NONE':
+                        new_verts = np.array([])
                     else:
-                        pass
-                        #target_u_range = np.array(target_us)
-                        #target_v_range = np.array(target_vs)
-                        #target_us, target_vs = np.meshgrid(target_u_range, target_v_range)
+                        if self.generate_mode == 'GRID':
+                            target_u_range = np.linspace(u_min, u_max, grid_points)
+                            target_v_range = np.linspace(v_min, v_max, grid_points)
+                            target_us, target_vs = np.meshgrid(target_u_range, target_v_range)
+                        else:
+                            pass
 
-                    #self.info("T Us: %s, T Vs: %s", target_us, target_vs)
-                    new_verts = rbf(target_us, target_vs)
+                        new_verts = rbf(target_us, target_vs)
 
-                if has_matrix:
+                if has_matrix and self.generate_mode != 'NONE':
                     new_verts = new_verts - translation
                     new_verts = np.apply_along_axis(lambda v : np_matrix @ v, 2, new_verts)
                 new_verts = new_verts.tolist()
-                if not (self.coord_mode == 'UV' and self.explicit_target_uv):
+                if not (self.coord_mode == 'UV' and self.generate_mode == 'EXPLICIT'):
                     new_verts = sum(new_verts, [])
                 new_edges = self.make_edges_xy(grid_points)
                 new_faces = self.make_faces_xy(grid_points)
