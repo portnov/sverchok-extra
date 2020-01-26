@@ -61,9 +61,10 @@ class SvExVectorFieldLambda(SvExVectorField):
         if self.in_field is None:
             Vs = np.zeros((xs.shape[0], ys.shape[0], zs.shape[0]))
         else:
-            Vs = self.in_field.evaluate_grid(xs, ys, zs)
+            vx, vy, vz = self.in_field.evaluate_grid(xs, ys, zs)
+            Vs = np.transpose( np.stack((vx, vy, vz)), axes=(1,2,3,0))
         return np.vectorize(self.function,
-                    signature = "(),(),(),()->(),(),()")(xs, ys, zs, Vs)
+                    signature = "(),(),(),(3)->(),(),()")(xs, ys, zs, Vs)
 
     def evaluate(self, x, y, z):
         if self.in_field is None:
@@ -126,10 +127,6 @@ class SvExVectorFieldCrossProduct(SvExVectorField):
         vectors2 = np.transpose( np.stack((vx2, vy2, vz2)), axes=(1,2,3,0))
         R = np.cross(vectors1, vectors2)
         return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
-#         def cross(v1, v2):
-#             v = np.cross(v1, v2)
-#             return v[0], v[1], v[2]
-#         return np.vectorize(cross, signature="(3),(3)->(),(),()")(vectors1, vectors2)
 
 class SvExVectorFieldMultipliedByScalar(SvExVectorField):
     def __init__(self, vector_field, scalar_field):
