@@ -1,11 +1,12 @@
 
 import numpy as np
+from math import sqrt
 from mathutils import Matrix, Vector
 from mathutils import noise
 from mathutils import kdtree
 from mathutils import bvhtree
 
-from sverchok.utils.geom import autorotate_householder, autorotate_track, autorotate_diff
+from sverchok.utils.geom import autorotate_householder, autorotate_track, autorotate_diff, diameter
 
 ##################
 #                #
@@ -643,6 +644,80 @@ class SvExBendAlongCurveField(SvExVectorField):
         new_vertices = multiply(matrices, src_vector_projections) + spline_vertices
         R = new_vertices - src_vectors
         return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
+
+class SvExBendAlongSurfaceField(SvExVectorField):
+    def __init__(self, surface, axis, autoscale=False, flip=False):
+        self.surface = surface
+        self.orient_axis = axis
+        self.autoscale = autoscale
+        self.flip = flip
+
+    def get_other_axes(self):
+        # Select U and V to be two axes except orient_axis
+        if self.orient_axis == 0:
+            u_index, v_index = 1,2
+        elif self.orient_axis == 1:
+            u_index, v_index = 2,0
+        else:
+            u_index, v_index = 0,1
+        return u_index, v_index
+        
+    def get_uv(self, vertices):
+        """
+        Translate source vertices to UV space of future spline.
+        vertices must be np.array of shape (n, 3).
+        """
+        u_index, v_index = self.get_other_axes()
+
+        # Rescale U and V coordinates to [0, 1], drop third coordinate
+        us = vertices[:,:,:, u_index].flatten()
+        vs = vertices[:,:,:, v_index].flatten()
+        min_u = min(us)
+        max_u = max(us)
+        min_v = min(vs)
+        max_v = max(vs)
+
+        size_u = max_u - min_u
+        size_v = max_v - min_v
+
+        if size_u < 0.00001:
+            raise Exception("Object has too small size in U direction")
+        if size_v < 0.00001:
+            raise Exception("Object has too small size in V direction")
+
+        us = self.surface.u_size * (us - min_u) / size_u + self.surface.get_u_min()
+        vs = self.surface.v_size * (vs - min_v) / size_v + self.surface.get_v_min()
+
+        return size_u, size_v, us, vs
+
+    def _evaluate(self, vertices):
+        src_size_u, src_size_v, us, vs = self.get_uv(vertices)
+        if self.autoscale:
+            u_index, v_index = self.get_other_axes()
+            scale_u = src_size_u / self.surface.u_size
+            scale_v = src_size_v / self.surface.v_size
+            scale_z = sqrt(scale_u * scale_v)
+        else:
+            scale_z = 1.0
+        if self.flip:
+            scale_z = - scale_z
+
+        surf_vertices = self.surface.evaluate_array(us, vs)
+        spline_normals = self.surface.normal_array(us, vs)
+        zs = vertices[:,:,:,self.orient_axis].flatten()
+        zs = zs[np.newaxis].T
+        new_vertices = surf_vertices + scale_z * zs * spline_normals
+        return new_vertices
+
+    def evaluate_grid(self, xs, ys, zs):
+        vertices = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        new_vertices = self._evaluate(vertices)
+        R = new_vertices - vertices
+        return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
+
+    def evaluate(self, x, y, z):
+        xs, ys, zs = self.evaluate_grid(np.array([[[x]]]), np.array([[[y]]]), np.array([[[z]]]))
+        return np.array([xs[0][0][0], ys[0][0][0], zs[0][0][0]])
 
 def register():
     pass

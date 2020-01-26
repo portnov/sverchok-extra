@@ -42,11 +42,8 @@ def nodes_index():
                 ("surface.minimal_surface", "SvExMinimalSurfaceNode"),
                 ("surface.smooth_spline", "SvExBivariateSplineNode"),
                 ("surface.nurbs_surface", "SvExNurbsSurfaceNode"),
-                ("surface.bend_along_nurbs_surface", "SvExBendAlongGeomdlSurface"),
-                ("surface.bend_along_min_surface", "SvExBendAlongMinSurfaceNode"),
                 ("surface.marching_cubes", "SvExMarchingCubesNode"),
-                ("surface.evaluate_min_surface", "SvExEvalMinimalSurfaceNode"),
-                ("surface.evaluate_nurbs_surface", "SvExEvalNurbsSurfaceNode")
+                ("surface.evaluate_surface", "SvExEvalSurfaceNode")
             ]),
             ("Curve", [
                 ("curve.interpolation_curve", "SvExSplineCurveNode"),
@@ -70,6 +67,7 @@ def nodes_index():
                 ("field.vector_field_math", "SvExVectorFieldMathNode"),
                 ("field.noise_vfield", "SvExNoiseVectorFieldNode"),
                 ("field.curve_bend_field", "SvExBendAlongCurveFieldNode"),
+                ("field.bend_along_surface", "SvExBendAlongSurfaceFieldNode"),
                 ("field.differential_operations", "SvExFieldDiffOpsNode")
             ]),
             ("Spatial", [

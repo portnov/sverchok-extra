@@ -17,6 +17,8 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList
 
+from sverchok_extra.data.surface import SvExGeomdlSurface
+
 if geomdl_available:
     
     class SvExNurbsSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
@@ -153,6 +155,8 @@ if geomdl_available:
                     new_faces = []
                 verts_out.append(new_verts)
                 faces_out.append(new_faces)
+
+                surf = SvExGeomdlSurface(surf)
                 surfaces_out.append(surf)
 
             if self.make_grid:

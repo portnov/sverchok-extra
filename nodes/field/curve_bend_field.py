@@ -14,10 +14,10 @@ from sverchok_extra.data.field.vector import SvExBendAlongCurveField
 class SvExBendAlongCurveFieldNode(bpy.types.Node, SverchCustomTreeNode):
     """
     Triggers: Bend Along Curve
-    Tooltip: Bend Along Curve
+    Tooltip: Generate a vector field which bends the space along the given curve.
     """
     bl_idname = 'SvExBendAlongCurveFieldNode'
-    bl_label = 'Bend Along Curve'
+    bl_label = 'Bend Along Curve Field'
     bl_icon = 'OUTLINER_OB_EMPTY'
 
     algorithms = [
