@@ -20,25 +20,26 @@ At the moment, this addon includes the following nodes for Sverchok:
 
 * *Curve* category:
   * NURBS Curve (uses [Geomdl][3] library)
+  * Interpolation Curve (cubic spline, uses numpy only)
+  * Evaluate Curve
   * Marching Squares (uses [Scikit-Image][5] library)
 * *Surface* category:
   * Marching Cubes (uses either [PyMCubes][8] or [Scikit-Image][5])
   * Smooth Bivariate Spline (uses [SciPy][4])
   * NURBS Surface (uses Geomdl)
   * Minimal Surface (uses SciPy)
-  * Evaluate NURBS Surface (uses Geomdl)
-  * Evaluate Minimal Surface (uses SciPy)
-  * Bend object along NURBS Surface (uses Geomdl)
-  * Bend object along Minimal Surface (uses SciPy)
+  * Evaluate Surface (universal node for NURBS / minimal surfaces)
 * *Spatial* category:
   * Voronoi 3D (uses SciPy)
   * Spherical Voronoi (uses SciPy)
 * *Field* category (please refer to the [wiki page][11] about used concept of the field; most of these nodes do not use external libraries, except for numpy):
   * Attractor Field
-  * Field differential operators
+  * Field differential operators (gradient, divergence, laplacian...)
   * Merge Scalar Fields
-  * Mesh Nearest Normals Field
+  * Mesh Nearest Normals Field (optionally uses SciPy)
   * Minimal Vector Field (uses SciPy)
+  * Bend along Surface (universal node for NURBS / minimal surfaces)
+  * Bend along Curve (universal node for NURBS / interpolation curves)
   * Noise Vector Field
   * Generate Scalar field by formula
   * Generate Vector field by formula
