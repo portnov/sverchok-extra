@@ -49,24 +49,11 @@ class SvExBendAlongSurfaceFieldNode(bpy.types.Node, SverchCustomTreeNode):
         description="Flip the surface orientation",
         default=False, update=updateNode)
 
-    coord_modes = [
-        ('XY', "X Y -> Z", "XY -> Z function", 0),
-        ('UV', "U V -> X Y Z", "UV -> XYZ function", 1)
-    ]
-
-    coord_mode : EnumProperty(
-        name = "Coordinates",
-        items = coord_modes,
-        default = 'XY',
-        update = updateNode)
-
     def sv_init(self, context):
         self.inputs.new('SvExSurfaceSocket', "Surface").display_shape = 'DIAMOND'
         self.outputs.new('SvExVectorFieldSocket', 'Field').display_shape = 'CIRCLE_DOT'
 
     def draw_buttons(self, context, layout):
-        layout.label(text="Surface mode:")
-        layout.prop(self, "coord_mode", expand=True)
         layout.label(text="Object vertical axis:")
         layout.prop(self, "orient_axis_", expand=True)
         layout.prop(self, "autoscale", toggle=True)
@@ -83,9 +70,6 @@ class SvExBendAlongSurfaceFieldNode(bpy.types.Node, SverchCustomTreeNode):
 
         fields_out = []
         for surface in surfaces_s:
-            #if surface.get_coord_mode() != self.coord_mode:
-            #    self.warning("Input surface mode is %s, but Evaluate node mode is %s; the result can be unexpected", surface.get_coord_mode(), self.coord_mode)
-
             field = SvExBendAlongSurfaceField(surface, self.orient_axis,
                         self.autoscale, self.flip)
             fields_out.append(field)
