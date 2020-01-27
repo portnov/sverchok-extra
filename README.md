@@ -1,5 +1,14 @@
-Sverchok-Extra README
-=====================
+README
+======
+
+```
+   _____                     __          __         ______     __            
+  / ___/   _____  __________/ /_  ____  / /__      / ____/  __/ /__________ _
+  \__ \ | / / _ \/ ___/ ___/ __ \/ __ \/ //_/_____/ __/ | |/_/ __/ ___/ __ `/
+ ___/ / |/ /  __/ /  / /__/ / / / /_/ / ,< /_____/ /____>  </ /_/ /  / /_/ / 
+/____/|___/\___/_/   \___/_/ /_/\____/_/|_|     /_____/_/|_|\__/_/   \__,_/
+initialized.
+```
 
 This is an addon for [Blender][1], which is meant to extend the [Sverchok][2]
 addon by features, that could not be included into Sverchok because it would
