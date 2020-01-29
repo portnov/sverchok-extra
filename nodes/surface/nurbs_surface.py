@@ -15,7 +15,7 @@ import bpy
 from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
 
 from sverchok.node_tree import SverchCustomTreeNode, throttled
-from sverchok.data_structure import updateNode, zip_long_repeat, fullList
+from sverchok.data_structure import updateNode, zip_long_repeat, fullList, ensure_nesting_level
 
 from sverchok_extra.data.surface import SvExGeomdlSurface
 
@@ -97,6 +97,11 @@ if geomdl_available:
             weights_s = self.inputs['Weights'].sv_get(default = [[1.0]])
             samples_s = self.inputs['Samples'].sv_get()
             u_size_s = self.inputs['USize'].sv_get()
+
+            if self.input_mode == '1D':
+                vertices_s = ensure_nesting_level(vertices_s, 3)
+            else:
+                vertices_s = ensure_nesting_level(vertices_s, 4)
             
             def convert_row(verts_row, weights_row):
                 return [(x, y, z, w) for (x,y,z), w in zip(verts_row, weights_row)]
@@ -113,7 +118,10 @@ if geomdl_available:
                 if self.input_mode == '1D':
                     fullList(weights, len(vertices))
                 else:
-                    for verts_u, weights_u in vertices:
+                    if isinstance(weights[0], (int, float)):
+                        weights = [weights]
+                    fullList(weights, len(vertices))
+                    for verts_u, weights_u in zip(vertices, weights):
                         fullList(weights_u, len(verts_u))
 
                 # Generate surface
@@ -136,11 +144,13 @@ if geomdl_available:
                 else:
                     # Control points
                     if self.surface_mode == 'NURBS':
+                        print(len(vertices))
+                        print(weights)
                         surf.ctrlpts2d = list(map(convert_row, vertices, weights))
                     else:
                         surf.ctrlpts2d = vertices
-                    n_u = len(verts_in)
-                    n_v = len(verts_in[0])
+                    n_u = len(vertices)
+                    n_v = len(vertices[0])
 
                 surf.knotvector_u = knotvector.generate(surf.degree_u, n_u)
                 surf.knotvector_v = knotvector.generate(surf.degree_v, n_v)
