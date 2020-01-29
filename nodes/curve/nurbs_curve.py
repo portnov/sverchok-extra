@@ -24,10 +24,10 @@ if geomdl_available:
     class SvExNurbsCurveNode(bpy.types.Node, SverchCustomTreeNode):
         """
         Triggers: NURBS Curve
-        Tooltip: NURBS Curve
+        Tooltip: Generate NURBS Curve
         """
         bl_idname = 'SvExNurbsCurveNode'
-        bl_label = 'NURBS Curve'
+        bl_label = 'Build NURBS Curve'
         bl_icon = 'CURVE_NCURVE'
 
         @throttled
@@ -121,11 +121,11 @@ if geomdl_available:
                 # Set knot vector
                 if self.knot_mode == 'AUTO':
                     if self.is_cyclic:
-                        self.info("N: %s, degree: %s", n_total, degree)
+                        self.debug("N: %s, degree: %s", n_total, degree)
                         knots = list(range(n_total + degree + 1))
                     else:
                         knots = knotvector.generate(curve.degree, n_total)
-                    self.info('Auto knots: %s', knots)
+                    self.debug('Auto knots: %s', knots)
                     curve.knotvector = knots
                 else:
                     if self.is_cyclic:
@@ -135,7 +135,7 @@ if geomdl_available:
                             t = last + delta
                             knots.append(t)
                             last = t
-                    self.info('Manual knots: %s', knots)
+                    self.debug('Manual knots: %s', knots)
                     #if not knotvector.check(curve.degree, knots, len(curve.ctrlpts)):
                     #    raise Exception("Explicitly provided knot vector is incorrect!")
                     curve.knotvector = knots

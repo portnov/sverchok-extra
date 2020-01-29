@@ -48,6 +48,8 @@ def nodes_index():
             ("Curve", [
                 ("curve.interpolation_curve", "SvExSplineCurveNode"),
                 ("curve.nurbs_curve", "SvExNurbsCurveNode"),
+                ("curve.interpolate_nurbs_curve", "SvExInterpolateNurbsCurveNode"),
+                ("curve.approximate_nurbs_curve", "SvExApproxNurbsCurveNode"),
                 ("curve.eval_curve", "SvExEvalCurveNode"),
                 ("curve.marching_squares", "SvExMarchingSquaresNode")
             ]),

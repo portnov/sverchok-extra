@@ -82,4 +82,3 @@ def unregister():
     if geomdl_available:
         bpy.utils.unregister_class(SvExInterpolateNurbsCurveNode)
 
-
