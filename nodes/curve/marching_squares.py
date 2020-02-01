@@ -189,9 +189,9 @@ if skimage_available:
                 x_range = np.linspace(min_x, max_x, num=samples)
                 y_range = np.linspace(min_y, max_y, num=samples)
                 z_range = np.array([z_value])
-                grid = np.meshgrid(x_range, y_range, z_range, indexing='ij')
-                field_values = field.evaluate_grid(*grid)
-                field_values = field_values[:,:,0]
+                xs, ys, zs = np.meshgrid(x_range, y_range, z_range, indexing='ij')
+                field_values = field.evaluate_grid(xs.flatten(), ys.flatten(), zs.flatten())
+                field_values = field_values.reshape((samples, samples))
 
                 contours = measure.find_contours(field_values, level=value)
 

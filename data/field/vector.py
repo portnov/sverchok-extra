@@ -160,7 +160,6 @@ class SvExVectorFieldsLerp(SvExVectorField):
         return (1 - scalar) * vector1 + scalar * vector2
 
     def evaluate_grid(self, xs, ys, zs):
-        def product(xs, ys, zs):
             scalars = self.scalar_field.evaluate_grid(xs, ys, zs)
             vx1, vy1, vz1 = self.vfield1.evaluate_grid(xs, ys, zs)
             vectors1 = np.stack((vx1, vy1, vz1))
@@ -168,7 +167,6 @@ class SvExVectorFieldsLerp(SvExVectorField):
             vectors2 = np.stack((vx2, vy2, vz2))
             R = (1 - scalars) * vectors1 + scalars * vectors2
             return R[0], R[1], R[2]
-        return np.vectorize(product, signature="(m),(m),(m)->(m),(m),(m)")(xs, ys, zs)
 
 class SvExRbfVectorField(SvExVectorField):
     def __init__(self, rbf):
