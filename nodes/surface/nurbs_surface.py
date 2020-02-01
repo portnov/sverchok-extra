@@ -24,10 +24,10 @@ if geomdl_available:
     class SvExNurbsSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
         """
         Triggers: NURBS Surface
-        Tooltip: NURBS Surface
+        Tooltip: Build NURBS Surface
         """
         bl_idname = 'SvExNurbsSurfaceNode'
-        bl_label = 'NURBS Surface'
+        bl_label = 'Build NURBS Surface'
         bl_icon = 'SURFACE_NSURFACE'
 
         sample_size : IntProperty(
