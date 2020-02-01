@@ -41,11 +41,11 @@ class SvExVectorFieldEvaluateNode(bpy.types.Node, SverchCustomTreeNode):
                 new_values = [tuple(value)]
             else:
                 XYZ = np.array(vertices)
-                xs = XYZ[:,0][np.newaxis][np.newaxis]
-                ys = XYZ[:,1][np.newaxis][np.newaxis]
-                zs = XYZ[:,2][np.newaxis][np.newaxis]
+                xs = XYZ[:,0]
+                ys = XYZ[:,1]
+                zs = XYZ[:,2]
                 new_xs, new_ys, new_zs = field.evaluate_grid(xs, ys, zs)
-                new_vectors = np.dstack((new_xs[0,0,:], new_ys[0,0,:], new_zs[0,0,:]))
+                new_vectors = np.dstack((new_xs[:], new_ys[:], new_zs[:]))
                 new_values = new_vectors[0].tolist()
 
             values_out.append(new_values)

@@ -114,8 +114,9 @@ if mcubes_available or skimage_available:
                 x_range = np.linspace(b1[0], b2[0], num=samples)
                 y_range = np.linspace(b1[1], b2[1], num=samples)
                 z_range = np.linspace(b1[2], b2[2], num=samples)
-                grid = np.meshgrid(x_range, y_range, z_range, indexing='ij')
-                func_values = field.evaluate_grid(*grid)
+                xs, ys, zs = np.meshgrid(x_range, y_range, z_range, indexing='ij')
+                func_values = field.evaluate_grid(xs.flatten(), ys.flatten(), zs.flatten())
+                func_values = func_values.reshape((samples, samples, samples))
 
                 if self.implementation == 'mcubes':
                     new_verts, new_faces = mcubes.marching_cubes(

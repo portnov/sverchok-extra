@@ -21,7 +21,7 @@ class ProcessRefsTestCase(SverchokTestCase):
                     with self.assert_logs_no_errors():
                         link_node_tree(blend_path, TREE_NAME)
                         tree = get_node_tree(TREE_NAME)
-                        #tree.process()
+                        tree.process()
                 finally:
                     remove_node_tree(TREE_NAME)
 

@@ -37,7 +37,7 @@ class SvExScalarFieldLambda(SvExScalarField):
 
     def evaluate_grid(self, xs, ys, zs):
         if self.in_field is None:
-            Vs = np.zeros((xs.shape[0], ys.shape[0], zs.shape[0]))
+            Vs = np.zeros(xs.shape[0])
         else:
             Vs = self.in_field.evaluate_grid(xs, ys, zs)
         return np.vectorize(self.function)(xs, ys, zs, Vs)
@@ -81,7 +81,7 @@ class SvExScalarFieldBinOp(SvExScalarField):
 
     def evaluate_grid(self, xs, ys, zs):
         func = lambda xs, ys, zs : self.function(self.field1.evaluate_grid(xs, ys, zs), self.field2.evaluate_grid(xs, ys, zs))
-        return np.vectorize(func, signature="(m,n,p),(m,n,p),(m,n,p)->(m,n,p)")(xs, ys, zs)
+        return np.vectorize(func, signature="(m),(m),(m)->(m)")(xs, ys, zs)
 
 class SvExNegatedScalarField(SvExScalarField):
     def __init__(self, field):
@@ -92,9 +92,7 @@ class SvExNegatedScalarField(SvExScalarField):
         return -x
 
     def evaluate_grid(self, xs, ys, zs):
-        def func(xs, ys, zs):
-            return - self.field.evaluate_grid(xs, ys, zs)
-        return np.vectorize(func, signature="(m,n,p),(m,n,p),(m,n,p)->(m,n,p)")(xs, ys, zs)
+        return (- self.field.evaluate_grid(xs, ys, zs))
 
 class SvExVectorFieldsScalarProduct(SvExScalarField):
     def __init__(self, field1, field2):
@@ -109,8 +107,8 @@ class SvExVectorFieldsScalarProduct(SvExScalarField):
     def evaluate_grid(self, xs, ys, zs):
         vx1, vy1, vz1 = self.field1.evaluate_grid(xs, ys, zs)
         vx2, vy2, vz2 = self.field2.evaluate_grid(xs, ys, zs)
-        vectors1 = np.transpose( np.stack((vx1, vy1, vz1)), axes=(1,2,3,0))
-        vectors2 = np.transpose( np.stack((vx2, vy2, vz2)), axes=(1,2,3,0))
+        vectors1 = np.stack((vx1, vy1, vz1)).T
+        vectors2 = np.stack((vx2, vy2, vz2)).T
         result = np.vectorize(np.dot, signature="(3),(3)->()")(vectors1, vectors2)
         return result
 
@@ -124,8 +122,8 @@ class SvExVectorFieldNorm(SvExScalarField):
 
     def evaluate_grid(self, xs, ys, zs):
         vx, vy, vz = self.field.evaluate_grid(xs, ys, zs)
-        vectors = np.transpose( np.stack((vx, vy, vz)), axes=(1,2,3,0))
-        result = np.linalg.norm(vectors, axis=3)
+        vectors = np.stack((vx, vy, vz)).T
+        result = np.linalg.norm(vectors, axis=1)
         return result
 
 class SvExMergedScalarField(SvExScalarField):
@@ -187,7 +185,7 @@ class SvExKdtScalarField(SvExScalarField):
             nearest, i, distance = self.kdt.find(v)
             return distance
 
-        points = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        points = np.stack((xs, ys, zs)).T
         norms = np.vectorize(find, signature='(3)->()')(points)
         if self.falloff is not None:
             result = self.falloff(norms)
@@ -219,7 +217,7 @@ class SvExLineAttractorScalarField(SvExScalarField):
             dv = to_center - projection
             return np.linalg.norm(dv)
 
-        points = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        points = np.stack((xs, ys, zs)).T
         norms = np.vectorize(func, signature='(3)->()')(points)
         if self.falloff is not None:
             result = self.falloff(norms)
@@ -249,7 +247,7 @@ class SvExPlaneAttractorScalarField(SvExScalarField):
             projection = np.dot(to_center, direction) * direction / direction2
             return np.linalg.norm(projection)
 
-        points = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        points = np.stack((xs, ys, zs)).T
         norms = np.vectorize(func, signature='(3)->()')(points)
         if self.falloff is not None:
             result = self.falloff(norms)
@@ -278,7 +276,7 @@ class SvExBvhAttractorScalarField(SvExScalarField):
                 raise Exception("No nearest point on mesh found for vertex %s" % v)
             return distance
 
-        points = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        points = np.stack((xs, ys, zs)).T
         norms = np.vectorize(find, signature='(3)->()')(points)
         if self.falloff is not None:
             result = self.falloff(norms)

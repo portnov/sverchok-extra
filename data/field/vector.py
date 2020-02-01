@@ -33,9 +33,9 @@ class SvExMatrixVectorField(SvExVectorField):
     def evaluate_grid(self, xs, ys, zs):
         matrix = np.array(self.matrix.to_3x3())
         translation = np.array(self.matrix.translation)
-        points = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
-        R = np.apply_along_axis(lambda v : matrix @ v + translation - v, 3, points)
-        return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
+        points = np.stack((xs, ys, zs)).T
+        R = np.apply_along_axis(lambda v : matrix @ v + translation - v, 1, points).T
+        return R[0], R[1], R[2]
 
 class SvExConstantVectorField(SvExVectorField):
     def __init__(self, vector):
@@ -59,10 +59,10 @@ class SvExVectorFieldLambda(SvExVectorField):
 
     def evaluate_grid(self, xs, ys, zs):
         if self.in_field is None:
-            Vs = np.zeros((xs.shape[0], ys.shape[0], zs.shape[0]))
+            Vs = np.zeros(xs.shape[0])
         else:
             vx, vy, vz = self.in_field.evaluate_grid(xs, ys, zs)
-            Vs = np.transpose( np.stack((vx, vy, vz)), axes=(1,2,3,0))
+            Vs = np.stack((vx, vy, vz)).T
         return np.vectorize(self.function,
                     signature = "(),(),(),(3)->(),(),()")(xs, ys, zs, Vs)
 
@@ -88,7 +88,7 @@ class SvExVectorFieldBinOp(SvExVectorField):
             vx2, vy2, vz2 = self.field2.evaluate_grid(xs, ys, zs)
             R = self.function(np.array([vx1, vy1, vz1]), np.array([vx2, vy2, vz2]))
             return R[0], R[1], R[2]
-        return np.vectorize(func, signature="(m,n,p),(m,n,p),(m,n,p)->(m,n,p),(m,n,p),(m,n,p)")(xs, ys, zs)
+        return np.vectorize(func, signature="(m),(m),(m)->(m),(m),(m)")(xs, ys, zs)
 
 class SvExAverageVectorField(SvExVectorField):
     def __init__(self, fields):
@@ -103,12 +103,12 @@ class SvExAverageVectorField(SvExVectorField):
             data = []
             for field in self.fields:
                 vx, vy, vz = field.evaluate_grid(xs, ys, zs)
-                vectors = np.transpose( np.stack((vx, vy, vz)), axes=(1,2,3,0))
+                vectors = np.stack((vx, vy, vz)).T
                 data.append(vectors)
             data = np.array(data)
-            mean = np.mean(data, axis=0)
-            return mean[:,:,:,0],mean[:,:,:,1],mean[:,:,:,2]
-        return np.vectorize(func, signature="(m,n,p),(m,n,p),(m,n,p)->(m,n,p),(m,n,p),(m,n,p)")(xs, ys, zs)
+            mean = np.mean(data, axis=0).T
+            return mean[0], mean[1], mean[2]
+        return np.vectorize(func, signature="(m),(m),(m)->(m),(m),(m)")(xs, ys, zs)
 
 class SvExVectorFieldCrossProduct(SvExVectorField):
     def __init__(self, field1, field2):
@@ -123,10 +123,10 @@ class SvExVectorFieldCrossProduct(SvExVectorField):
     def evaluate_grid(self, xs, ys, zs):
         vx1, vy1, vz1 = self.field1.evaluate_grid(xs, ys, zs)
         vx2, vy2, vz2 = self.field2.evaluate_grid(xs, ys, zs)
-        vectors1 = np.transpose( np.stack((vx1, vy1, vz1)), axes=(1,2,3,0))
-        vectors2 = np.transpose( np.stack((vx2, vy2, vz2)), axes=(1,2,3,0))
-        R = np.cross(vectors1, vectors2)
-        return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
+        vectors1 = np.stack((vx1, vy1, vz1)).T
+        vectors2 = np.stack((vx2, vy2, vz2)).T
+        R = np.cross(vectors1, vectors2).T
+        return R[0], R[1], R[2]
 
 class SvExVectorFieldMultipliedByScalar(SvExVectorField):
     def __init__(self, vector_field, scalar_field):
@@ -143,9 +143,9 @@ class SvExVectorFieldMultipliedByScalar(SvExVectorField):
             scalars = self.scalar_field.evaluate_grid(xs, ys, zs)
             vx, vy, vz = self.vector_field.evaluate_grid(xs, ys, zs)
             vectors = np.stack((vx, vy, vz))
-            R = scalars * vectors
-            return R[0,:,:], R[1,:,:], R[2,:,:]
-        return np.vectorize(product, signature="(m,n,p),(m,n,p),(m,n,p)->(m,n,p),(m,n,p),(m,n,p)")(xs, ys, zs)
+            R = (scalars * vectors)
+            return R[0], R[1], R[2]
+        return np.vectorize(product, signature="(m),(m),(m)->(m),(m),(m)")(xs, ys, zs)
 
 class SvExVectorFieldsLerp(SvExVectorField):
     def __init__(self, vfield1, vfield2, scalar_field):
@@ -167,8 +167,8 @@ class SvExVectorFieldsLerp(SvExVectorField):
             vx2, vy2, vz2 = self.vfield2.evaluate_grid(xs, ys, zs)
             vectors2 = np.stack((vx2, vy2, vz2))
             R = (1 - scalars) * vectors1 + scalars * vectors2
-            return R[0,:,:], R[1,:,:], R[2,:,:]
-        return np.vectorize(product, signature="(m,n,p),(m,n,p),(m,n,p)->(m,n,p),(m,n,p),(m,n,p)")(xs, ys, zs)
+            return R[0], R[1], R[2]
+        return np.vectorize(product, signature="(m),(m),(m)->(m),(m),(m)")(xs, ys, zs)
 
 class SvExRbfVectorField(SvExVectorField):
     def __init__(self, rbf):
@@ -179,9 +179,9 @@ class SvExRbfVectorField(SvExVectorField):
 
     def evaluate_grid(self, xs, ys, zs):
         value = self.rbf(xs, ys, zs)
-        vx = value[:,:,:,0]
-        vy = value[:,:,:,1]
-        vz = value[:,:,:,2]
+        vx = value[:,0]
+        vy = value[:,1]
+        vz = value[:,2]
         vx = vx - xs
         vy = vy - ys
         vz = vz - zs
@@ -201,7 +201,7 @@ class SvExNoiseVectorField(SvExVectorField):
         def mk_noise(v):
             r = noise.noise_vector(v, noise_basis=self.noise_type)
             return r[0], r[1], r[2]
-        vectors = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        vectors = np.stack((xs,ys,zs)).T
         return np.vectorize(mk_noise, signature="(3)->(),(),()")(vectors)
 
 class SvExKdtVectorField(SvExVectorField):
@@ -242,13 +242,13 @@ class SvExKdtVectorField(SvExVectorField):
             else:
                 return (dx, dy, dz)
 
-        points = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        points = np.stack((xs, ys, zs)).T
         vectors = np.vectorize(find, signature='(3)->(),(),()')(points)
         if self.falloff is not None:
             norms = np.linalg.norm(vectors, axis=0)
             lens = self.falloff(norms)
-            R = lens * vectors
-            return R[0,:,:], R[1,:,:], R[2,:,:]
+            R = (lens * vectors).T
+            return R[0], R[1], R[2]
         else:
             return vectors
 
@@ -266,11 +266,11 @@ class SvExVectorFieldPointDistance(SvExVectorField):
         if self.falloff is not None:
             norms = np.linalg.norm(vectors, axis=0)
             lens = self.falloff(norms)
-            R = lens * vectors
-            return R[0,:,:], R[1,:,:], R[2,:,:]
+            R = (lens * vectors)
+            return R[0], R[1], R[2]
         else:
             R = vectors
-            return R[0,:,:], R[1,:,:], R[2,:,:]
+            return R[0], R[1], R[2]
 
     def evaluate(self, x, y, z):
         vector = np.array([x, y, z]) - self.center
@@ -305,16 +305,16 @@ class SvExLineAttractorVectorField(SvExVectorField):
             dv = to_center - projection
             return dv
 
-        points = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        points = np.stack((xs, ys, zs)).T
         vectors = np.vectorize(func, signature='(3)->(3)')(points)
         if self.falloff is not None:
             norms = np.linalg.norm(vectors, axis=0)
             lens = self.falloff(norms)
-            R = lens * vectors
-            return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
+            R = (lens * vectors).T
+            return R[0], R[1], R[2]
         else:
-            R = vectors
-            return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
+            R = vectors.T
+            return R[0], R[1], R[2]
 
 class SvExPlaneAttractorVectorField(SvExVectorField):
     def __init__(self, center, direction, falloff=None):
@@ -338,16 +338,16 @@ class SvExPlaneAttractorVectorField(SvExVectorField):
             projection = np.dot(to_center, direction) * direction / direction2
             return projection
 
-        points = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        points = np.stack((xs, ys, zs)).T
         vectors = np.vectorize(func, signature='(3)->(3)')(points)
         if self.falloff is not None:
             norms = np.linalg.norm(vectors, axis=0)
             lens = self.falloff(norms)
-            R = lens * vectors
-            return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
+            R = (lens * vectors).T
+            return R[0], R[1], R[2]
         else:
-            R = vectors
-            return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
+            R = vectors.T
+            return R[0], R[1], R[2]
 
 class SvExBvhAttractorVectorField(SvExVectorField):
     def __init__(self, bvh=None, verts=None, faces=None, falloff=None, use_normal=False):
@@ -378,16 +378,16 @@ class SvExBvhAttractorVectorField(SvExVectorField):
             else:
                 return np.array(nearest) - v
 
-        points = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        points = np.stack((xs, ys, zs)).T
         vectors = np.vectorize(find, signature='(3)->(3)')(points)
         if self.falloff is not None:
             norms = np.linalg.norm(vectors, axis=0)
             lens = self.falloff(norms)
-            R = lens * vectors
-            return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
+            R = (lens * vectors).T
+            return R[0], R[1], R[2]
         else:
-            R = vectors
-            return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
+            R = vectors.T
+            return R[0], R[1], R[2]
 
 class SvExBvhRbfNormalVectorField(SvExVectorField):
     def __init__(self, bvh, rbf):
@@ -408,10 +408,10 @@ class SvExBvhRbfNormalVectorField(SvExVectorField):
             x0, y0, z0 = nearest
             return self.rbf(x0, y0, z0)
 
-        points = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        points = np.stack((xs, ys, zs)).T
         vectors = np.vectorize(find, signature='(3)->(3)')(points)
-        R = vectors
-        return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
+        R = vectors.T
+        return R[0], R[1], R[2]
 
 class SvExVectorFieldTangent(SvExVectorField):
     def __init__(self, field1, field2):
@@ -427,8 +427,8 @@ class SvExVectorFieldTangent(SvExVectorField):
     def evaluate_grid(self, xs, ys, zs):
         vx1, vy1, vz1 = self.field1.evaluate_grid(xs, ys, zs)
         vx2, vy2, vz2 = self.field2.evaluate_grid(xs, ys, zs)
-        vectors1 = np.transpose( np.stack((vx1, vy1, vz1)), axes=(1,2,3,0))
-        vectors2 = np.transpose( np.stack((vx2, vy2, vz2)), axes=(1,2,3,0))
+        vectors1 = np.stack((vx1, vy1, vz1)).T
+        vectors2 = np.stack((vx2, vy2, vz2)).T
 
         def project(v1, v2):
             projection = np.dot(v1, v2) * v2 / np.dot(v2, v2)
@@ -451,8 +451,8 @@ class SvExVectorFieldCotangent(SvExVectorField):
     def evaluate_grid(self, xs, ys, zs):
         vx1, vy1, vz1 = self.field1.evaluate_grid(xs, ys, zs)
         vx2, vy2, vz2 = self.field2.evaluate_grid(xs, ys, zs)
-        vectors1 = np.transpose( np.stack((vx1, vy1, vz1)), axes=(1,2,3,0))
-        vectors2 = np.transpose( np.stack((vx2, vy2, vz2)), axes=(1,2,3,0))
+        vectors1 = np.stack((vx1, vy1, vz1)).T
+        vectors2 = np.stack((vx2, vy2, vz2)).T
 
         def project(v1, v2):
             projection = np.dot(v1, v2) * v2 / np.dot(v2, v2)
@@ -509,7 +509,7 @@ class SvExScalarFieldGradient(SvExVectorField):
         dv_dz = (v_dz_plus - v_dz_minus) / (2*step)
 
         R = np.stack((dv_dx, dv_dy, dv_dz))
-        return R[0,:,:], R[1,:,:], R[2,:,:]
+        return R[0], R[1], R[2]
 
 class SvExVectorFieldRotor(SvExVectorField):
     def __init__(self, field, step):
@@ -557,8 +557,8 @@ class SvExVectorFieldRotor(SvExVectorField):
         rx = dz_dy - dy_dz
         ry = - (dz_dx - dx_dz)
         rz = dy_dx - dx_dy
-        R = np.transpose( np.stack((rx, ry, rz)), axes=(1,2,3,0))
-        return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
+        R = np.stack((rx, ry, rz))
+        return R[0], R[1], R[2]
 
 class SvExBendAlongCurveField(SvExVectorField):
     def __init__(self, curve, algorithm, scale_all, axis, t_min, t_max, up_axis=None):
@@ -633,14 +633,14 @@ class SvExBendAlongCurveField(SvExVectorField):
         spline_vertices = self.curve.evaluate_array(ts)
         scale = self.get_scale()
         matrices = np.vectorize(lambda t : self.get_matrix(t, scale), signature='(3)->(3,3)')(spline_tangents)
-        src_vectors = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        src_vectors = np.stack((xs, ys, zs)).T
         src_vector_projections = src_vectors.copy()
-        src_vector_projections[:,:,:, self.axis] = 0
-        matrices = matrices[np.newaxis][np.newaxis]
+        src_vector_projections[ self.axis] = 0
+        #matrices = matrices[np.newaxis][np.newaxis]
         multiply = np.vectorize(lambda m, v: m @ v, signature='(3,3),(3)->(3)')
         new_vertices = multiply(matrices, src_vector_projections) + spline_vertices
-        R = new_vertices - src_vectors
-        return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
+        R = (new_vertices - src_vectors).T
+        return R[0], R[1], R[2]
 
 class SvExBendAlongSurfaceField(SvExVectorField):
     def __init__(self, surface, axis, autoscale=False, flip=False):
@@ -667,8 +667,8 @@ class SvExBendAlongSurfaceField(SvExVectorField):
         u_index, v_index = self.get_other_axes()
 
         # Rescale U and V coordinates to [0, 1], drop third coordinate
-        us = vertices[:,:,:, u_index].flatten()
-        vs = vertices[:,:,:, v_index].flatten()
+        us = vertices[:,u_index].flatten()
+        vs = vertices[:,v_index].flatten()
         min_u = min(us)
         max_u = max(us)
         min_v = min(vs)
@@ -701,20 +701,22 @@ class SvExBendAlongSurfaceField(SvExVectorField):
 
         surf_vertices = self.surface.evaluate_array(us, vs)
         spline_normals = self.surface.normal_array(us, vs)
-        zs = vertices[:,:,:,self.orient_axis].flatten()
+        zs = vertices[:,self.orient_axis].flatten()
         zs = zs[np.newaxis].T
-        new_vertices = surf_vertices + scale_z * zs * spline_normals
+        v1 = zs * spline_normals
+        v2 = scale_z * v1
+        new_vertices = surf_vertices + v2
         return new_vertices
 
     def evaluate_grid(self, xs, ys, zs):
-        vertices = np.transpose( np.stack((xs, ys, zs)), axes=(1,2,3,0))
+        vertices = np.stack((xs, ys, zs)).T
         new_vertices = self._evaluate(vertices)
-        R = new_vertices - vertices
-        return R[:,:,:,0], R[:,:,:,1], R[:,:,:,2]
+        R = (new_vertices - vertices).T
+        return R[0], R[1], R[2]
 
     def evaluate(self, x, y, z):
         xs, ys, zs = self.evaluate_grid(np.array([[[x]]]), np.array([[[y]]]), np.array([[[z]]]))
-        return np.array([xs[0][0][0], ys[0][0][0], zs[0][0][0]])
+        return np.array([xs, ys, zs])
 
 def register():
     pass

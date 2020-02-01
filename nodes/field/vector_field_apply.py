@@ -71,11 +71,11 @@ class SvExVectorFieldApplyNode(bpy.types.Node, SverchCustomTreeNode):
                     fullList(coeffs, len(vertices))
                     vertices = np.array(vertices)
                     for i in range(iterations):
-                        xs = vertices[:,0][np.newaxis][np.newaxis]
-                        ys = vertices[:,1][np.newaxis][np.newaxis]
-                        zs = vertices[:,2][np.newaxis][np.newaxis]
+                        xs = vertices[:,0]
+                        ys = vertices[:,1]
+                        zs = vertices[:,2]
                         new_xs, new_ys, new_zs = field.evaluate_grid(xs, ys, zs)
-                        new_vectors = np.dstack((new_xs[0,0,:], new_ys[0,0,:], new_zs[0,0,:]))
+                        new_vectors = np.dstack((new_xs[:], new_ys[:], new_zs[:]))
                         new_vectors = np.array(coeffs)[np.newaxis].T * new_vectors[0]
                         vertices = vertices + new_vectors
                     new_verts = vertices.tolist()

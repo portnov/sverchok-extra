@@ -46,10 +46,10 @@ class SvExScalarFieldEvaluateNode(bpy.types.Node, SverchCustomTreeNode):
                 new_values = [value]
             else:
                 XYZ = np.array(vertices)
-                xs = XYZ[:,0][np.newaxis][np.newaxis]
-                ys = XYZ[:,1][np.newaxis][np.newaxis]
-                zs = XYZ[:,2][np.newaxis][np.newaxis]
-                new_values = field.evaluate_grid(xs, ys, zs).tolist()[0][0]
+                xs = XYZ[:,0]
+                ys = XYZ[:,1]
+                zs = XYZ[:,2]
+                new_values = field.evaluate_grid(xs, ys, zs).tolist()
             values_out.append(new_values)
 
         self.outputs['Value'].sv_set(values_out)
