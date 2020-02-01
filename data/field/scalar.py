@@ -26,7 +26,7 @@ class SvExConstantScalarField(SvExScalarField):
         return self.value
 
     def evaluate_grid(self, xs, ys, zs):
-        result = np.full_like(xs, self.value)
+        result = np.full_like(xs, self.value, dtype=np.float64)
         return result
 
 class SvExScalarFieldLambda(SvExScalarField):
