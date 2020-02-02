@@ -47,6 +47,8 @@ if geomdl_available:
             self.inputs['Weights'].hide_safe = self.surface_mode == 'BSPLINE'
             self.outputs['Vertices'].hide_safe = not self.make_grid
             self.outputs['Faces'].hide_safe = not self.make_grid
+            self.inputs['KnotsU'].hide_safe = self.knot_mode == 'AUTO'
+            self.inputs['KnotsV'].hide_safe = self.knot_mode == 'AUTO'
 
         input_mode : EnumProperty(
                 name = "Input mode",
@@ -76,9 +78,36 @@ if geomdl_available:
                 default = True,
                 update = update_sockets)
 
+        knot_modes = [
+            ('AUTO', "Auto", "Generate knotvector automatically", 0),
+            ('EXPLICIT', "Explicit", "Specify knotvector explicitly", 1)
+        ]
+
+        knot_mode : EnumProperty(
+                name = "Knotvector",
+                items = knot_modes,
+                default = 'AUTO',
+                update = update_sockets)
+
+        degree_u : IntProperty(
+                name = "Degree U",
+                min = 2, max = 6,
+                default = 3,
+                update = updateNode)
+
+        degree_v : IntProperty(
+                name = "Degree V",
+                min = 2, max = 6,
+                default = 3,
+                update = updateNode)
+
         def sv_init(self, context):
             self.inputs.new('SvVerticesSocket', "ControlPoints")
             self.inputs.new('SvStringsSocket', "Weights")
+            self.inputs.new('SvStringsSocket', "KnotsU")
+            self.inputs.new('SvStringsSocket', "KnotsV")
+            self.inputs.new('SvStringsSocket', "DegreeU").prop_name = 'degree_u'
+            self.inputs.new('SvStringsSocket', "DegreeV").prop_name = 'degree_v'
             self.inputs.new('SvStringsSocket', "Samples").prop_name = 'sample_size'
             self.inputs.new('SvStringsSocket', "USize").prop_name = 'u_size'
             self.outputs.new('SvVerticesSocket', "Vertices")
@@ -89,7 +118,9 @@ if geomdl_available:
         def draw_buttons(self, context, layout):
             layout.prop(self, "surface_mode", expand=True)
             layout.prop(self, "input_mode")
-            layout.prop(self, "make_grid")
+            layout.label(text='Knots:')
+            layout.prop(self, "knot_mode", expand=True)
+            layout.prop(self, "make_grid", toggle=True)
 
         def process(self):
             vertices_s = self.inputs['ControlPoints'].sv_get()
@@ -97,6 +128,10 @@ if geomdl_available:
             weights_s = self.inputs['Weights'].sv_get(default = [[1.0]])
             samples_s = self.inputs['Samples'].sv_get()
             u_size_s = self.inputs['USize'].sv_get()
+            knots_u_s = self.inputs['KnotsU'].sv_get(default = [[]])
+            knots_v_s = self.inputs['KnotsV'].sv_get(default = [[]])
+            degree_u_s = self.inputs['DegreeU'].sv_get()
+            degree_v_s = self.inputs['DegreeV'].sv_get()
 
             if self.input_mode == '1D':
                 vertices_s = ensure_nesting_level(vertices_s, 3)
@@ -110,9 +145,14 @@ if geomdl_available:
             edges_out = []
             faces_out = []
             surfaces_out = []
-            for vertices, weights, samples, u_size in zip_long_repeat(vertices_s, weights_s, samples_s, u_size_s):
+            inputs = zip_long_repeat(vertices_s, weights_s, knots_u_s, knots_v_s, degree_u_s, degree_v_s, samples_s, u_size_s)
+            for vertices, weights, knots_u, knots_v, degree_u, degree_v, samples, u_size in inputs:
                 if isinstance(samples, (list, tuple)):
                     samples = samples[0]
+                if isinstance(degree_u, (tuple, list)):
+                    degree_u = degree_u[0]
+                if isinstance(degree_v, (tuple, list)):
+                    degree_v = degree_v[0]
                 if isinstance(u_size, (list, tuple)):
                     u_size = u_size[0]
                 if self.input_mode == '1D':
@@ -129,8 +169,8 @@ if geomdl_available:
                     surf = NURBS.Surface()
                 else: # BSPLINE
                     surf = BSpline.Surface()
-                surf.degree_u = 3
-                surf.degree_v = 3
+                surf.degree_u = degree_u
+                surf.degree_v = degree_v
 
                 if self.input_mode == '1D':
                     # Control points
@@ -152,8 +192,12 @@ if geomdl_available:
                     n_u = len(vertices)
                     n_v = len(vertices[0])
 
-                surf.knotvector_u = knotvector.generate(surf.degree_u, n_u)
-                surf.knotvector_v = knotvector.generate(surf.degree_v, n_v)
+                if self.knot_mode == 'AUTO':
+                    surf.knotvector_u = knotvector.generate(surf.degree_u, n_u)
+                    surf.knotvector_v = knotvector.generate(surf.degree_v, n_v)
+                else:
+                    surf.knotvector_u = knots_u
+                    surf.knotvector_v = knots_v
 
                 if self.make_grid:
                     surf.sample_size = samples
