@@ -86,6 +86,30 @@ class SvExComposedVectorField(SvExVectorField):
             vectors = np.apply_along_axis(lambda v: np.array(from_spherical(*tuple(v), mode='radians')), 1, vectors).T
             return vectors[0], vectors[1], vectors[2]
 
+class SvExAbsoluteVectorField(SvExVectorField):
+    def __init__(self, field):
+        self.field = field
+
+    def evaluate(self, x, y, z):
+        r = self.field.evaluate(x, y, z)
+        return r + np.array([x, y, z])
+    
+    def evaluate_grid(self, xs, ys, zs):
+        rxs, rys, rzs = self.field.evaluate_grid(xs, ys, zs)
+        return rxs + xs, rys + ys, rzs + zs
+
+class SvExRelativeVectorField(SvExVectorField):
+    def __init__(self, field):
+        self.field = field
+
+    def evaluate(self, x, y, z):
+        r = self.field.evaluate(x, y, z)
+        return r - np.array([x, y, z])
+    
+    def evaluate_grid(self, xs, ys, zs):
+        rxs, rys, rzs = self.field.evaluate_grid(xs, ys, zs)
+        return rxs - xs, rys - ys, rzs - zs
+
 class SvExVectorFieldLambda(SvExVectorField):
     def __init__(self, function, variables, in_field):
         self.function = function

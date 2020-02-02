@@ -92,6 +92,36 @@ class ComposeVectorFieldTestCase(SverchokTestCase):
         self.assert_numpy_arrays_equal(rys, expected_y, precision=3)
         self.assert_numpy_arrays_equal(rzs, expected_z, precision=3)
 
+class AbsoluteVectorFieldTestCase(SverchokTestCase):
+    def test_abs(self):
+        field1 = make_vector_field("x", "y", "z")
+        field = SvExAbsoluteVectorField(field1)
+        xs = np.array([1, 2])
+        ys = np.array([2, 3])
+        zs = np.array([3, 4])
+        rxs, rys, rzs = field.evaluate_grid(xs, ys, zs)
+        expected_x = np.array([2, 4])
+        expected_y = np.array([4, 6])
+        expected_z = np.array([6, 8])
+        self.assert_numpy_arrays_equal(rxs, expected_x, precision=3)
+        self.assert_numpy_arrays_equal(rys, expected_y, precision=3)
+        self.assert_numpy_arrays_equal(rzs, expected_z, precision=3)
+
+class RelativeVectorFieldTestCase(SverchokTestCase):
+    def test_abs(self):
+        field1 = make_vector_field("x", "y", "z")
+        field = SvExRelativeVectorField(field1)
+        xs = np.array([1, 2])
+        ys = np.array([2, 3])
+        zs = np.array([3, 4])
+        rxs, rys, rzs = field.evaluate_grid(xs, ys, zs)
+        expected_x = np.array([0, 0])
+        expected_y = np.array([0, 0])
+        expected_z = np.array([0, 0])
+        self.assert_numpy_arrays_equal(rxs, expected_x, precision=3)
+        self.assert_numpy_arrays_equal(rys, expected_y, precision=3)
+        self.assert_numpy_arrays_equal(rzs, expected_z, precision=3)
+
 class LambdaVectorFieldTestCase(SverchokTestCase):
     def test_lambda(self):
         field = make_vector_field("-y", "x", "z")
