@@ -7,6 +7,8 @@ from mathutils import kdtree
 from mathutils import bvhtree
 
 from sverchok.utils.geom import autorotate_householder, autorotate_track, autorotate_diff, diameter
+from sverchok.utils.math import from_cylindrical, from_spherical, to_cylindrical, to_spherical
+
 
 ##################
 #                #
@@ -50,6 +52,39 @@ class SvExConstantVectorField(SvExVectorField):
         ry = np.full_like(ys, y)
         rz = np.full_like(zs, z)
         return rx, ry, rz
+
+class SvExComposedVectorField(SvExVectorField):
+    def __init__(self, coords, sfield1, sfield2, sfield3):
+        self.coords = coords
+        self.sfield1 = sfield1
+        self.sfield2 = sfield2
+        self.sfield3 = sfield3
+
+    def evaluate(self, x, y, z):
+        v1 = self.sfield1.evaluate(x, y, z)
+        v2 = self.sfield2.evaluate(x, y, z)
+        v3 = self.sfield3.evaluate(x, y, z)
+        if self.coords == 'XYZ':
+            return np.array((v1, v2, v3))
+        elif self.coords == 'CYL':
+            return np.array(from_cylindrical(v1, v2, v3, mode='radians'))
+        else: # SPH:
+            return np.array(from_spherical(v1, v2, v3, mode='radians'))
+
+    def evaluate_grid(self, xs, ys, zs):
+        v1s = self.sfield1.evaluate_grid(xs, ys, zs)
+        v2s = self.sfield2.evaluate_grid(xs, ys, zs)
+        v3s = self.sfield3.evaluate_grid(xs, ys, zs)
+        if self.coords == 'XYZ':
+            return v1s, v2s, v3s
+        elif self.coords == 'CYL':
+            vectors = np.stack((v1s, v2s, v3s)).T
+            vectors = np.apply_along_axis(lambda v: np.array(from_cylindrical(*tuple(v), mode='radians')), 1, vectors).T
+            return vectors[0], vectors[1], vectors[2]
+        else: # SPH:
+            vectors = np.stack((v1s, v2s, v3s)).T
+            vectors = np.apply_along_axis(lambda v: np.array(from_spherical(*tuple(v), mode='radians')), 1, vectors).T
+            return vectors[0], vectors[1], vectors[2]
 
 class SvExVectorFieldLambda(SvExVectorField):
     def __init__(self, function, variables, in_field):

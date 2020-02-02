@@ -43,6 +43,55 @@ class ConstVectorFieldTestCase(SverchokTestCase):
         self.assert_numpy_arrays_equal(rys, expected_y)
         self.assert_numpy_arrays_equal(rzs, expected_z)
 
+class ComposeVectorFieldTestCase(SverchokTestCase):
+    def test_xyz(self):
+        field1 = make_scalar_field("x")
+        field2 = make_scalar_field("y")
+        field3 = make_scalar_field("z")
+        field = SvExComposedVectorField('XYZ', field1, field2, field3)
+        xs = np.array([1, 2])
+        ys = np.array([2, 3])
+        zs = np.array([3, 4])
+        rxs, rys, rzs = field.evaluate_grid(xs, ys, zs)
+        expected_x = np.array([1, 2])
+        expected_y = np.array([2, 3])
+        expected_z = np.array([3, 4])
+        self.assert_numpy_arrays_equal(rxs, expected_x)
+        self.assert_numpy_arrays_equal(rys, expected_y)
+        self.assert_numpy_arrays_equal(rzs, expected_z)
+
+    def test_cyl_const(self):
+        field1 = SvExConstantScalarField(1)
+        field2 = SvExConstantScalarField(0.5)
+        field3 = SvExConstantScalarField(0.7)
+        field = SvExComposedVectorField('CYL', field1, field2, field3)
+        xs = np.array([1, 2])
+        ys = np.array([2, 3])
+        zs = np.array([3, 4])
+        rxs, rys, rzs = field.evaluate_grid(xs, ys, zs)
+        expected_x = np.array([0.878, 0.878])
+        expected_y = np.array([0.479, 0.479])
+        expected_z = np.array([0.7, 0.7])
+        self.assert_numpy_arrays_equal(rxs, expected_x, precision=3)
+        self.assert_numpy_arrays_equal(rys, expected_y, precision=3)
+        self.assert_numpy_arrays_equal(rzs, expected_z, precision=3)
+
+    def test_sph_const(self):
+        field1 = SvExConstantScalarField(1)
+        field2 = SvExConstantScalarField(0.5)
+        field3 = SvExConstantScalarField(0.7)
+        field = SvExComposedVectorField('SPH', field1, field2, field3)
+        xs = np.array([1, 2])
+        ys = np.array([2, 3])
+        zs = np.array([3, 4])
+        rxs, rys, rzs = field.evaluate_grid(xs, ys, zs)
+        expected_x = np.array([0.565, 0.565])
+        expected_y = np.array([0.309, 0.309])
+        expected_z = np.array([0.765, 0.765])
+        self.assert_numpy_arrays_equal(rxs, expected_x, precision=3)
+        self.assert_numpy_arrays_equal(rys, expected_y, precision=3)
+        self.assert_numpy_arrays_equal(rzs, expected_z, precision=3)
+
 class LambdaVectorFieldTestCase(SverchokTestCase):
     def test_lambda(self):
         field = make_vector_field("-y", "x", "z")

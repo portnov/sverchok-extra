@@ -26,6 +26,97 @@ class ConstScalarFieldTestCase(SverchokTestCase):
         expected = np.array([0.5, 0.5])
         self.assert_numpy_arrays_equal(r, expected)
 
+class DecomposeFieldTestCase(SverchokTestCase):
+    def test_x(self):
+        field1 = make_vector_field("2*x", "3*y", "4*z")
+        field = SvExVectorFieldDecomposed(field1, 'XYZ', 0)
+        xs = np.array([1, 2])
+        ys = np.array([2, 3])
+        zs = np.array([3, 4])
+        r = field.evaluate_grid(xs, ys, zs)
+        expected = np.array([2, 4])
+        self.assert_numpy_arrays_equal(r, expected)
+
+    def test_y(self):
+        field1 = make_vector_field("2*x", "3*y", "4*z")
+        field = SvExVectorFieldDecomposed(field1, 'XYZ', 1)
+        xs = np.array([1, 2])
+        ys = np.array([2, 3])
+        zs = np.array([3, 4])
+        r = field.evaluate_grid(xs, ys, zs)
+        expected = np.array([6, 9])
+        self.assert_numpy_arrays_equal(r, expected)
+
+    def test_z(self):
+        field1 = make_vector_field("2*x", "3*y", "4*z")
+        field = SvExVectorFieldDecomposed(field1, 'XYZ', 2)
+        xs = np.array([1, 2])
+        ys = np.array([2, 3])
+        zs = np.array([3, 4])
+        r = field.evaluate_grid(xs, ys, zs)
+        expected = np.array([12, 16])
+        self.assert_numpy_arrays_equal(r, expected)
+
+    def test_cyl_rho(self):
+        field1 = make_vector_field("x", "y", "z")
+        field = SvExVectorFieldDecomposed(field1, 'CYL', 0)
+        xs = np.array([1, 2])
+        ys = np.array([2, 3])
+        zs = np.array([3, 4])
+        r = field.evaluate_grid(xs, ys, zs)
+        expected = np.array([2.236, 3.606])
+        self.assert_numpy_arrays_equal(r, expected, precision=3)
+
+    def test_cyl_phi(self):
+        field1 = make_vector_field("x", "y", "z")
+        field = SvExVectorFieldDecomposed(field1, 'CYL', 1)
+        xs = np.array([1, 2])
+        ys = np.array([2, 3])
+        zs = np.array([3, 4])
+        r = field.evaluate_grid(xs, ys, zs)
+        expected = np.array([1.107, 0.983])
+        self.assert_numpy_arrays_equal(r, expected, precision=3)
+
+    def test_cyl_z(self):
+        field1 = make_vector_field("x", "y", "z")
+        field = SvExVectorFieldDecomposed(field1, 'CYL', 2)
+        xs = np.array([1, 2])
+        ys = np.array([2, 3])
+        zs = np.array([3, 4])
+        r = field.evaluate_grid(xs, ys, zs)
+        expected = np.array([3, 4])
+        self.assert_numpy_arrays_equal(r, expected, precision=3)
+
+    def test_sph_rho(self):
+        field1 = make_vector_field("x", "y", "z")
+        field = SvExVectorFieldDecomposed(field1, 'SPH', 0)
+        xs = np.array([1, 2])
+        ys = np.array([2, 3])
+        zs = np.array([3, 4])
+        r = field.evaluate_grid(xs, ys, zs)
+        expected = np.array([3.742, 5.385])
+        self.assert_numpy_arrays_equal(r, expected, precision=3)
+
+    def test_cyl_phi(self):
+        field1 = make_vector_field("x", "y", "z")
+        field = SvExVectorFieldDecomposed(field1, 'SPH', 1)
+        xs = np.array([1, 2])
+        ys = np.array([2, 3])
+        zs = np.array([3, 4])
+        r = field.evaluate_grid(xs, ys, zs)
+        expected = np.array([1.107, 0.983])
+        self.assert_numpy_arrays_equal(r, expected, precision=3)
+
+    def test_cyl_z(self):
+        field1 = make_vector_field("x", "y", "z")
+        field = SvExVectorFieldDecomposed(field1, 'SPH', 2)
+        xs = np.array([1, 2])
+        ys = np.array([2, 3])
+        zs = np.array([3, 4])
+        r = field.evaluate_grid(xs, ys, zs)
+        expected = np.array([0.641, 0.734])
+        self.assert_numpy_arrays_equal(r, expected, precision=3)
+
 class ScalarFieldMathTestCase(SverchokTestCase):
     def test_scalar_field_lambda(self):
         field = make_scalar_field("x*x + y*y + z*z")

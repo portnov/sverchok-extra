@@ -5,6 +5,8 @@ from mathutils import noise
 from mathutils import kdtree
 from mathutils import bvhtree
 
+from sverchok.utils.math import from_cylindrical, from_spherical, to_cylindrical, to_spherical
+
 ##################
 #                #
 #  Scalar Fields #
@@ -28,6 +30,36 @@ class SvExConstantScalarField(SvExScalarField):
     def evaluate_grid(self, xs, ys, zs):
         result = np.full_like(xs, self.value, dtype=np.float64)
         return result
+
+class SvExVectorFieldDecomposed(SvExScalarField):
+    def __init__(self, vfield, coords, axis):
+        self.vfield = vfield
+        self.coords = coords
+        self.axis = axis
+
+    def evaluate(self, x, y, z):
+        result = self.vfield.evaluate(x, y, z)
+        if self.coords == 'XYZ':
+            return result[self.axis]
+        elif self.coords == 'CYL':
+            rho, phi, z = to_cylindrical(tuple(result), mode='radians')
+            return [rho, phi, z][self.axis]
+        else: # SPH
+            rho, phi, theta = to_spherical(tuple(result), mode='radians')
+            return [rho, phi, theta][self.axis]
+
+    def evaluate_grid(self, xs, ys, zs):
+        results = self.vfield.evaluate_grid(xs, ys, zs)
+        if self.coords == 'XYZ':
+            return results[self.axis]
+        elif self.coords == 'CYL':
+            vectors = np.stack(results).T
+            vectors = np.apply_along_axis(lambda v: np.array(to_cylindrical(tuple(v), mode='radians')), 1, vectors)
+            return vectors[:, self.axis]
+        else: # SPH
+            vectors = np.stack(results).T
+            vectors = np.apply_along_axis(lambda v: np.array(to_spherical(tuple(v), mode='radians')), 1, vectors)
+            return vectors[:, self.axis]
 
 class SvExScalarFieldLambda(SvExScalarField):
     def __init__(self, function, variables, in_field):
