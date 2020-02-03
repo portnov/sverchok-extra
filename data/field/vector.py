@@ -642,7 +642,7 @@ class SvExBendAlongCurveField(SvExVectorField):
         if self.scale_all:
             scale_matrix = Matrix.Scale(1/scale, 4, ax1) @ Matrix.Scale(scale, 4, ax2) @ Matrix.Scale(scale, 4, ax3)
         else:
-            scale_matrix = Matrix.Identity(4)
+            scale_matrix = Matrix.Scale(1/scale, 4, ax1)
         scale_matrix = np.array(scale_matrix.to_3x3())
 
         tangent = Vector(tangent)
@@ -660,17 +660,21 @@ class SvExBendAlongCurveField(SvExVectorField):
         return np.matmul(rot, scale_matrix)
 
     def get_t_value(self, x, y, z):
+        curve_t_min, curve_t_max = self.curve.get_u_bounds()
         t = [x, y, z][self.axis]
-        t = (t - self.t_min) / (self.t_max - self.t_min)
+        t = (curve_t_max - curve_t_min) * (t - self.t_min) / (self.t_max - self.t_min) + curve_t_min
         return t
 
     def get_t_values(self, xs, ys, zs):
+        curve_t_min, curve_t_max = self.curve.get_u_bounds()
+        print(curve_t_min, curve_t_max)
         ts = [xs, ys, zs][self.axis]
-        ts = (ts - self.t_min) / (self.t_max - self.t_min)
+        ts = (curve_t_max - curve_t_min) * (ts - self.t_min) / (self.t_max - self.t_min) + curve_t_min
         return ts
 
     def get_scale(self):
-        return 1.0 / (self.t_max - self.t_min)
+        curve_t_min, curve_t_max = self.curve.get_u_bounds()
+        return (self.t_max - self.t_min) / (curve_t_max - curve_t_min)
 
     def evaluate(self, x, y, z):
         t = self.get_t_value(x, y, z)
@@ -686,13 +690,15 @@ class SvExBendAlongCurveField(SvExVectorField):
 
     def evaluate_grid(self, xs, ys, zs):
         ts = self.get_t_values(xs, ys, zs).flatten()
+        print("Spline T:", ts)
         spline_tangents = self.curve.tangent_array(ts)
         spline_vertices = self.curve.evaluate_array(ts)
+        print("Spline V:", spline_vertices)
         scale = self.get_scale()
         matrices = np.vectorize(lambda t : self.get_matrix(t, scale), signature='(3)->(3,3)')(spline_tangents)
         src_vectors = np.stack((xs, ys, zs)).T
         src_vector_projections = src_vectors.copy()
-        src_vector_projections[ self.axis] = 0
+        src_vector_projections[:,self.axis] = 0
         #matrices = matrices[np.newaxis][np.newaxis]
         multiply = np.vectorize(lambda m, v: m @ v, signature='(3,3),(3)->(3)')
         new_vertices = multiply(matrices, src_vector_projections) + spline_vertices

@@ -24,9 +24,13 @@ class SvExCurve(object):
     def tangent_array(self, ts):
         raise Exception("not implemented!")
 
+    def get_u_bounds(self):
+        raise Exception("not implemented!")
+
 class SvExGeomdlCurve(SvExCurve):
     def __init__(self, curve):
         self.curve = curve
+        self.u_bounds = (0.0, 1.0)
 
     def evaluate(self, t):
         v = self.curve.evaluate_single(t)
@@ -43,6 +47,9 @@ class SvExGeomdlCurve(SvExCurve):
     def tangent_array(self, ts):
         vs = self.curve.tangent(list(ts))
         return np.array([t[1] for t in vs])
+
+    def get_u_bounds(self):
+        return self.u_bounds
 
 class SvExSplineCurve(SvExCurve):
     def __init__(self, spline):
@@ -62,6 +69,9 @@ class SvExSplineCurve(SvExCurve):
 
     def tangent_array(self, ts):
         return self.spline.tangent(ts)
+
+    def get_u_bounds(self):
+        return (0.0, 1.0)
 
 def register():
     pass

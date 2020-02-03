@@ -67,11 +67,13 @@ class SvExEvalCurveNode(bpy.types.Node, SverchCustomTreeNode):
                         samples = samples[0]
 
                 if self.eval_mode == 'AUTO':
-                    ts = np.linspace(0, 1.0, num=samples)
+                    t_min, t_max = curve.get_u_bounds()
+                    ts = np.linspace(t_min, t_max, num=samples)
                 else:
                     ts = np.array(ts)
 
-                new_verts = curve.evaluate_array(ts).tolist()
+                new_verts = curve.evaluate_array(ts)
+                new_verts = new_verts.tolist()
                 new_tangents = curve.tangent_array(ts).tolist()
                 n = len(ts)
                 new_edges = [(i,i+1) for i in range(n-1)]

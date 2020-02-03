@@ -75,6 +75,7 @@ class SvExBendAlongCurveFieldNode(bpy.types.Node, SverchCustomTreeNode):
         self.inputs.new('SvStringsSocket', 'TMin').prop_name = 't_min'
         self.inputs.new('SvStringsSocket', 'TMax').prop_name = 't_max'
         self.outputs.new('SvExVectorFieldSocket', 'Field')
+        self.update_sockets(context)
 
     def draw_buttons(self, context, layout):
         layout.label(text="Orientation:")

@@ -57,6 +57,11 @@ if geomdl_available:
                 default = 'AUTO',
                 update = update_sockets)
 
+        normalize_knots : BoolProperty(
+                name = "Normalize Knots",
+                default = True,
+                update = updateNode)
+
         is_cyclic : BoolProperty(
                 name = "Cyclic",
                 default = False,
@@ -70,9 +75,13 @@ if geomdl_available:
 
         def draw_buttons(self, context, layout):
             layout.prop(self, "surface_mode", expand=True)
-            layout.label(text='Knots:')
-            layout.prop(self, "knot_mode", expand=True)
-            #layout.prop(self, 'is_cyclic', toggle=True)
+            col = layout.column(align=True)
+            col.label(text='Knots:')
+            row = col.row()
+            row.prop(self, "knot_mode", expand=True)
+            col.prop(self, 'normalize_knots', toggle=True)
+            if self.knot_mode == 'AUTO':
+                layout.prop(self, 'is_cyclic', toggle=True)
 
         def sv_init(self, context):
             self.inputs.new('SvVerticesSocket', "ControlPoints")
@@ -98,16 +107,16 @@ if geomdl_available:
                     degree = degree[0]
 
                 n_source = len(vertices)
-                if self.is_cyclic:
-                    vertices = vertices + vertices[:degree-1]
+                if self.knot_mode == 'AUTO' and self.is_cyclic:
+                    vertices = vertices + vertices[:degree+1]
                 n_total = len(vertices)
                 fullList(weights, n_total)
 
                 # Create a 3-dimensional B-spline Curve
                 if self.surface_mode == 'NURBS':
-                    curve = NURBS.Curve()
+                    curve = NURBS.Curve(normalize_kv = self.normalize_knots)
                 else:
-                    curve = BSpline.Curve()
+                    curve = BSpline.Curve(normalize_kv = self.normalize_knots)
 
                 # Set degree
                 curve.degree = degree
@@ -128,20 +137,21 @@ if geomdl_available:
                     self.debug('Auto knots: %s', knots)
                     curve.knotvector = knots
                 else:
-                    if self.is_cyclic:
-                        last = knots[-1]
-                        for i in range(degree):
-                            delta = knots[i+1] - knots[i]
-                            t = last + delta
-                            knots.append(t)
-                            last = t
                     self.debug('Manual knots: %s', knots)
                     #if not knotvector.check(curve.degree, knots, len(curve.ctrlpts)):
                     #    raise Exception("Explicitly provided knot vector is incorrect!")
                     curve.knotvector = knots
 
-                curve = SvExGeomdlCurve(curve)
-                curves_out.append(curve)
+                new_curve = SvExGeomdlCurve(curve)
+                if self.is_cyclic:
+                    u_min = curve.knotvector[degree]
+                    u_max = curve.knotvector[-degree-2]
+                    new_curve.u_bounds = u_min, u_max
+                else:
+                    u_min = min(curve.knotvector)
+                    u_max = max(curve.knotvector)
+                    new_curve.u_bounds = (u_min, u_max)
+                curves_out.append(new_curve)
 
             self.outputs['Curve'].sv_set(curves_out)
 

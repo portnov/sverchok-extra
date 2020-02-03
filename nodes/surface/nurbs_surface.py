@@ -47,6 +47,7 @@ if geomdl_available:
             self.inputs['Weights'].hide_safe = self.surface_mode == 'BSPLINE'
             self.outputs['Vertices'].hide_safe = not self.make_grid
             self.outputs['Faces'].hide_safe = not self.make_grid
+            self.inputs['Samples'].hide_safe = not self.make_grid
             self.inputs['KnotsU'].hide_safe = self.knot_mode == 'AUTO'
             self.inputs['KnotsV'].hide_safe = self.knot_mode == 'AUTO'
 
@@ -89,6 +90,11 @@ if geomdl_available:
                 default = 'AUTO',
                 update = update_sockets)
 
+        normalize_knots : BoolProperty(
+                name = "Normalize Knots",
+                default = True,
+                update = updateNode)
+
         degree_u : IntProperty(
                 name = "Degree U",
                 min = 2, max = 6,
@@ -118,8 +124,12 @@ if geomdl_available:
         def draw_buttons(self, context, layout):
             layout.prop(self, "surface_mode", expand=True)
             layout.prop(self, "input_mode")
-            layout.label(text='Knots:')
-            layout.prop(self, "knot_mode", expand=True)
+            col = layout.column(align=True)
+            col.label(text='Knots:')
+            row = col.row()
+            row.prop(self, "knot_mode", expand=True)
+            if self.knot_mode == 'EXPLICIT':
+                col.prop(self, 'normalize_knots', toggle=True)
             layout.prop(self, "make_grid", toggle=True)
 
         def process(self):
