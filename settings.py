@@ -16,18 +16,30 @@ class SvExPipInstall(bpy.types.Operator):
 
     package : bpy.props.StringProperty(name = "Package names")
 
-    def _run(self, cmd):
-        code = subprocess.call(cmd)
-        return (code == 0)
-
     def execute(self, context):
         cmd = [PYPATH, '-m', 'pip', 'install', '--upgrade'] + self.package.split(" ")
-        ok = self._run(cmd)
+        ok = subprocess.call(cmd) == 0
         if ok:
             self.report({'INFO'}, "%s installed successfully" % self.package)
             return {'FINISHED'}
         else:
             self.report({'ERROR'}, "Cannot install %s, see console output for details" % self.package)
+            return {'CANCELLED'}
+
+class SvExEnsurePip(bpy.types.Operator):
+    """Install PIP by using ensurepip module"""
+    bl_idname = "node.sv_ex_ensurepip"
+    bl_label = "Install PIP"
+    bl_options = {'REGISTER', 'INTERNAL'}
+
+    def execute(self, context):
+        cmd = [PYPATH, '-m', 'ensurepip']
+        ok = subprocess.call(cmd) == 0
+        if ok:
+            self.report({'INFO'}, "PIP installed successfully")
+            return {'FINISHED'}
+        else:
+            self.report({'ERROR'}, "Cannot install PIP, see console output for details")
             return {'CANCELLED'}
 
 class SvExPreferences(AddonPreferences):
@@ -59,8 +71,11 @@ class SvExPreferences(AddonPreferences):
         row = draw_message("pip")
         if pip is not None:
             row.operator('node.sv_ex_pip_install', text="Upgrade PIP").package = "pip setuptools wheel"
-        if pip is None and ensurepip is None:
-            row.operator('wm.url_open', text="Installation instructions").url = "https://pip.pypa.io/en/stable/installing/"
+        else:
+            if ensurepip is not None:
+                row.operator('node.sv_ex_ensurepip', text="Install PIP")
+            else:
+                row.operator('wm.url_open', text="Installation instructions").url = "https://pip.pypa.io/en/stable/installing/"
         draw_message("scipy")
         draw_message("geomdl")
         draw_message("skimage")
@@ -71,11 +86,13 @@ class SvExPreferences(AddonPreferences):
 
 def register():
     bpy.utils.register_class(SvExPipInstall)
+    bpy.utils.register_class(SvExEnsurePip)
     bpy.utils.register_class(SvExPreferences)
 
 
 def unregister():
     bpy.utils.unregister_class(SvExPreferences)
+    bpy.utils.unregister_class(SvExEnsurePip)
     bpy.utils.unregister_class(SvExPipInstall)
 
 if __name__ == '__main__':
