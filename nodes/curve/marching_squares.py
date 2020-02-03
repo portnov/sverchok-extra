@@ -1,13 +1,4 @@
 
-from sverchok.utils.logging import info, exception
-
-try:
-    from skimage import measure
-    skimage_available = True
-except ImportError as e:
-    info("SciKit-Image package is not available")
-    skimage_available = False
-
 import numpy as np
 
 import bpy
@@ -15,8 +6,12 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, St
 
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match_long_repeat
+from sverchok.utils.logging import info, exception
 
-if skimage_available:
+from sverchok_extra.dependencies import skimage
+
+if skimage is not None:
+    from skimage import measure
 
     class SvExMarchingSquaresNode(bpy.types.Node, SverchCustomTreeNode):
         """
@@ -208,10 +203,10 @@ if skimage_available:
             self.outputs['Faces'].sv_set(faces_out)
 
 def register():
-    if skimage_available:
+    if skimage is not None:
         bpy.utils.register_class(SvExMarchingSquaresNode)
 
 def unregister():
-    if skimage_available:
+    if skimage is not None:
         bpy.utils.unregister_class(SvExMarchingSquaresNode)
 

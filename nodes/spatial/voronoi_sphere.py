@@ -1,14 +1,4 @@
 
-from sverchok.utils.logging import info, exception
-
-try:
-    import scipy
-    from scipy.spatial import SphericalVoronoi
-    scipy_available = True
-except ImportError as e:
-    info("SciPy is not available, Voronoi 3D node will not be available")
-    scipy_available = False
-
 from collections import defaultdict
 import numpy as np
 
@@ -23,6 +13,9 @@ from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_
 from sverchok.utils.math import to_spherical, from_spherical
 from sverchok.utils.sv_mesh_utils import polygons_to_edges
 from sverchok.utils.sv_bmesh_utils import pydata_from_bmesh, bmesh_from_pydata
+from sverchok.utils.logging import info, exception
+
+from sverchok_extra.dependencies import scipy
 
 def to_radius(r, v, c):
     x,y,z = v
@@ -32,7 +25,8 @@ def to_radius(r, v, c):
     x,y,z = from_spherical(r, phi, theta, "radians")
     return x+x0, y+y0, z+z0
 
-if scipy_available:
+if scipy is not None:
+    from scipy.spatial import SphericalVoronoi
 
     class SvExVoronoiSphereNode(bpy.types.Node, SverchCustomTreeNode):
         """
@@ -96,10 +90,10 @@ if scipy_available:
             self.outputs['Faces'].sv_set(faces_out)
 
 def register():
-    if scipy_available:
+    if scipy is not None:
         bpy.utils.register_class(SvExVoronoiSphereNode)
 
 def unregister():
-    if scipy_available:
+    if scipy is not None:
         bpy.utils.unregister_class(SvExVoronoiSphereNode)
 

@@ -1,14 +1,4 @@
 
-from sverchok.utils.logging import info, exception
-
-try:
-    import scipy
-    from scipy.spatial import Voronoi
-    scipy_available = True
-except ImportError as e:
-    info("SciPy is not available, Voronoi 3D node will not be available")
-    scipy_available = False
-
 from collections import defaultdict
 
 import bpy
@@ -21,8 +11,12 @@ from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, get_data_nesting_level
 from sverchok.utils.sv_mesh_utils import polygons_to_edges, mesh_join
 from sverchok.utils.sv_bmesh_utils import pydata_from_bmesh, bmesh_from_pydata
+from sverchok.utils.logging import info, exception
 
-if scipy_available:
+from sverchok_extra.dependencies import scipy
+
+if scipy is not None:
+    from scipy.spatial import Voronoi
 
     class SvExVoronoi3DNode(bpy.types.Node, SverchCustomTreeNode):
         """
@@ -279,10 +273,10 @@ if scipy_available:
             self.outputs['Faces'].sv_set(faces_out)
 
 def register():
-    if scipy_available:
+    if scipy is not None:
         bpy.utils.register_class(SvExVoronoi3DNode)
 
 def unregister():
-    if scipy_available:
+    if scipy is not None:
         bpy.utils.unregister_class(SvExVoronoi3DNode)
 

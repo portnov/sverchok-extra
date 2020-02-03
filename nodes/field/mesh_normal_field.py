@@ -1,14 +1,4 @@
 
-from sverchok.utils.logging import info, exception
-
-try:
-    import scipy
-    from scipy.interpolate import Rbf
-    scipy_available = True
-except ImportError as e:
-    info("SciPy is not available, normal interpolation mode will not be available")
-    scipy_available = False
-
 import numpy as np
 
 import bpy
@@ -19,9 +9,14 @@ from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match_long_repeat
 from sverchok.utils.logging import info, exception
 from sverchok.utils.sv_bmesh_utils import bmesh_from_pydata
+from sverchok.utils.logging import info, exception
 
 from sverchok_extra.data.field.vector import SvExBvhAttractorVectorField, SvExBvhRbfNormalVectorField
 from sverchok_extra.utils import rbf_functions
+from sverchok_extra.dependencies import scipy
+
+if scipy is not None:
+    from scipy.interpolate import Rbf
 
 class SvExMeshNormalFieldNode(bpy.types.Node, SverchCustomTreeNode):
     """
@@ -44,7 +39,7 @@ class SvExMeshNormalFieldNode(bpy.types.Node, SverchCustomTreeNode):
             update = updateNode)
 
     def draw_buttons(self, context, layout):
-        if scipy_available:
+        if scipy is not None:
             layout.prop(self, "interpolate", toggle=True)
             if self.interpolate:
                 layout.prop(self, "function")
@@ -63,7 +58,9 @@ class SvExMeshNormalFieldNode(bpy.types.Node, SverchCustomTreeNode):
 
         fields_out = []
         for vertices, faces in zip_long_repeat(vertices_s, faces_s):
-            if self.interpolate:
+            if self.interpolate and scipy is None:
+                self.info("Normal interpolation mode was enabled earlier, but scipy is not available currently. Will not apply interpolation.")
+            if self.interpolate and scipy is not None:
                 bvh = bvhtree.BVHTree.FromPolygons(vertices, faces)
 
                 bm = bmesh_from_pydata(vertices, [], faces, normal_update=True)

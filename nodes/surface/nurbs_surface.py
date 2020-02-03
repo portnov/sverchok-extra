@@ -1,25 +1,17 @@
 
-from sverchok.utils.logging import info, exception
-
-try:
-    from geomdl import NURBS
-    from geomdl import BSpline
-    from geomdl import tessellate
-    from geomdl import knotvector
-    geomdl_available = True
-except ImportError as e:
-    info("geomdl package is not available, NURBS Surface node will not be available")
-    geomdl_available = False
 
 import bpy
 from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
 
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, ensure_nesting_level
+from sverchok.utils.logging import info, exception
 
 from sverchok_extra.data.surface import SvExGeomdlSurface
+from sverchok_extra.dependencies import geomdl
 
-if geomdl_available:
+if geomdl is not None:
+    from geomdl import NURBS, BSpline, knotvector
     
     class SvExNurbsSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
         """
@@ -229,10 +221,10 @@ if geomdl_available:
             self.outputs['Surface'].sv_set(surfaces_out)
 
 def register():
-    if geomdl_available:
+    if geomdl is not None:
         bpy.utils.register_class(SvExNurbsSurfaceNode)
 
 def unregister():
-    if geomdl_available:
+    if geomdl is not None:
         bpy.utils.unregister_class(SvExNurbsSurfaceNode)
 

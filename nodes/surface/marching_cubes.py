@@ -1,20 +1,4 @@
 
-from sverchok.utils.logging import info, exception
-
-try:
-    import mcubes
-    mcubes_available = True
-except ImportError as e:
-    info("mcubes package is not available")
-    mcubes_available = False
-
-try:
-    from skimage import measure
-    skimage_available = True
-except ImportError as e:
-    info("SciKit-Image package is not available")
-    skimage_available = False
-
 import numpy as np
 
 import bpy
@@ -22,8 +6,14 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, St
 
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match_long_repeat
+from sverchok.utils.logging import info, exception
 
-if mcubes_available or skimage_available:
+from sverchok_extra.dependencies import mcubes, skimage
+
+if skimage is not None:
+    import skimage.measure
+
+if mcubes is not None or skimage is not None:
 
     class SvExMarchingCubesNode(bpy.types.Node, SverchCustomTreeNode):
         """
@@ -48,9 +38,9 @@ if mcubes_available or skimage_available:
 
         def get_modes(self, context):
             modes = []
-            if skimage_available:
+            if skimage is not None:
                 modes.append(("skimage", "SciKit-Image", "SciKit-Image", 0))
-            if mcubes_available:
+            if mcubes is not None:
                 modes.append(("mcubes", "PyMCubes", "PyMCubes", 1))
             return modes
 
@@ -128,7 +118,7 @@ if mcubes_available or skimage_available:
                     new_normals = []
                 else: # skimage
                     spacing = tuple(1 / (b2n - b1n))
-                    new_verts, new_faces, normals, values = measure.marching_cubes_lewiner(
+                    new_verts, new_faces, normals, values = skimage.measure.marching_cubes_lewiner(
                             func_values, level = value,
                             #spacing = spacing,
                             step_size = 1)
@@ -144,10 +134,10 @@ if mcubes_available or skimage_available:
             self.outputs['VertexNormals'].sv_set(normals_out)
 
 def register():
-    if mcubes_available or skimage_available:
+    if mcubes is not None or skimage is not None:
         bpy.utils.register_class(SvExMarchingCubesNode)
 
 def unregister():
-    if mcubes_available or skimage_available:
+    if mcubes is not None or skimage is not None:
         bpy.utils.unregister_class(SvExMarchingCubesNode)
 

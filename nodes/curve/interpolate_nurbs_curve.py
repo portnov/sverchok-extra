@@ -1,22 +1,16 @@
 
-from sverchok.utils.logging import info, exception
-
-try:
-    from geomdl import fitting
-    geomdl_available = True
-except ImportError as e:
-    info("geomdl package is not available, NURBS Curve node will not be available")
-    geomdl_available = False
-
 import bpy
 from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
 
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList
+from sverchok.utils.logging import info, exception
 
 from sverchok_extra.data.curve import SvExGeomdlCurve
+from sverchok_extra.dependencies import geomdl
 
-if geomdl_available:
+if geomdl is not None:
+    from geomdl import fitting
     
     class SvExInterpolateNurbsCurveNode(bpy.types.Node, SverchCustomTreeNode):
         """
@@ -75,10 +69,10 @@ if geomdl_available:
             self.outputs['Knots'].sv_set(knots_out)
 
 def register():
-    if geomdl_available:
+    if geomdl is not None:
         bpy.utils.register_class(SvExInterpolateNurbsCurveNode)
 
 def unregister():
-    if geomdl_available:
+    if geomdl is not None:
         bpy.utils.unregister_class(SvExInterpolateNurbsCurveNode)
 

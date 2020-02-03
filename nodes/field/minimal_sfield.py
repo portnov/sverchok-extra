@@ -1,14 +1,4 @@
 
-from sverchok.utils.logging import info, exception
-
-try:
-    import scipy
-    from scipy.interpolate import Rbf
-    scipy_available = True
-except ImportError as e:
-    info("SciPy is not available, Minimal Scalar Field node will not be available")
-    scipy_available = False
-
 import numpy as np
 
 import bpy
@@ -18,10 +8,13 @@ from mathutils import Matrix
 import sverchok
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, get_data_nesting_level
+from sverchok.utils.logging import info, exception
 
 from sverchok_extra.data.field.scalar import SvExRbfScalarField
+from sverchok_extra.dependencies import scipy
 
-if scipy_available:
+if scipy is not None:
+    from scipy.interpolate import Rbf
 
     class SvExMinimalScalarFieldNode(bpy.types.Node, SverchCustomTreeNode):
         """
@@ -104,10 +97,10 @@ if scipy_available:
             self.outputs['Field'].sv_set(fields_out)
 
 def register():
-    if scipy_available:
+    if scipy is not None:
         bpy.utils.register_class(SvExMinimalScalarFieldNode)
 
 def unregister():
-    if scipy_available:
+    if scipy is not None:
         bpy.utils.unregister_class(SvExMinimalScalarFieldNode)
 
