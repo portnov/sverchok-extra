@@ -82,3 +82,9 @@ except ImportError:
     info(mcubes_d.message)
     mcubes = None
 
+good_names = [d.package for d in dependencies.values() if d.module is not None and d.package is not None]
+if good_names:
+    info("Dependencies available: %s.", ", ".join(good_names))
+else:
+    info("No dependencies are available.")
+
