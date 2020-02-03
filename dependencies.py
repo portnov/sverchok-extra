@@ -1,6 +1,7 @@
 
 class Dependency(object):
-    def __init__(self, url,  module=None, message=None):
+    def __init__(self, package, url,  module=None, message=None):
+        self.package = package
         self.module = module
         self.message = message
         self.url = url
@@ -8,7 +9,7 @@ class Dependency(object):
 
 dependencies = dict()
 
-sverchok_d = dependencies["sverchok"] = Dependency("https://github.com/nortikin/sverchok")
+sverchok_d = dependencies["sverchok"] = Dependency(None, "https://github.com/nortikin/sverchok")
 try:
     import sverchok
     from sverchok.utils.logging import info, error, debug
@@ -19,7 +20,7 @@ except ImportError:
     print(sverchok_d.message)
     sverchok = None
 
-pip_d = dependencies["pip"] = Dependency("https://pypi.org/project/pip/")
+pip_d = dependencies["pip"] = Dependency("pip", "https://pypi.org/project/pip/")
 try:
     import pip
     pip_d.message = "PIP is available"
@@ -39,7 +40,7 @@ else:
     ensurepip = None
     debug("PIP is already installed, no need to call ensurepip")
 
-scipy_d = dependencies["scipy"] = Dependency("https://www.scipy.org/")
+scipy_d = dependencies["scipy"] = Dependency("scipy", "https://www.scipy.org/")
 try:
     import scipy
     scipy_d.message = "SciPy is available"
@@ -50,7 +51,7 @@ except ImportError:
     info(scipy_d.message)
     scipy = None
 
-geomdl_d = dependencies["geomdl"] = Dependency("https://github.com/orbingol/NURBS-Python/tree/master/geomdl")
+geomdl_d = dependencies["geomdl"] = Dependency("geomdl", "https://github.com/orbingol/NURBS-Python/tree/master/geomdl")
 try:
     import geomdl
     geomdl_d.message = "geomdl package is available"
@@ -60,7 +61,7 @@ except ImportError:
     info(geomdl_d.message)
     geomdl = None
 
-skimage_d = dependencies["skimage"] = Dependency("https://scikit-image.org/")
+skimage_d = dependencies["skimage"] = Dependency("scikit-image", "https://scikit-image.org/")
 try:
     import skimage
     skimage_d.message = "SciKit-Image package is available"
@@ -71,7 +72,7 @@ except ImportError:
     info(skimage_d.message)
     skimage = None
 
-mcubes_d = dependencies["mcubes"] = Dependency("https://github.com/pmneila/PyMCubes")
+mcubes_d = dependencies["mcubes"] = Dependency("mcubes", "https://github.com/pmneila/PyMCubes")
 try:
     import mcubes
     mcubes_d.message = "PyMCubes package is available"

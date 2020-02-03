@@ -20,7 +20,7 @@ class SvExPipInstall(bpy.types.Operator):
         cmd = [PYPATH, '-m', 'pip', 'install', '--upgrade'] + self.package.split(" ")
         ok = subprocess.call(cmd) == 0
         if ok:
-            self.report({'INFO'}, "%s installed successfully" % self.package)
+            self.report({'INFO'}, "%s installed successfully. Please restart Blender to see effect." % self.package)
             return {'FINISHED'}
         else:
             self.report({'ERROR'}, "Cannot install %s, see console output for details" % self.package)
@@ -36,7 +36,7 @@ class SvExEnsurePip(bpy.types.Operator):
         cmd = [PYPATH, '-m', 'ensurepip']
         ok = subprocess.call(cmd) == 0
         if ok:
-            self.report({'INFO'}, "PIP installed successfully")
+            self.report({'INFO'}, "PIP installed successfully. Please restart Blender to see effect.")
             return {'FINISHED'}
         else:
             self.report({'ERROR'}, "Cannot install PIP, see console output for details")
@@ -63,7 +63,7 @@ class SvExPreferences(AddonPreferences):
             row = col.row(align=True)
             row.operator('wm.url_open', text="Visit package website").url = dependency.url
             if dependency.module is None and dependency.pip_installable and pip is not None:
-                row.operator('node.sv_ex_pip_install', text="Install with PIP").package = package
+                row.operator('node.sv_ex_pip_install', text="Install with PIP").package = dependency.package
             return row
 
         box.label(text="Dependencies:")
