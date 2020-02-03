@@ -667,7 +667,6 @@ class SvExBendAlongCurveField(SvExVectorField):
 
     def get_t_values(self, xs, ys, zs):
         curve_t_min, curve_t_max = self.curve.get_u_bounds()
-        print(curve_t_min, curve_t_max)
         ts = [xs, ys, zs][self.axis]
         ts = (curve_t_max - curve_t_min) * (ts - self.t_min) / (self.t_max - self.t_min) + curve_t_min
         return ts
@@ -690,10 +689,8 @@ class SvExBendAlongCurveField(SvExVectorField):
 
     def evaluate_grid(self, xs, ys, zs):
         ts = self.get_t_values(xs, ys, zs).flatten()
-        print("Spline T:", ts)
         spline_tangents = self.curve.tangent_array(ts)
         spline_vertices = self.curve.evaluate_array(ts)
-        print("Spline V:", spline_vertices)
         scale = self.get_scale()
         matrices = np.vectorize(lambda t : self.get_matrix(t, scale), signature='(3)->(3,3)')(spline_tangents)
         src_vectors = np.stack((xs, ys, zs)).T
