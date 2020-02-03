@@ -35,6 +35,7 @@ if __name__ != "sverchok_extra":
 from sverchok_extra import sockets
 from sverchok_extra import data
 from sverchok_extra import icons
+from sverchok_extra import settings
 from sverchok_extra.utils import show_welcome
 
 def nodes_index():
@@ -158,6 +159,7 @@ def register():
     debug("Registering sverchok-extra")
     global our_menu_classes
 
+    settings.register()
     sockets.register()
     data.register()
     icons.register()
@@ -189,4 +191,5 @@ def unregister():
     icons.unregister()
     data.unregister()
     sockets.unregister()
+    settings.unregister()
 
