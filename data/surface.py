@@ -1,17 +1,16 @@
-from sverchok.utils.logging import info, exception
-
-try:
-    from geomdl import operations
-    geomdl_available = True
-except ImportError as e:
-    info("geomdl package is not available, NURBS Surface operations will not be available")
-    geomdl_available = False
 
 import numpy as np
 from mathutils import Matrix, Vector
 from mathutils import noise
 from mathutils import kdtree
 from mathutils import bvhtree
+
+from sverchok.utils.logging import info, exception
+
+from sverchok_extra.dependencies import geomdl
+
+if geomdl is not None:
+    from geomdl import operations
 
 ##################
 #                #
@@ -154,7 +153,7 @@ class SvExGeomdlSurface(SvExSurface):
         return self.normal_array(np.array([u]), np.array([v]))[0]
 
     def normal_array(self, us, vs):
-        if geomdl_available:
+        if geomdl is not None:
             uv_coords = list(zip(list(us), list(vs)))
             spline_normals = np.array( operations.normal(self.surface, uv_coords) )[:,1,:]
             return spline_normals
