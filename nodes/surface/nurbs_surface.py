@@ -210,6 +210,7 @@ if geomdl is not None:
                     if self.is_cyclic_u:
                         vertices.extend(vertices[:degree_u+1])
                         weights.extend(weights[:degree_u+1])
+                    self.debug("UxV: ", len(vertices), len(vertices[0]))
 
                 # Control points
                 if self.surface_mode == 'NURBS':
@@ -243,20 +244,20 @@ if geomdl is not None:
                     u_min = surf.knotvector_u[degree_u]
                     u_max = surf.knotvector_u[-degree_u-2]
                     new_surf.u_bounds = u_min, u_max
+                    print("U:",new_surf.u_bounds)
                 else:
                     u_min = min(surf.knotvector_u)
                     u_max = max(surf.knotvector_u)
                     new_surf.u_bounds = u_min, u_max
-                    print(new_surf.u_bounds)
                 if self.is_cyclic_v:
                     v_min = surf.knotvector_v[degree_v]
                     v_max = surf.knotvector_v[-degree_v-2]
                     new_surf.v_bounds = v_min, v_max
-                    print(new_surf.v_bounds)
+                    print("V:",new_surf.v_bounds)
                 else:
                     v_min = min(surf.knotvector_v)
                     v_max = max(surf.knotvector_v)
-                    new_surf.v_bounds = u_min, v_max
+                    new_surf.v_bounds = v_min, v_max
                 surfaces_out.append(new_surf)
 
                 if self.make_grid:

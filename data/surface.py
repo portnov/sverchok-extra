@@ -150,7 +150,7 @@ class SvExGeomdlSurface(SvExSurface):
     def get_v_min(self):
         return self.v_bounds[0]
 
-    def get_u_max(self):
+    def get_v_max(self):
         return self.v_bounds[1]
 
     @property
