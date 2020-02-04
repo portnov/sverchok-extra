@@ -47,8 +47,14 @@ class SvExSurface(object):
     def get_u_min(self):
         return 0.0
 
+    def get_u_max(self):
+        return 1.0
+
     def get_v_min(self):
         return 0.0
+
+    def get_v_max(self):
+        return 1.0
 
 class SvExRbfSurface(SvExSurface):
     def __init__(self, rbf, coord_mode, input_orientation, input_matrix):
@@ -69,8 +75,14 @@ class SvExRbfSurface(SvExSurface):
     def get_u_min(self):
         return self.u_bounds[0]
 
+    def get_u_max(self):
+        return self.u_bounds[1]
+
     def get_v_min(self):
         return self.v_bounds[0]
+
+    def get_u_max(self):
+        return self.v_bounds[1]
 
     @property
     def u_size(self):
@@ -120,6 +132,8 @@ class SvExRbfSurface(SvExSurface):
 class SvExGeomdlSurface(SvExSurface):
     def __init__(self, surface):
         self.surface = surface
+        self.u_bounds = (0, 1)
+        self.v_bounds = (0, 1)
 
     def get_input_orientation(self):
         return 'Z'
@@ -127,13 +141,25 @@ class SvExGeomdlSurface(SvExSurface):
     def get_coord_mode(self):
         return 'UV'
 
+    def get_u_min(self):
+        return self.u_bounds[0]
+
+    def get_u_max(self):
+        return self.u_bounds[1]
+
+    def get_v_min(self):
+        return self.v_bounds[0]
+
+    def get_u_max(self):
+        return self.v_bounds[1]
+
     @property
     def u_size(self):
-        return 1.0
+        return self.u_bounds[1] - self.u_bounds[0]
 
     @property
     def v_size(self):
-        return 1.0
+        return self.v_bounds[1] - self.v_bounds[0]
 
     @property
     def has_input_matrix(self):

@@ -98,10 +98,11 @@ if geomdl is not None:
                     degree = degree[0]
 
                 n_source = len(vertices)
+                fullList(weights, n_source)
                 if self.knot_mode == 'AUTO' and self.is_cyclic:
                     vertices = vertices + vertices[:degree+1]
+                    weights = weights + weights[:degree+1]
                 n_total = len(vertices)
-                fullList(weights, n_total)
 
                 # Create a 3-dimensional B-spline Curve
                 if self.surface_mode == 'NURBS':

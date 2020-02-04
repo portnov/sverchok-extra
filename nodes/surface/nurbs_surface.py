@@ -1,4 +1,5 @@
 
+from itertools import zip_longest
 
 import bpy
 from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
@@ -9,6 +10,13 @@ from sverchok.utils.logging import info, exception
 
 from sverchok_extra.data.surface import SvExGeomdlSurface
 from sverchok_extra.dependencies import geomdl
+
+# from python 3.5 docs https://docs.python.org/3.5/library/itertools.html recipes
+def grouper(iterable, n, fillvalue=None):
+    "Collect data into fixed-length chunks or blocks"
+    # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx"
+    args = [iter(iterable)] * n
+    return list(zip_longest(*args, fillvalue=fillvalue))
 
 if geomdl is not None:
     from geomdl import NURBS, BSpline, knotvector
@@ -99,6 +107,16 @@ if geomdl is not None:
                 default = 3,
                 update = updateNode)
 
+        is_cyclic_u : BoolProperty(
+                name = "Cyclic U",
+                default = False,
+                update = updateNode)
+
+        is_cyclic_v : BoolProperty(
+                name = "Cyclic V",
+                default = False,
+                update = updateNode)
+
         def sv_init(self, context):
             self.inputs.new('SvVerticesSocket', "ControlPoints")
             self.inputs.new('SvStringsSocket', "Weights")
@@ -111,7 +129,7 @@ if geomdl is not None:
             self.outputs.new('SvVerticesSocket', "Vertices")
             self.outputs.new('SvStringsSocket', "Faces")
             self.outputs.new('SvExSurfaceSocket', "Surface").display_shape = 'DIAMOND'
-            self.update_socket(context)
+            self.update_sockets(context)
 
         def draw_buttons(self, context, layout):
             layout.prop(self, "surface_mode", expand=True)
@@ -120,8 +138,11 @@ if geomdl is not None:
             col.label(text='Knots:')
             row = col.row()
             row.prop(self, "knot_mode", expand=True)
-            if self.knot_mode == 'EXPLICIT':
-                col.prop(self, 'normalize_knots', toggle=True)
+            col.prop(self, 'normalize_knots', toggle=True)
+            if self.knot_mode == 'AUTO':
+                row = col.row(align=True)
+                row.prop(self, 'is_cyclic_u', toggle=True)
+                row.prop(self, 'is_cyclic_v', toggle=True)
             layout.prop(self, "make_grid", toggle=True)
 
         def process(self):
@@ -168,38 +189,75 @@ if geomdl is not None:
 
                 # Generate surface
                 if self.surface_mode == 'NURBS':
-                    surf = NURBS.Surface()
+                    surf = NURBS.Surface(normalize_kv = self.normalize_knots)
                 else: # BSPLINE
-                    surf = BSpline.Surface()
+                    surf = BSpline.Surface(normalize_kv = self.normalize_knots)
                 surf.degree_u = degree_u
                 surf.degree_v = degree_v
 
                 if self.input_mode == '1D':
-                    # Control points
-                    n_u = u_size
-                    n_v = len(vertices) // n_u
-                    surf.ctrlpts_size_u = n_u
-                    surf.ctrlpts_size_v = n_v
-                    surf.ctrlpts = vertices
-                    if self.surface_mode == 'NURBS':
-                        surf.weights = weights
-                else:
-                    # Control points
-                    if self.surface_mode == 'NURBS':
-                        print(len(vertices))
-                        print(weights)
-                        surf.ctrlpts2d = list(map(convert_row, vertices, weights))
-                    else:
-                        surf.ctrlpts2d = vertices
-                    n_u = len(vertices)
-                    n_v = len(vertices[0])
+                    n_v = u_size
+                    n_u = len(vertices) // n_v
+
+                    vertices = grouper(vertices, n_u)
+                    weights = grouper(weights, n_u)
 
                 if self.knot_mode == 'AUTO':
-                    surf.knotvector_u = knotvector.generate(surf.degree_u, n_u)
-                    surf.knotvector_v = knotvector.generate(surf.degree_v, n_v)
+                    if self.is_cyclic_v:
+                        for row_idx in range(len(vertices)):
+                            vertices[row_idx].extend(vertices[row_idx][:degree_v+1])
+                            weights[row_idx].extend(weights[row_idx][:degree_v+1])
+                    if self.is_cyclic_u:
+                        vertices.extend(vertices[:degree_u+1])
+                        weights.extend(weights[:degree_u+1])
+
+                # Control points
+                if self.surface_mode == 'NURBS':
+                    ctrlpts = list(map(convert_row, vertices, weights))
+                    surf.ctrlpts2d = ctrlpts
+                else:
+                    surf.ctrlpts2d = vertices
+                n_u_total = len(vertices)
+                n_v_total= len(vertices[0])
+
+                if self.knot_mode == 'AUTO':
+                    if self.is_cyclic_u:
+                        knots_u = list(range(n_u_total + degree_u + 1))
+                    else:
+                        knots_u = knotvector.generate(surf.degree_u, n_u_total)
+                    self.info("Auto knots U: %s", knots_u)
+                    surf.knotvector_u = knots_u
+
+                    if self.is_cyclic_v:
+                        knots_v = list(range(n_v_total + degree_v + 1))
+                    else:
+                        knots_v = knotvector.generate(surf.degree_v, n_v_total)
+                    self.info("Auto knots V: %s", knots_v)
+                    surf.knotvector_v = knots_v
                 else:
                     surf.knotvector_u = knots_u
                     surf.knotvector_v = knots_v
+
+                new_surf = SvExGeomdlSurface(surf)
+                if self.is_cyclic_u:
+                    u_min = surf.knotvector_u[degree_u]
+                    u_max = surf.knotvector_u[-degree_u-2]
+                    new_surf.u_bounds = u_min, u_max
+                else:
+                    u_min = min(surf.knotvector_u)
+                    u_max = max(surf.knotvector_u)
+                    new_surf.u_bounds = u_min, u_max
+                    print(new_surf.u_bounds)
+                if self.is_cyclic_v:
+                    v_min = surf.knotvector_v[degree_v]
+                    v_max = surf.knotvector_v[-degree_v-2]
+                    new_surf.v_bounds = v_min, v_max
+                    print(new_surf.v_bounds)
+                else:
+                    v_min = min(surf.knotvector_v)
+                    v_max = max(surf.knotvector_v)
+                    new_surf.v_bounds = u_min, v_max
+                surfaces_out.append(new_surf)
 
                 if self.make_grid:
                     surf.sample_size = samples
@@ -212,8 +270,6 @@ if geomdl is not None:
                 verts_out.append(new_verts)
                 faces_out.append(new_faces)
 
-                surf = SvExGeomdlSurface(surf)
-                surfaces_out.append(surf)
 
             if self.make_grid:
                 self.outputs['Vertices'].sv_set(verts_out)
