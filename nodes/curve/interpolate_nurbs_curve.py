@@ -14,11 +14,11 @@ if geomdl is not None:
     
     class SvExInterpolateNurbsCurveNode(bpy.types.Node, SverchCustomTreeNode):
         """
-        Triggers: NURBS Curve
-        Tooltip: Interpolate NURBS Curve
+        Triggers: NURBS Curve interpolation
+        Tooltip: Interpolating NURBS Curve
         """
         bl_idname = 'SvExInterpolateNurbsCurveNode'
-        bl_label = 'Interpolate NURBS Curve'
+        bl_label = 'Interpolating NURBS Curve'
         bl_icon = 'CURVE_NCURVE'
 
         degree : IntProperty(
