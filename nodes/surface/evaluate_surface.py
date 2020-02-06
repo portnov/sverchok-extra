@@ -91,6 +91,18 @@ class SvExEvalSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
             default = 25, min = 3,
             update = updateNode)
 
+    clamp_modes = [
+        ('NO', "As is", "Do not clamp input values - try to process them as is (you will get either error or extrapolation on out-of-bounds values, depending on specific surface type", 0),
+        ('CLAMP', "Clamp", "Clamp input values into bounds - for example, turn -0.1 into 0", 1),
+        ('WRAP', "Wrap", "Wrap input values into bounds - for example, turn -0.1 into 0.9", 2)
+    ]
+
+    clamp_mode : EnumProperty(
+            name = "Clamp",
+            items = clamp_modes,
+            default = 'NO',
+            update = updateNode)
+
     def draw_buttons(self, context, layout):
         layout.label(text="Surface type:")
         layout.prop(self, "coord_mode", expand=True)
@@ -102,6 +114,7 @@ class SvExEvalSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
             if self.input_mode == 'VERTICES':
                 layout.label(text="Input orientation:")
                 layout.prop(self, "orientation", expand=True)
+            layout.prop(self, 'clamp_mode', expand=True)
 
     def sv_init(self, context):
         self.inputs.new('SvExSurfaceSocket', "Surface").display_shape = 'DIAMOND' #0
@@ -123,6 +136,26 @@ class SvExEvalSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
             us, vs = verts[:,1], verts[:,2]
         else: # XZ
             us, vs = verts[:,0], verts[:,2]
+        return us, vs
+
+    def _clamp(self, surface, us, vs):
+        u_min = surface.get_u_min()
+        u_max = surface.get_u_max()
+        v_min = surface.get_v_min()
+        v_max = surface.get_v_max()
+        us = np.clip(us, u_min, u_max)
+        vs = np.clip(vs, v_min, v_max)
+        return us, vs
+
+    def _wrap(self, surface, us, vs):
+        u_min = surface.get_u_min()
+        u_max = surface.get_u_max()
+        v_min = surface.get_v_min()
+        v_max = surface.get_v_max()
+        u_len = u_max - u_min
+        v_len = v_max - u_min
+        us = (us - u_min) % u_len + u_min
+        vs = (vs - v_min) % v_len + v_min
         return us, vs
 
     def build_output(self, surface, verts):
@@ -205,6 +238,10 @@ class SvExEvalSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
                     target_us, target_vs = self.parse_input(target_verts)
                 else:
                     target_us, target_vs = np.array(target_us), np.array(target_vs)
+                if self.clamp_mode == 'CLAMP':
+                    target_us, target_vs = self._clamp(surface, target_us, target_vs)
+                elif self.clamp_mode == 'WRAP':
+                    target_us, target_vs = self._wrap(surface, target_us, target_vs)
                 new_edges = []
                 new_faces = []
             new_verts = surface.evaluate_array(target_us, target_vs)
