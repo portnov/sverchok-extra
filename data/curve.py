@@ -11,6 +11,12 @@ from mathutils import bvhtree
 #                #
 ##################
 
+def make_euclidian_ts(pts):
+    tmp = np.linalg.norm(pts[:-1] - pts[1:], axis=1)
+    tknots = np.insert(tmp, 0, 0).cumsum()
+    tknots = tknots / tknots[-1]
+    return tknots
+
 class SvExCurve(object):
     def evaluate(self, t):
         raise Exception("not implemented!")

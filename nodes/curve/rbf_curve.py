@@ -8,7 +8,8 @@ from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
 from sverchok.utils.logging import info, exception
 
-from sverchok_extra.data.curve import SvExRbfCurve
+from sverchok_extra.utils import rbf_functions
+from sverchok_extra.data.curve import SvExRbfCurve, make_euclidian_ts
 from sverchok_extra.dependencies import scipy
 
 if scipy is not None:
@@ -23,18 +24,9 @@ if scipy is not None:
         bl_label = 'Minimal Curve'
         bl_icon = 'CURVE_NCURVE'
 
-        functions = [
-            ('multiquadric', "Multi Quadric", "Multi Quadric", 0),
-            ('inverse', "Inverse", "Inverse", 1),
-            ('gaussian', "Gaussian", "Gaussian", 2),
-            ('cubic', "Cubic", "Cubic", 3),
-            ('quintic', "Quintic", "Qunitic", 4),
-            ('thin_plate', "Thin Plate", "Thin Plate", 5)
-        ]
-
         function : EnumProperty(
                 name = "Function",
-                items = functions,
+                items = rbf_functions,
                 default = 'multiquadric',
                 update = updateNode)
 
@@ -59,12 +51,6 @@ if scipy is not None:
             self.inputs.new('SvStringsSocket', "Smooth").prop_name = 'smooth'
             self.outputs.new('SvExCurveSocket', "Curve").display_shape = 'DIAMOND'
 
-        def make_ts(self, pts):
-            tmp = np.linalg.norm(pts[:-1] - pts[1:], axis=1)
-            tknots = np.insert(tmp, 0, 0).cumsum()
-            tknots = tknots / tknots[-1]
-            return tknots
-
         def process(self):
             if not any(socket.is_linked for socket in self.outputs):
                 return
@@ -82,7 +68,7 @@ if scipy is not None:
                     smooth = smooth[0]
 
                 vertices = np.array(vertices)
-                ts = self.make_ts(vertices)
+                ts = make_euclidian_ts(vertices)
                 rbf = Rbf(ts, vertices,
                             function=self.function,
                             smooth=smooth,
