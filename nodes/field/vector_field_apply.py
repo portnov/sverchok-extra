@@ -5,7 +5,7 @@ import bpy
 from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, StringProperty
 
 from sverchok.node_tree import SverchCustomTreeNode, throttled
-from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match_long_repeat, ensure_nesting_level
+from sverchok.data_structure import updateNode, zip_long_repeat, repeat_last_for_length, match_long_repeat, ensure_nesting_level
 from sverchok.utils.logging import info, exception
 
 class SvExVectorFieldApplyNode(bpy.types.Node, SverchCustomTreeNode):
@@ -68,7 +68,7 @@ class SvExVectorFieldApplyNode(bpy.types.Node, SverchCustomTreeNode):
                         vertex = (np.array(vertex) + coeff * vector).tolist()
                     new_verts = [vertex]
                 else:
-                    fullList(coeffs, len(vertices))
+                    coeffs = repeat_last_for_length(coeffs, len(vertices))
                     vertices = np.array(vertices)
                     for i in range(iterations):
                         xs = vertices[:,0]

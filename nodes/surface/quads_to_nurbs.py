@@ -97,7 +97,8 @@ if geomdl is not None:
             def mk_face_point(i, j, k):
                 dv1 = (vertices[j] - vertices[i]) * tangent_weights[i]
                 dv2 = (vertices[k] - vertices[i]) * tangent_weights[i]
-                return planes[i].projection_of_point(vertices[i] + dv1 + dv2)
+                m = face_weight
+                return planes[i].projection_of_point(vertices[i] + m*dv1 + m*dv2)
 
             e01 = planes[0].projection_of_point(mk_edge_point(0, 1))
             e02 = planes[1].projection_of_point(mk_edge_point(1, 0))
