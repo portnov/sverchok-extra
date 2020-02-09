@@ -71,6 +71,11 @@ class SvExAttractorFieldNode(bpy.types.Node, SverchCustomTreeNode):
         default = 'AVG',
         update = updateNode)
 
+    signed : BoolProperty(
+            name = "Signed",
+            default = False,
+            update = updateNode)
+
     def sv_init(self, context):
         d = self.inputs.new('SvVerticesSocket', "Center")
         d.use_prop = True
@@ -92,6 +97,8 @@ class SvExAttractorFieldNode(bpy.types.Node, SverchCustomTreeNode):
         layout.prop(self, 'attractor_type')
         if self.attractor_type == 'Point':
             layout.prop(self, 'point_mode')
+        elif self.attractor_type == 'Mesh':
+            layout.prop(self, 'signed', toggle=True)
         layout.prop(self, 'falloff_type')
         layout.prop(self, 'clamp')
 
@@ -126,7 +133,7 @@ class SvExAttractorFieldNode(bpy.types.Node, SverchCustomTreeNode):
 
     def to_mesh(self, verts, faces, falloff):
         bvh = bvhtree.BVHTree.FromPolygons(verts, faces)
-        sfield = SvExBvhAttractorScalarField(bvh=bvh, falloff=falloff)
+        sfield = SvExBvhAttractorScalarField(bvh=bvh, falloff=falloff, signed=self.signed)
         vfield = SvExBvhAttractorVectorField(bvh=bvh, falloff=falloff)
         return vfield, sfield
 

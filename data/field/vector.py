@@ -1,6 +1,6 @@
 
 import numpy as np
-from math import sqrt
+from math import sqrt, copysign
 from mathutils import Matrix, Vector
 from mathutils import noise
 from mathutils import kdtree
@@ -407,9 +407,10 @@ class SvExPlaneAttractorVectorField(SvExVectorField):
             return R[0], R[1], R[2]
 
 class SvExBvhAttractorVectorField(SvExVectorField):
-    def __init__(self, bvh=None, verts=None, faces=None, falloff=None, use_normal=False):
+    def __init__(self, bvh=None, verts=None, faces=None, falloff=None, use_normal=False, signed_normal=False):
         self.falloff = falloff
         self.use_normal = use_normal
+        self.signed_normal = signed_normal
         if bvh is not None:
             self.bvh = bvh
         elif verts is not None and faces is not None:
@@ -421,7 +422,12 @@ class SvExBvhAttractorVectorField(SvExVectorField):
         vertex = Vector((x,y,z))
         nearest, normal, idx, distance = self.bvh.find_nearest(vertex)
         if self.use_normal:
-            return np.array(normal)
+            if self.signed_normal:
+                sign = (v - nearest).dot(normal)
+                sign = copysign(1, sign)
+            else:
+                sign = 1
+            return sign * np.array(normal)
         else:
             return np.array(nearest - vertex)
 
@@ -431,7 +437,12 @@ class SvExBvhAttractorVectorField(SvExVectorField):
             if nearest is None:
                 raise Exception("No nearest point on mesh found for vertex %s" % v)
             if self.use_normal:
-                return np.array(normal)
+                if self.signed_normal:
+                    sign = (v - nearest).dot(normal)
+                    sign = copysign(1, sign)
+                else:
+                    sign = 1
+                return sign * np.array(normal)
             else:
                 return np.array(nearest) - v
 

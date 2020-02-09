@@ -1,5 +1,6 @@
 
 import numpy as np
+from math import copysign
 from mathutils import Matrix, Vector
 from mathutils import noise
 from mathutils import kdtree
@@ -288,8 +289,9 @@ class SvExPlaneAttractorScalarField(SvExScalarField):
             return norms
 
 class SvExBvhAttractorScalarField(SvExScalarField):
-    def __init__(self, bvh=None, verts=None, faces=None, falloff=None):
+    def __init__(self, bvh=None, verts=None, faces=None, falloff=None, signed=False):
         self.falloff = falloff
+        self.signed = signed
         if bvh is not None:
             self.bvh = bvh
         elif verts is not None and faces is not None:
@@ -299,14 +301,24 @@ class SvExBvhAttractorScalarField(SvExScalarField):
 
     def evaluate(self, x, y, z):
         nearest, normal, idx, distance = self.bvh.find_nearest((x,y,z))
-        return distance
+        if self.signed:
+            sign = (Vector((x,y,z)) - nearest).dot(normal)
+            sign = copysign(1, sign)
+        else:
+            sign = 1
+        return sign * distance
 
     def evaluate_grid(self, xs, ys, zs):
         def find(v):
             nearest, normal, idx, distance = self.bvh.find_nearest(v)
             if nearest is None:
                 raise Exception("No nearest point on mesh found for vertex %s" % v)
-            return distance
+            if self.signed:
+                sign = (v - nearest).dot(normal)
+                sign = copysign(1, sign)
+            else:
+                sign = 1
+            return sign * distance
 
         points = np.stack((xs, ys, zs)).T
         norms = np.vectorize(find, signature='(3)->()')(points)

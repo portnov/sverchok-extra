@@ -38,11 +38,18 @@ class SvExMeshNormalFieldNode(bpy.types.Node, SverchCustomTreeNode):
             default = 'multiquadric',
             update = updateNode)
 
+    signed : BoolProperty(
+            name = "Signed",
+            default = False,
+            update = updateNode)
+
     def draw_buttons(self, context, layout):
         if scipy is not None:
             layout.prop(self, "interpolate", toggle=True)
             if self.interpolate:
                 layout.prop(self, "function")
+        if scipy is None or not self.interpolate:
+            layout.prop(self, "signed", toggle=True)
 
     def sv_init(self, context):
         self.inputs.new('SvVerticesSocket', 'Vertices')
@@ -78,7 +85,7 @@ class SvExMeshNormalFieldNode(bpy.types.Node, SverchCustomTreeNode):
 
                 field = SvExBvhRbfNormalVectorField(bvh, rbf)
             else:
-                field = SvExBvhAttractorVectorField(verts=vertices, faces=faces, use_normal=True)
+                field = SvExBvhAttractorVectorField(verts=vertices, faces=faces, use_normal=True, signed_normal=self.signed)
             fields_out.append(field)
         self.outputs['Field'].sv_set(fields_out)
 
