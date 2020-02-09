@@ -33,6 +33,33 @@ class SvExCurve(object):
     def get_u_bounds(self):
         raise Exception("not implemented!")
 
+class SvExLine(SvExCurve):
+    def __init__(self, point, direction):
+        self.point = point
+        self.direction = direction
+        self.u_bounds = (0.0, 1.0)
+
+    def get_u_bounds(self):
+        return self.u_bounds
+
+    def evaluate(self, t):
+        return self.point + t * self.direction
+
+    def evaluate_array(self, ts):
+        ts = ts[np.newaxis].T
+        return self.point + ts * self.direction
+
+    def tangent(self, t):
+        tg = self.direction
+        n = np.linalg.norm(tg)
+        return tg / n
+
+    def tangent_array(self, ts):
+        tg = self.direction
+        n = np.linalg.norm(tg)
+        tangent = tg / n
+        return np.tile(tangent, len(ts))
+
 class SvExGeomdlCurve(SvExCurve):
     def __init__(self, curve):
         self.curve = curve
