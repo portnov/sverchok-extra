@@ -48,6 +48,7 @@ def nodes_index():
                 ("surface.interpolating_surface", "SvExInterpolatingSurfaceNode"),
                 ("surface.quads_to_nurbs", "SvExQuadsToNurbsNode"),
                 ("surface.marching_cubes", "SvExMarchingCubesNode"),
+                ("surface.apply_field_to_surface", "SvExApplyFieldToSurfaceNode"),
                 ("surface.evaluate_surface", "SvExEvalSurfaceNode")
             ]),
             ("Curve", [
@@ -56,6 +57,7 @@ def nodes_index():
                 ("curve.nurbs_curve", "SvExNurbsCurveNode"),
                 ("curve.interpolate_nurbs_curve", "SvExInterpolateNurbsCurveNode"),
                 ("curve.approximate_nurbs_curve", "SvExApproxNurbsCurveNode"),
+                ("curve.apply_field_to_curve", "SvExApplyFieldToCurveNode"),
                 ("curve.eval_curve", "SvExEvalCurveNode"),
                 ("curve.marching_squares", "SvExMarchingSquaresNode")
             ]),
@@ -187,7 +189,11 @@ def unregister():
         #unregister_node_panels()
         nodeitems_utils.unregister_node_categories("SVERCHOK_EXTRA")
     for clazz in our_menu_classes:
-        bpy.utils.unregister_class(clazz)
+        try:
+            bpy.utils.unregister_class(clazz)
+        except Exception as e:
+            print("Can't unregister menu class %s" % clazz)
+            print(e)
     #unregister_node_add_operators()
     unregister_nodes()
 

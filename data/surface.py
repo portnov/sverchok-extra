@@ -82,7 +82,7 @@ class SvExRbfSurface(SvExSurface):
     def get_v_min(self):
         return self.v_bounds[0]
 
-    def get_u_max(self):
+    def get_v_max(self):
         return self.v_bounds[1]
 
     @property
@@ -272,6 +272,82 @@ class SvExInterpolatingSurface(SvExSurface):
         # FIXME: To be optimized!
         normals = [self._normal(u, v) for u,v in zip(us, vs)]
         return np.array(normals)
+
+class SvExDeformedByFieldSurface(SvExSurface):
+    def __init__(self, surface, field, coefficient=1.0):
+        self.surface = surface
+        self.field = field
+        self.coefficient = coefficient
+        self.normal_delta = 0.001
+
+    def get_coord_mode(self):
+        return self.surface.get_coord_mode()
+
+    def get_u_min(self):
+        return self.surface.get_u_min()
+
+    def get_u_max(self):
+        return self.surface.get_u_max()
+
+    def get_v_min(self):
+        return self.surface.get_v_min()
+
+    def get_v_max(self):
+        return self.surface.get_v_max()
+
+    @property
+    def u_size(self):
+        return self.surface.u_size
+
+    @property
+    def v_size(self):
+        return self.surface.v_size
+
+    @property
+    def has_input_matrix(self):
+        return self.surface.has_input_matrix
+
+    def get_input_matrix(self):
+        return self.surface.get_input_matrix()
+
+    def evaluate(self, u, v):
+        p = self.surface.evaluate(u, v)
+        vec = self.field.evaluate(p)
+        return p + self.coefficient * vec
+
+    def evaluate_array(self, us, vs):
+        ps = self.surface.evaluate_array(us, vs)
+        xs, ys, zs = ps[:,0], ps[:,1], ps[:,2]
+        vxs, vys, vzs = self.field.evaluate_grid(xs, ys, zs)
+        vecs = np.stack((vxs, vys, vzs)).T
+        return ps + self.coefficient * vecs
+
+    def normal(self, u, v):
+        h = self.normal_delta
+        p = self.evaluate(u, v)
+        p_u = self.evaluate(u+h, v)
+        p_v = self.evaluate(u, v+h)
+        du = (p_u - p) / h
+        dv = (p_v - p) / h
+        normal = np.cross(du, dv)
+        n = np.linalg.norm(normal)
+        normal = normal / n
+        return normal
+
+    def normal_array(self, us, vs):
+        surf_vertices = self.evaluate_array(us, vs)
+        u_plus = self.evaluate_array(us + self.normal_delta, vs)
+        v_plus = self.evaluate_array(us, vs + self.normal_delta)
+        du = u_plus - surf_vertices
+        dv = v_plus - surf_vertices
+        #self.info("Du: %s", du)
+        #self.info("Dv: %s", dv)
+        normal = np.cross(du, dv)
+        norm = np.linalg.norm(normal, axis=1)[np.newaxis].T
+        #if norm != 0:
+        normal = normal / norm
+        #self.info("Normals: %s", normal)
+        return normal
 
 def register():
     pass

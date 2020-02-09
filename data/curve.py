@@ -106,6 +106,52 @@ class SvExRbfCurve(SvExCurve):
         points_h = self.rbf(ts+self.tangent_delta)
         return (points_h - points) / self.tangent_delta
 
+class SvExDeformedByFieldCurve(SvExCurve):
+    def __init__(self, curve, field, coefficient=1.0):
+        self.curve = curve
+        self.field = field
+        self.coefficient = coefficient
+        self.tangent_delta = 0.001
+
+    def get_u_bounds(self):
+        return self.curve.get_u_bounds()
+
+    def evaluate(self, t):
+        v = self.curve.evaluate(t)
+        vec = self.field.evaluate(v)
+        return v + self.coefficient * vec
+
+    def evaluate_array(self, ts):
+        vs = self.curve.evaluate_array(ts)
+        xs, ys, zs = vs[:,0], vs[:,1], vs[:,2]
+        vxs, vys, vzs = self.field.evaluate_grid(xs, ys, zs)
+        vecs = np.stack((vxs, vys, vzs)).T
+        return vs + self.coefficient * vecs
+
+    def tangent(self, t):
+        v = self.evaluate(t)
+        h = self.tangent_delta
+        v_h = self.evaluate(t+h)
+        return (v_h - v) / h
+
+    def tangent_array(self, ts):
+        vs = self.evaluate_array(ts)
+        h = self.tangent_delta
+        u_max = self.curve.get_u_bounds()[1]
+        bad_idxs = (ts+h) > u_max
+        good_idxs = (ts+h) <= u_max
+        ts_h = ts + h
+        ts_h[bad_idxs] = (ts - h)[bad_idxs]
+
+        vs_h = self.evaluate_array(ts_h)
+        tangents_plus = (vs_h - vs) / h
+        tangents_minus = (vs - vs_h) / h
+        tangents_x = np.where(good_idxs, tangents_plus[:,0], tangents_minus[:,0])
+        tangents_y = np.where(good_idxs, tangents_plus[:,1], tangents_minus[:,1])
+        tangents_z = np.where(good_idxs, tangents_plus[:,2], tangents_minus[:,2])
+        tangents = np.stack((tangents_x, tangents_y, tangents_z)).T
+        return tangents
+
 def register():
     pass
 
