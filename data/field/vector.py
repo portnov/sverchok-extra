@@ -727,7 +727,7 @@ class SvExBendAlongSurfaceField(SvExVectorField):
         elif self.orient_axis == 1:
             u_index, v_index = 2,0
         else:
-            u_index, v_index = 0,1
+            u_index, v_index = 1,0
         return u_index, v_index
         
     def get_uv(self, vertices):
@@ -766,7 +766,10 @@ class SvExBendAlongSurfaceField(SvExVectorField):
             scale_v = src_size_v / self.surface.v_size
             scale_z = sqrt(scale_u * scale_v)
         else:
-            scale_z = 1.0
+            if self.orient_axis == 2:
+                scale_z = -1.0
+            else:
+                scale_z = 1.0
         if self.flip:
             scale_z = - scale_z
 
