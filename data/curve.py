@@ -60,6 +60,31 @@ class SvExLine(SvExCurve):
         tangent = tg / n
         return np.tile(tangent, len(ts))
 
+class SvExLambdaCurve(SvExCurve):
+    def __init__(self, function):
+        self.function = function
+        self.u_bounds = (0.0, 1.0)
+        self.tangent_delta = 0.001
+
+    def get_u_bounds(self):
+        return self.u_bounds
+
+    def evaluate(self, t):
+        return self.function(t)
+
+    def evaluate_array(self, ts):
+        return np.vectorize(self.function, signature='()->(3)')(ts)
+
+    def tangent(self, t):
+        point = self.function(t)
+        point_h = self.function(t+self.tangent_delta)
+        return (point_h - point) / self.tangent_delta
+
+    def tangent_array(self, ts):
+        points = np.vectorize(self.function, signature='()->(3)')(ts)
+        points_h = np.vectorize(self.function, signature='()->(3)')(ts+self.tangent_delta)
+        return (points_h - points) / self.tangent_delta
+
 class SvExGeomdlCurve(SvExCurve):
     def __init__(self, curve):
         self.curve = curve
