@@ -105,6 +105,57 @@ class SvExPlane(SvExSurface):
         normal = normal / n
         return np.tile(normal, len(ts))
 
+class SvExLambdaSurface(SvExSurface):
+    def __init__(self, function):
+        self.function = function
+        self.u_bounds = (0.0, 1.0)
+        self.v_bounds = (0.0, 1.0)
+        self.normal_delta = 0.001
+
+    def get_u_min(self):
+        return self.u_bounds[0]
+
+    def get_u_max(self):
+        return self.u_bounds[1]
+
+    def get_v_min(self):
+        return self.v_bounds[0]
+
+    def get_v_max(self):
+        return self.v_bounds[1]
+
+    @property
+    def u_size(self):
+        return self.u_bounds[1] - self.u_bounds[0]
+
+    @property
+    def v_size(self):
+        return self.v_bounds[1] - self.v_bounds[0]
+
+    def evaluate(self, u, v):
+        return self.function(u, v)
+
+    def evaluate_array(self, us, vs):
+        return np.vectorize(self.function, signature='(),()->(3)')(us, vs)
+
+    def normal(self, u, v):
+        return self.normal_array(np.array([u]), np.array([v]))[0]
+
+    def normal_array(self, us, vs):
+        surf_vertices = self.evaluate_array(us, vs)
+        u_plus = self.evaluate_array(us + self.normal_delta, vs)
+        v_plus = self.evaluate_array(us, vs + self.normal_delta)
+        du = u_plus - surf_vertices
+        dv = v_plus - surf_vertices
+        #self.info("Du: %s", du)
+        #self.info("Dv: %s", dv)
+        normal = np.cross(du, dv)
+        norm = np.linalg.norm(normal, axis=1)[np.newaxis].T
+        #if norm != 0:
+        normal = normal / norm
+        #self.info("Normals: %s", normal)
+        return normal
+
 class SvExRbfSurface(SvExSurface):
     def __init__(self, rbf, coord_mode, input_orientation, input_matrix):
         self.rbf = rbf

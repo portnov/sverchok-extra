@@ -41,6 +41,7 @@ from sverchok_extra.utils import show_welcome
 def nodes_index():
     return [("Surface", [
                 ("surface.plane", "SvExPlaneSurfaceNode"),
+                ("surface.surface_formula", "SvExSurfaceFormulaNode"),
                 ("surface.minimal_surface", "SvExMinimalSurfaceNode"),
                 ("surface.smooth_spline", "SvExBivariateSplineNode"),
                 ("surface.nurbs_surface", "SvExNurbsSurfaceNode"),
