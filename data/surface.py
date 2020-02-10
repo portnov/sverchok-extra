@@ -248,6 +248,18 @@ class SvExInterpolatingSurface(SvExSurface):
         # (u,v) -> normal
         self._normal_cache = {}
 
+    @property
+    def u_size(self):
+        return self.u_bounds[1] - self.u_bounds[0]
+        #v = 0.0
+        #verts = [spline.evaluate(v) for spline in self.v_splines]
+        #return self.get_u_spline(v, verts).u_size
+
+    @property
+    def v_size(self):
+        return self.v_bounds[1] - self.v_bounds[0]
+        #return self.v_splines[0].v_size
+
     def get_u_spline(self, v, vertices):
         """Get a spline along U direction for specified value of V coordinate"""
         spline = self._u_splines.get(v, None)

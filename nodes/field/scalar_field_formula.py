@@ -22,10 +22,14 @@ class SvExScalarFieldFormulaNode(bpy.types.Node, SverchCustomTreeNode):
     bl_label = 'Scalar Field'
     bl_icon = 'OUTLINER_OB_EMPTY'
 
+    @throttled
+    def on_update(self, context):
+        self.adjust_sockets()
+
     formula: StringProperty(
             name = "Formula",
             default = "x*x + y*y + z*z",
-            update = updateNode)
+            update = on_update)
 
     input_mode : EnumProperty(
         name = "Coordinates",

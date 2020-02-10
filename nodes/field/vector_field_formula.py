@@ -22,26 +22,30 @@ class SvExVectorFieldFormulaNode(bpy.types.Node, SverchCustomTreeNode):
     bl_label = 'Vector Field'
     bl_icon = 'OUTLINER_OB_EMPTY'
 
+    @throttled
+    def on_update(self, context):
+        self.adjust_sockets()
+
     formula1: StringProperty(
             name = "Formula",
             default = "-y",
-            update = updateNode)
+            update = on_update)
 
     formula2: StringProperty(
             name = "Formula",
             default = "x",
-            update = updateNode)
+            update = on_update)
 
     formula3: StringProperty(
             name = "Formula",
             default = "z",
-            update = updateNode)
+            update = on_update)
 
     input_mode : EnumProperty(
         name = "Coordinates",
         items = coordinate_modes,
         default = 'XYZ',
-        update = updateNode)
+        update = on_update)
 
     output_mode : EnumProperty(
         name = "Coordinates",
