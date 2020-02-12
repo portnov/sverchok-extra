@@ -69,6 +69,11 @@ if skimage is not None:
                 default = False,
                 update = update_sockets)
 
+        connect_bounds : BoolProperty(
+                name = "Connect boundary",
+                default = True,
+                update = updateNode)
+
         def sv_init(self, context):
             self.inputs.new('SvExScalarFieldSocket', "Field").display_shape = 'CIRCLE_DOT'
             self.inputs.new('SvStringsSocket', "Value").prop_name = 'iso_value'
@@ -86,6 +91,7 @@ if skimage is not None:
 
         def draw_buttons(self, context, layout):
             layout.prop(self, 'make_faces', toggle=True)
+            layout.prop(self, 'connect_bounds', toggle=True)
 
         def make_contour(self, samples, min_x, x_size, min_y, y_size, z, contour):
             n = len(contour)
@@ -121,7 +127,9 @@ if skimage is not None:
                 vertex = (x, y, z)
                 verts.append(vertex)
 
-            make_face = self.make_faces and vert_0_bound == vert_n_bound
+            has_boundary = vert_0_bound is not None or vert_n_bound is not None
+            is_inner = not has_boundary
+            make_face = (is_inner or self.connect_bounds) and (self.make_faces and vert_0_bound == vert_n_bound)
 
             edges = [(i, i+1) for i in range(n-1)]
             if make_face:
