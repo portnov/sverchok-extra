@@ -3,6 +3,7 @@ import numpy as np
 
 import bpy
 from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, StringProperty
+from mathutils import Vector, Matrix
 
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match_long_repeat
@@ -77,6 +78,7 @@ if skimage is not None:
             self.inputs.new('SvStringsSocket', "MinY").prop_name = 'min_y'
             self.inputs.new('SvStringsSocket', "MaxY").prop_name = 'max_y'
             self.inputs.new('SvStringsSocket', "Z").prop_name = 'z_value'
+            self.inputs.new('SvMatrixSocket', "Matrix")
             self.outputs.new('SvVerticesSocket', "Vertices")
             self.outputs.new('SvStringsSocket', "Edges")
             self.outputs.new('SvStringsSocket', "Faces")
@@ -142,6 +144,23 @@ if skimage is not None:
                 faces.append(new_faces)
             return verts, edges, faces
 
+        def apply_matrix(self, matrix, xs, ys, zs):
+            matrix = matrix.inverted()
+            m = np.array(matrix.to_3x3())
+            t = np.array(matrix.translation)
+            points = np.stack((xs, ys, zs)).T
+            points = np.apply_along_axis(lambda v: m @ v + t,1, points).T
+            return points[0], points[1], points[2]
+
+        def unapply_matrix(self, matrix, verts_s):
+            def unapply(verts):
+                m = np.array(matrix.to_3x3())
+                t = np.array(matrix.translation)
+                points = np.array(verts)
+                points = np.apply_along_axis(lambda v: m @ v + t,1, points)
+                return points.tolist()
+            return list(map(unapply, verts_s))
+
         def process(self):
             if not any(socket.is_linked for socket in self.outputs):
                 return
@@ -154,18 +173,19 @@ if skimage is not None:
             value_s = self.inputs['Value'].sv_get()
             z_value_s = self.inputs['Z'].sv_get()
             samples_s = self.inputs['Samples'].sv_get()
+            matrix_s = self.inputs['Matrix'].sv_get(default=[Matrix()])
 
             if isinstance(value_s[0], (list, tuple)):
                 value_s = value_s[0]
             if isinstance(z_value_s[0], (list, tuple)):
                 z_value_s = z_value_s[0]
 
-            parameters = zip_long_repeat(fields_s, min_x_s, max_x_s, min_y_s, max_y_s, z_value_s, value_s, samples_s)
+            parameters = zip_long_repeat(fields_s, matrix_s, min_x_s, max_x_s, min_y_s, max_y_s, z_value_s, value_s, samples_s)
 
             verts_out = []
             edges_out = []
             faces_out = []
-            for field, min_x, max_x, min_y, max_y, z_value, value, samples in parameters:
+            for field, matrix, min_x, max_x, min_y, max_y, z_value, value, samples in parameters:
                 if isinstance(samples, (list, tuple)):
                     samples = samples[0]
                 if isinstance(value, (list, tuple)):
@@ -181,11 +201,16 @@ if skimage is not None:
                 if isinstance(z_value, (list, tuple)):
                     z_value = z_value[0]
 
+                has_matrix = matrix != Matrix()
+
                 x_range = np.linspace(min_x, max_x, num=samples)
                 y_range = np.linspace(min_y, max_y, num=samples)
                 z_range = np.array([z_value])
                 xs, ys, zs = np.meshgrid(x_range, y_range, z_range, indexing='ij')
-                field_values = field.evaluate_grid(xs.flatten(), ys.flatten(), zs.flatten())
+                xs, ys, zs = xs.flatten(), ys.flatten(), zs.flatten()
+                if has_matrix:
+                    xs, ys, zs = self.apply_matrix(matrix, xs, ys, zs)
+                field_values = field.evaluate_grid(xs, ys, zs)
                 field_values = field_values.reshape((samples, samples))
 
                 contours = measure.find_contours(field_values, level=value)
@@ -194,6 +219,8 @@ if skimage is not None:
                 y_size = (max_y - min_y)/samples
 
                 new_verts, new_edges, new_faces = self.make_contours(samples, min_x, x_size, min_y, y_size, z_value, contours)
+                if has_matrix:
+                    new_verts = self.unapply_matrix(matrix, new_verts)
                 verts_out.extend(new_verts)
                 edges_out.extend(new_edges)
                 faces_out.extend(new_faces)
