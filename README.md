@@ -28,33 +28,51 @@ Features
 At the moment, this addon includes the following nodes for Sverchok:
 
 * *Curve* category:
-  * NURBS Curve (uses [Geomdl][3] library)
+  * Straight line curve
+  * Formula-defined curve
   * Interpolation Curve (cubic spline, uses numpy only)
+  * Minimal (interpolation) Curve (uses [SciPy][4])
+  * NURBS Curve (uses [Geomdl][3] library)
+  * NURBS Interpolation Curve (uses Geomdl library)
+  * NURBS Approximation Curve (uses Geomdl library)
+  * Apply Vector Field to Curve
   * Evaluate Curve
   * Marching Squares (uses [Scikit-Image][5] library)
 * *Surface* category:
-  * Marching Cubes (uses either [PyMCubes][8] or [Scikit-Image][5])
+  * Plane Surface
+  * Formula-defined Surface
   * Smooth Bivariate Spline (uses [SciPy][4])
   * NURBS Surface (uses Geomdl)
+  * NURBS Interpolation Surface (uses Geomdl)
+  * NURBS Approximation Surface (uses Geomdl)
+  * Quads to NURBS (uses Geomdl)
   * Minimal Surface (uses SciPy)
+  * Curves to Surface (optionally uses SciPy and/or Geomdl)
+  * Apply Vector Field to Surface
   * Evaluate Surface (universal node for NURBS / minimal surfaces)
+  * Marching Cubes (uses either [PyMCubes][8] or [Scikit-Image][5])
 * *Spatial* category:
   * Voronoi 3D (uses SciPy)
   * Spherical Voronoi (uses SciPy)
+  * Scalar Field Random Probe
 * *Field* category (please refer to the [wiki page][11] about used concept of the field; most of these nodes do not use external libraries, except for numpy):
+  * Generate Scalar field by formula
+  * Generate Vector field by formula
+  * Compose Vector Field (from three Scalar fields)
+  * Decompose Vector Field (into three Scalar fields)
+  * Scalar field of a point
   * Attractor Field
-  * Field differential operators (gradient, divergence, laplacian...)
-  * Merge Scalar Fields
   * Mesh Nearest Normals Field (optionally uses SciPy)
+  * Merge Scalar Fields
+  * Minimal Scalar Field (uses SciPy)
   * Minimal Vector Field (uses SciPy)
+  * Voronoi 3D Scalar / Vector Field (uses Blender's mathutils only)
   * Bend along Surface (universal node for NURBS / minimal surfaces)
   * Bend along Curve (universal node for NURBS / interpolation curves)
   * Noise Vector Field
-  * Generate Scalar field by formula
-  * Generate Vector field by formula
   * Scalar field math
   * Vector field math
-  * Scalar field of a point
+  * Field differential operators (gradient, divergence, laplacian...)
   * Apply vector field
   * Evaluate vector field
   * Evaluate scalar field
