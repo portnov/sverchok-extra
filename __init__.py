@@ -82,6 +82,7 @@ def nodes_index():
                 ("field.vector_field_apply", "SvExVectorFieldApplyNode"),
                 ("field.vector_field_math", "SvExVectorFieldMathNode"),
                 ("field.noise_vfield", "SvExNoiseVectorFieldNode"),
+                ("field.voronoi_field", "SvExVoronoiFieldNode"),
                 ("field.curve_bend_field", "SvExBendAlongCurveFieldNode"),
                 ("field.bend_along_surface", "SvExBendAlongSurfaceFieldNode"),
                 ("field.differential_operations", "SvExFieldDiffOpsNode")

@@ -421,6 +421,26 @@ class SvExRbfScalarField(SvExScalarField):
         value = self.rbf(xs, ys, zs)
         return value
 
+class SvExVoronoiScalarField(SvExScalarField):
+    def __init__(self, vertices):
+        self.kdt = kdtree.KDTree(len(vertices))
+        for i, v in enumerate(vertices):
+            self.kdt.insert(v, i)
+        self.kdt.balance()
+
+    def evaluate(self, x, y, z):
+        vs = self.kdt.find_n((x,y,z), 2)
+        if len(vs) != 2:
+            raise Exception("Unexpected kdt result at (%s,%s,%s): %s" % (x, y, z, vs))
+        t1, t2 = vs
+        distance1 = t1[2]
+        distance2 = t2[2]
+        return abs(distance1 - distance2)
+
+    def evaluate_grid(self, xs, ys, zs):
+        #points = np.stack((xs, ys, zs)).T
+        return np.vectorize(self.evaluate, signature='(),(),()->()')(xs,ys,zs)
+
 def register():
     pass
 
