@@ -170,7 +170,7 @@ class SvExDeformedByFieldCurve(SvExCurve):
 
     def evaluate(self, t):
         v = self.curve.evaluate(t)
-        vec = self.field.evaluate(v)
+        vec = self.field.evaluate(*tuple(v))
         return v + self.coefficient * vec
 
     def evaluate_array(self, ts):
