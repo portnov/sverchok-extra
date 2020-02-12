@@ -438,7 +438,6 @@ class SvExVoronoiScalarField(SvExScalarField):
         return abs(distance1 - distance2)
 
     def evaluate_grid(self, xs, ys, zs):
-        #points = np.stack((xs, ys, zs)).T
         return np.vectorize(self.evaluate, signature='(),(),()->()')(xs,ys,zs)
 
 def register():

@@ -10,6 +10,7 @@ from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match
 from sverchok.utils.logging import info, exception
 
 from sverchok_extra.data.field.scalar import SvExVoronoiScalarField
+from sverchok_extra.data.field.vector import SvExVoronoiVectorField
 
 class SvExVoronoiFieldNode(bpy.types.Node, SverchCustomTreeNode):
     """
@@ -23,7 +24,8 @@ class SvExVoronoiFieldNode(bpy.types.Node, SverchCustomTreeNode):
 
     def sv_init(self, context):
         self.inputs.new('SvVerticesSocket', "Vertices")
-        self.outputs.new('SvExScalarFieldSocket', "Field").display_shape = 'CIRCLE_DOT'
+        self.outputs.new('SvExScalarFieldSocket', "SField").display_shape = 'CIRCLE_DOT'
+        self.outputs.new('SvExVectorFieldSocket', "VField").display_shape = 'CIRCLE_DOT'
 
     def process(self):
 
@@ -32,12 +34,16 @@ class SvExVoronoiFieldNode(bpy.types.Node, SverchCustomTreeNode):
 
         vertices_s = self.inputs['Vertices'].sv_get()
 
-        fields_out = []
+        sfields_out = []
+        vfields_out = []
         for vertices in vertices_s:
-            field = SvExVoronoiScalarField(vertices)
-            fields_out.append(field)
+            sfield = SvExVoronoiScalarField(vertices)
+            vfield = SvExVoronoiVectorField(vertices)
+            sfields_out.append(sfield)
+            vfields_out.append(vfield)
 
-        self.outputs['Field'].sv_set(fields_out)
+        self.outputs['SField'].sv_set(sfields_out)
+        self.outputs['VField'].sv_set(vfields_out)
 
 def register():
     bpy.utils.register_class(SvExVoronoiFieldNode)
