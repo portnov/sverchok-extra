@@ -91,6 +91,10 @@ def nodes_index():
                 ("spatial.voronoi3d", "SvExVoronoi3DNode"),
                 ("spatial.voronoi_sphere", "SvExVoronoiSphereNode"),
                 ("spatial.field_random_probe", "SvExFieldRandomProbeNode")
+            ]),
+            ("Exchange", [
+                ("exchange.import_rw3dm_json", "SvExJsonToNurbsNode"),
+                ("exchange.export_rw3dm_json", "SvExNurbsToJsonNode")
             ])
     ]
 
