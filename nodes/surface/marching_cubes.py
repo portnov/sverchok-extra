@@ -36,6 +36,16 @@ if mcubes is not None or skimage is not None:
                 min = 4,
                 update = updateNode)
 
+        sample_size_draft : IntProperty(
+                name = "[D] Samples",
+                default = 25,
+                min = 4,
+                update = updateNode)
+
+        draft_properties_mapping = dict(
+                sample_size = 'sample_size_draft'
+            )
+
         def get_modes(self, context):
             modes = []
             if skimage is not None:
@@ -66,6 +76,12 @@ if mcubes is not None or skimage is not None:
         def draw_buttons(self, context, layout):
             layout.prop(self, "implementation", text="")
         
+        def draw_label(self):
+            label = self.label or self.name
+            if self.id_data.sv_draft:
+                label = "[D] " + label
+            return label
+
         def get_bounds(self, vertices):
             vs = np.array(vertices)
             min = vs.min(axis=0)
@@ -132,6 +148,9 @@ if mcubes is not None or skimage is not None:
             self.outputs['Vertices'].sv_set(verts_out)
             self.outputs['Faces'].sv_set(faces_out)
             self.outputs['VertexNormals'].sv_set(normals_out)
+
+        def does_support_draft_mode(self):
+            return True
 
 def register():
     if mcubes is not None or skimage is not None:
