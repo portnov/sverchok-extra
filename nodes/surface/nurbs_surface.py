@@ -226,14 +226,14 @@ if geomdl is not None:
                         knots_u = list(range(n_u_total + degree_u + 1))
                     else:
                         knots_u = knotvector.generate(surf.degree_u, n_u_total)
-                    self.info("Auto knots U: %s", knots_u)
+                    self.debug("Auto knots U: %s", knots_u)
                     surf.knotvector_u = knots_u
 
                     if self.is_cyclic_v:
                         knots_v = list(range(n_v_total + degree_v + 1))
                     else:
                         knots_v = knotvector.generate(surf.degree_v, n_v_total)
-                    self.info("Auto knots V: %s", knots_v)
+                    self.debug("Auto knots V: %s", knots_v)
                     surf.knotvector_v = knots_v
                 else:
                     surf.knotvector_u = knots_u
