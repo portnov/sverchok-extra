@@ -6,7 +6,7 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
 from mathutils import Vector
 
 from sverchok.node_tree import SverchCustomTreeNode, throttled
-from sverchok.data_structure import updateNode, zip_long_repeat, fullList
+from sverchok.data_structure import updateNode, zip_long_repeat, fullList, get_data_nesting_level
 
 from sverchok_extra.data.surface import SvExPlane
 
@@ -105,6 +105,8 @@ class SvExPlaneSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
                 v_min = v_min[0]
             if isinstance(v_max, (list, tuple)):
                 v_max = v_max[0]
+            if get_data_nesting_level(normal) == 2:
+                normal = normal[0]
 
             point1 = np.array(point1)
             if self.mode == '3PT':
