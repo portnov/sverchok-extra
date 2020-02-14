@@ -76,6 +76,9 @@ At the moment, this addon includes the following nodes for Sverchok:
   * Apply vector field
   * Evaluate vector field
   * Evaluate scalar field
+* *Exchange* category:
+  * NURBS to JSON (uses Geomdl to represent NURBS surfaces or curves in JSON format which can be converted to Rhino's `3dm` by [rw3dm][12]
+  * JSON to NURBS (uses Geomdl to read NURBS surfaces or curves from the same JSON format)
 
 There will be more.
 
@@ -90,7 +93,45 @@ something, otherwise Sverchok-Extra will just do nothing.
 One thing you will have to install anyway if you want to use Sverchok-Extra is
 [pip][6]. All libraries are installed with it.
 
+### Simple dependencies installation UI
+
+Some of dependencies can be installed easily, by just running `pip`. For such
+dependencies, Sverchok-Extra supports easy-to-use installation user interface.
+To use it, navigate to Edit => Preferences, then locate Sverchok-Extra
+preferences under Addons section:
+
+![Settings](https://user-images.githubusercontent.com/284644/74547121-74555380-4f6d-11ea-8388-80421a04fc3f.png)
+
+The dialog shows current status of all dependencies. For dependencies that can
+be installed by `pip`, but are not yet installed, this dialog will show an
+"Install" button. You'll have just to press the button and wait for when
+Blender will say that the library is installed. If there will be any errors
+during installation, Blender will report it and print details into console
+output.
+
+For dependencies that can not be installed that easily, the dialog contains a
+button which opens the browser on an official web site of corresponding
+library, so you can find installation instructions.
+
+The following sections of this document will be useful if you can not install
+the library by pressing the button. For libraries that can not be that easily
+installed by `pip`, this document contains only short instructions. Please
+refer to web sites of corresponding libraries for complete instructions and
+support.
+
+All commands provided in this document are for Linux-based systems. For Windows
+and MacOS, commands may differ a bit, but the general idea will be the same.
+
 ### Install pip
+
+In some cases, it may appear that Blender's python already knows about your
+system's installation of python (python is usually installed by default on most
+Linux distros). In such cases, you may use just `pip install something` to
+install libraries.
+
+There are two known ways to install `pip` into Blender.
+
+#### Option 1
 
 This I tested on latest Blender 2.81 builds. The similar instructions should
 work for other Blender 2.8x versions.
@@ -100,10 +141,17 @@ work for other Blender 2.8x versions.
 
 (exact name of `python` executable depends on specific blender build).
 
-In some cases, it may appear that Blender's python already knows about your
-system's installation of python (python is usually installed by default on most
-Linux distros). In such cases, you may use just `pip install something` to
-install libraries.
+#### Option 2
+
+If, for some reason, Option 1 does not work for you (on some system Python says
+`no module named ensurepip`), then you have to do the following:
+
+1. Download [get-pip.py][13] script
+2. Run it with Blender's python:
+
+    $ /path/to/blender/2.xx/python/bin/python3.7m /path/to/get-pip.py
+
+Please refer to [official pip site][14] for official installation instructions.
 
 ### Install SciPy
 
@@ -182,4 +230,7 @@ LICENSE: GPL-3.
 [9]: https://nurbs-python.readthedocs.io/en/latest/install.html
 [10]: https://github.com/portnov/sverchok-extra/archive/master.zip
 [11]: https://github.com/portnov/sverchok-extra/wiki/Fields
+[12]: https://github.com/orbingol/rw3dm
+[13]: https://bootstrap.pypa.io/get-pip.py
+[14]: https://pip.pypa.io/en/stable/installing/
 
