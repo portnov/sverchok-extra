@@ -22,7 +22,7 @@ import sverchok
 from sverchok.core import sv_registration_utils, make_node_list
 from sverchok.utils import auto_gather_node_classes, get_node_class_reference
 from sverchok.menu import SverchNodeItem, node_add_operators, SverchNodeCategory, register_node_panels, unregister_node_panels, unregister_node_add_operators
-from sverchok.utils.extra_categories import register_extra_category_provider
+from sverchok.utils.extra_categories import register_extra_category_provider, unregister_extra_category_provider
 from sverchok.ui.nodeview_space_menu import make_extra_category_menus
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat
@@ -170,8 +170,9 @@ def reload_modules():
         importlib.reload(im)
 
 def register():
-    debug("Registering sverchok-extra")
     global our_menu_classes
+
+    debug("Registering sverchok-extra")
 
     settings.register()
     sockets.register()
@@ -182,9 +183,8 @@ def register():
     extra_nodes = importlib.import_module(".nodes", "sverchok_extra")
     auto_gather_node_classes(extra_nodes)    
     menu = make_menu()
-    provider = SvExCategoryProvider("SVERCHOK_EXTRA", menu)
-    register_extra_category_provider(provider)
-    #if 'SVERCHOK_EXTRA' in nodeitems_utils._node_categories:
+    menu_category_provider = SvExCategoryProvider("SVERCHOK_EXTRA", menu)
+    register_extra_category_provider(menu_category_provider) #if 'SVERCHOK_EXTRA' in nodeitems_utils._node_categories:
         #unregister_node_panels()
         #nodeitems_utils.unregister_node_categories("SVERCHOK_EXTRA")
     nodeitems_utils.register_node_categories("SVERCHOK_EXTRA", menu)
@@ -203,6 +203,7 @@ def unregister():
         except Exception as e:
             print("Can't unregister menu class %s" % clazz)
             print(e)
+    unregister_extra_category_provider("SVERCHOK_EXTRA")
     #unregister_node_add_operators()
     unregister_nodes()
 
