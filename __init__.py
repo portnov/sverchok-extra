@@ -73,6 +73,7 @@ def nodes_index():
                 ("field.scalar_field_point", "SvExScalarFieldPointNode"),
                 ("field.attractor_field", "SvExAttractorFieldNode"),
                 ("field.mesh_normal_field", "SvExMeshNormalFieldNode"),
+                ("field.image_field", "SvExImageFieldNode"),
                 ("field.scalar_field_math", "SvExScalarFieldMathNode"),
                 ("field.merge_scalar_fields", "SvExMergeScalarFieldsNode"),
                 ("field.scalar_field_eval", "SvExScalarFieldEvaluateNode"),
