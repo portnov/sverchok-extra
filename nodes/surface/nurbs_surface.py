@@ -16,7 +16,7 @@ def grouper(iterable, n, fillvalue=None):
     "Collect data into fixed-length chunks or blocks"
     # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx"
     args = [iter(iterable)] * n
-    return list(zip_longest(*args, fillvalue=fillvalue))
+    return list(map(list, zip_longest(*args, fillvalue=fillvalue)))
 
 if geomdl is not None:
     from geomdl import NURBS, BSpline, knotvector
