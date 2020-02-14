@@ -63,6 +63,7 @@ At the moment, this addon includes the following nodes for Sverchok:
   * Scalar field of a point
   * Attractor Field
   * Mesh Nearest Normals Field (optionally uses SciPy)
+  * Image Field (convert Image data block into scalar or vector field)
   * Merge Scalar Fields
   * Minimal Scalar Field (uses SciPy)
   * Minimal Vector Field (uses SciPy)
