@@ -51,6 +51,7 @@ def nodes_index():
                 ("surface.quads_to_nurbs", "SvExQuadsToNurbsNode"),
                 ("surface.marching_cubes", "SvExMarchingCubesNode"),
                 ("surface.apply_field_to_surface", "SvExApplyFieldToSurfaceNode"),
+                ("surface.nurbs_trim_tessellate", "SvExTessellateTrimmedNurbsNode"),
                 ("surface.evaluate_surface", "SvExEvalSurfaceNode")
             ]),
             ("Curve", [
