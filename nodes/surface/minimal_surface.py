@@ -254,6 +254,9 @@ if scipy is not None:
                     else: # Z
                         pass
 
+                    #print(XYZ[:,0])
+                    #print(XYZ[:,1])
+                    #print(XYZ[:,2])
                     rbf = Rbf(XYZ[:,0],XYZ[:,1],XYZ[:,2],
                             function=self.function,
                             smooth=smooth,
@@ -273,6 +276,8 @@ if scipy is not None:
                             target_x_range = np.linspace(x_min, x_max, grid_points)
                             target_y_range = np.linspace(y_min, y_max, grid_points)
                             XI, YI = np.meshgrid(target_x_range, target_y_range)
+                            XI = XI.flatten()
+                            YI = YI.flatten()
                         else: # EXPLICIT
                             XI, YI = np.array(target_us), np.array(target_vs)
                         ZI = rbf(XI, YI)
@@ -284,7 +289,7 @@ if scipy is not None:
                         else: # Z
                             pass
 
-                        new_verts = np.dstack((XI,YI,ZI))
+                        new_verts = np.stack((XI,YI,ZI)).T
                 else: # UV
                     if not self.explicit_src_uv:
                         src_us, src_vs = self.make_uv(vertices)
@@ -312,17 +317,23 @@ if scipy is not None:
                             target_u_range = np.linspace(u_min, u_max, grid_points)
                             target_v_range = np.linspace(v_min, v_max, grid_points)
                             target_us, target_vs = np.meshgrid(target_u_range, target_v_range)
+                            target_us = target_us.flatten()
+                            target_vs = target_vs.flatten()
                         else:
-                            pass
+                            if len(target_us) == 0:
+                                raise Exception("Target U values are not specified")
+                            if len(target_vs) == 0:
+                                raise Exception("Target V values are not specified")
 
                         new_verts = rbf(target_us, target_vs)
 
                 if has_matrix and self.generate_mode != 'NONE':
                     new_verts = new_verts - translation
-                    new_verts = np.apply_along_axis(lambda v : np_matrix @ v, 2, new_verts)
+                    print(new_verts.shape)
+                    new_verts = np.apply_along_axis(lambda v : np_matrix @ v, 1, new_verts)
                 new_verts = new_verts.tolist()
-                if not (self.coord_mode == 'UV' and self.generate_mode == 'EXPLICIT'):
-                    new_verts = sum(new_verts, [])
+                #if not (self.coord_mode == 'UV' and self.generate_mode == 'EXPLICIT'):
+                #    new_verts = sum(new_verts, [])
                 new_edges = self.make_edges_xy(grid_points)
                 new_faces = self.make_faces_xy(grid_points)
 

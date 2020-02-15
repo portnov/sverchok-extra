@@ -208,7 +208,7 @@ class SvExRbfSurface(SvExSurface):
     def evaluate_array(self, us, vs):
         surf_vertices = np.array( self.rbf(us, vs) )
         if self.coord_mode == 'XY':
-            surf_vertices = np.dstack((us, vs, surf_vertices))[0]
+            surf_vertices = np.stack((us, vs, surf_vertices)).T
         return surf_vertices 
 
     def normal(self, u, v):

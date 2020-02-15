@@ -21,16 +21,8 @@ class SvExEvalSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
     bl_label = 'Evaluate Surface'
     bl_icon = 'OUTLINER_OB_EMPTY'
 
-    coord_modes = [
-        ('XY', "X Y -> Z", "XY -> Z function", 0),
-        ('UV', "U V -> X Y Z", "UV -> XYZ function", 1)
-    ]
-
     @throttled
     def update_sockets(self, context):
-        self.inputs[U_SOCKET].name = "U" if self.coord_mode == 'UV' else "X"
-        self.inputs[V_SOCKET].name = "V" if self.coord_mode == 'UV' else "Y"
-
         self.inputs[U_SOCKET].hide_safe = self.eval_mode == 'GRID' or self.input_mode == 'VERTICES'
         self.inputs[V_SOCKET].hide_safe = self.eval_mode == 'GRID' or self.input_mode == 'VERTICES'
         self.inputs['Vertices'].hide_safe = self.eval_mode == 'GRID' or self.input_mode == 'PAIRS'
@@ -40,12 +32,6 @@ class SvExEvalSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
 
         self.outputs['Edges'].hide_safe = self.eval_mode == 'EXPLICIT'
         self.outputs['Faces'].hide_safe = self.eval_mode == 'EXPLICIT'
-
-    coord_mode : EnumProperty(
-        name = "Coordinates",
-        items = coord_modes,
-        default = 'XY',
-        update = update_sockets)
 
     eval_modes = [
         ('GRID', "Grid", "Generate a default grid", 0),
@@ -104,8 +90,6 @@ class SvExEvalSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
             update = updateNode)
 
     def draw_buttons(self, context, layout):
-        layout.label(text="Surface type:")
-        layout.prop(self, "coord_mode", expand=True)
         layout.label(text="Evaluate:")
         layout.prop(self, "eval_mode", expand=True)
         if self.eval_mode == 'EXPLICIT':
@@ -159,18 +143,21 @@ class SvExEvalSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
         return us, vs
 
     def build_output(self, surface, verts):
-        orientation = surface.get_input_orientation()
-        if orientation == 'X':
-            verts[:,1], verts[:,2], verts[:,0] = verts[:,0], verts[:,1], verts[:,2]
-        elif orientation == 'Y':
-            verts[:,2], verts[:,0], verts[:,1] = verts[:,0], verts[:,1], verts[:,2]
-        else: # Z
-            pass
         if surface.has_input_matrix:
+            orientation = surface.get_input_orientation()
+            if orientation == 'X':
+                reorder = np.array([2, 0, 1])
+                verts = verts[:, reorder]
+            elif orientation == 'Y':
+                reorder = np.array([1, 2, 0])
+                verts = verts[:, reorder]
+            else: # Z
+                pass
             matrix = surface.get_input_matrix()
             verts = verts - matrix.translation
             np_matrix = np.array(matrix.to_3x3())
-            verts = np.apply_along_axis(lambda v : np_matrix @ v, 2, verts)
+            print(verts.shape)
+            verts = np.apply_along_axis(lambda v : np_matrix @ v, 1, verts)
         return verts
 
     def make_grid_input(self, surface, samples_u, samples_v):
@@ -221,9 +208,6 @@ class SvExEvalSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
 
         inputs = zip_long_repeat(surfaces_s, target_us_s, target_vs_s, target_verts_s, samples_u_s, samples_v_s)
         for surface, target_us, target_vs, target_verts, samples_u, samples_v in inputs:
-            if surface.get_coord_mode() != self.coord_mode:
-                self.warning("Input surface mode is %s, but Evaluate node mode is %s; the result can be unexpected", surface.get_coord_mode(), self.coord_mode)
-
             if isinstance(samples_u, (list, tuple)):
                 samples_u = samples_u[0]
             if isinstance(samples_v, (list, tuple)):
@@ -246,11 +230,8 @@ class SvExEvalSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
                 new_faces = []
             new_verts = surface.evaluate_array(target_us, target_vs)
 
-            if self.coord_mode == 'XY':
-                new_verts = self.build_output(surface, new_verts)
-                new_verts = new_verts.tolist()
-            else:
-                new_verts = new_verts.tolist()
+            new_verts = self.build_output(surface, new_verts)
+            new_verts = new_verts.tolist()
             verts_out.append(new_verts)
             edges_out.append(new_edges)
             faces_out.append(new_faces)
