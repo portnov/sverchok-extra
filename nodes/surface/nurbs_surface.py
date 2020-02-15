@@ -75,8 +75,8 @@ if geomdl is not None:
                 update = update_sockets)
 
         make_grid : BoolProperty(
-                name = "Make grid",
-                default = True,
+                name = "Tessellate",
+                default = False,
                 update = update_sockets)
 
         knot_modes = [
