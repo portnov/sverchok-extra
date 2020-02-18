@@ -719,6 +719,8 @@ class SvExBendAlongSurfaceField(SvExVectorField):
         self.orient_axis = axis
         self.autoscale = autoscale
         self.flip = flip
+        self.u_bounds = (0, 1)
+        self.v_bounds = (0, 1)
 
     def get_other_axes(self):
         # Select U and V to be two axes except orient_axis
@@ -740,11 +742,8 @@ class SvExBendAlongSurfaceField(SvExVectorField):
         # Rescale U and V coordinates to [0, 1], drop third coordinate
         us = vertices[:,u_index].flatten()
         vs = vertices[:,v_index].flatten()
-        min_u = min(us)
-        max_u = max(us)
-        min_v = min(vs)
-        max_v = max(vs)
-
+        min_u, max_u = self.u_bounds
+        min_v, max_v = self.v_bounds
         size_u = max_u - min_u
         size_v = max_v - min_v
 
