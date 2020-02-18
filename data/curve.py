@@ -1,5 +1,6 @@
 
 import numpy as np
+from math import sin, cos, pi
 from mathutils import Matrix, Vector
 from mathutils import noise
 from mathutils import kdtree
@@ -59,6 +60,43 @@ class SvExLine(SvExCurve):
         n = np.linalg.norm(tg)
         tangent = tg / n
         return np.tile(tangent, len(ts))
+
+class SvExCircle(SvExCurve):
+    def __init__(self, matrix, radius):
+        self.matrix = np.array(matrix.to_3x3())
+        self.center = np.array(matrix.translation)
+        self.radius = radius
+        self.u_bounds = (0.0, 2*pi)
+
+    def get_u_bounds(self):
+        return self.u_bounds
+
+    def evaluate(self, t):
+        r = self.radius
+        x = r * cos(t)
+        y = r * sin(t)
+        return self.matrix @ np.array([x, y, 0]) + self.center
+
+    def evaluate_array(self, ts):
+        r = self.radius
+        xs = r * np.cos(ts)
+        ys = r * np.sin(ts)
+        zs = np.zeros_like(xs)
+        vertices = np.stack((xs, ys, zs)).T
+        return np.apply_along_axis(lambda v: self.matrix @ v, 1, vertices) + self.center
+
+    def tangent(self, t):
+        x = - sin(t)
+        y = cos(t)
+        z = 0
+        return self.matrix @ np.array([x, y, z])
+
+    def tangent_array(self, ts):
+        xs = - np.sin(ts)
+        ys = np.cos(ts)
+        zs = np.zeros_like(xs)
+        vectors = np.stack((xs, ys, zs)).T
+        return np.apply_along_axis(lambda v: self.matrix @ v, 1, vectors)
 
 class SvExLambdaCurve(SvExCurve):
     def __init__(self, function):
