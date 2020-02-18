@@ -6,7 +6,7 @@ import bpy
 from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
 
 from sverchok.node_tree import SverchCustomTreeNode, throttled
-from sverchok.data_structure import updateNode, zip_long_repeat, fullList
+from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
 
 from sverchok_extra.data.curve import SvExCircle
 
@@ -15,7 +15,7 @@ class SvExCircleNode(bpy.types.Node, SverchCustomTreeNode):
     Triggers: Circle
     Tooltip: Generate circular curve
     """
-    bl_idname = 'SvExLineCurveNode'
+    bl_idname = 'SvExCircleNode'
     bl_label = 'Circle (Curve)'
     bl_icon = 'MESH_CIRCLE'
 
@@ -35,14 +35,14 @@ class SvExCircleNode(bpy.types.Node, SverchCustomTreeNode):
 
         center_s = self.inputs['Center'].sv_get(default=[Matrix()])
         radius_s = self.inputs['Radius'].sv_get()
+        radius_s = ensure_nesting_level(radius_s, 2)
+        center_s = ensure_nesting_level(center_s, 2, data_types=[Matrix])
 
         curves_out = []
-        for center, radius in zip_long_repeat(center_s, radius_s):
-            if isinstance(radius, (list, tuple)):
-                radius = radius[0]
-
-            curve = SvExCircle(center, radius)
-            curves_out.append(curve)
+        for centers, radiuses in zip_long_repeat(center_s, radius_s):
+            for center, radius in zip_long_repeat(centers, radiuses):
+                curve = SvExCircle(center, radius)
+                curves_out.append(curve)
 
         self.outputs['Curve'].sv_set(curves_out)
 
