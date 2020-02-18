@@ -1,5 +1,6 @@
 
 import numpy as np
+from math import pi, cos, sin, atan, sqrt
 from collections import defaultdict
 from mathutils import Matrix, Vector
 from mathutils import noise
@@ -7,6 +8,7 @@ from mathutils import kdtree
 from mathutils import bvhtree
 
 from sverchok.utils.logging import info, exception
+from sverchok.utils.math import from_spherical
 
 from sverchok_extra.dependencies import geomdl
 
@@ -99,11 +101,189 @@ class SvExPlane(SvExSurface):
     def normal(self, u, v):
         return self._normal
 
-    def normal_array(self, ts):
+    def normal_array(self, us, vs):
         normal = self.normal
         n = np.linalg.norm(normal)
         normal = normal / n
-        return np.tile(normal, len(ts))
+        return np.tile(normal, len(us))
+
+class SvExEquirectSphere(SvExSurface):
+    def __init__(self, center, radius, theta1):
+        self.center = center
+        self.radius = radius
+        self.theta1 = theta1
+        self.u_bounds = (0, radius * 2*pi * cos(theta1))
+        self.v_bounds = (-radius * theta1, radius * (pi - theta1))
+
+    def get_u_min(self):
+        return self.u_bounds[0]
+
+    def get_u_max(self):
+        return self.u_bounds[1]
+
+    def get_v_min(self):
+        return self.v_bounds[0]
+
+    def get_v_max(self):
+        return self.v_bounds[1]
+
+    @property
+    def u_size(self):
+        return self.u_bounds[1] - self.u_bounds[0]
+
+    @property
+    def v_size(self):
+        return self.v_bounds[1] - self.v_bounds[0]
+
+    def evaluate(self, u, v):
+        rho = self.radius
+        phi = u / (rho * cos(self.theta1))
+        theta = v / rho + self.theta1
+        x, y, z = from_spherical(rho, phi, theta, mode="radians")
+        return np.array([x,y,z]) + self.center
+
+    def evaluate_array(self, us, vs):
+        rho = self.radius
+        phis = us / (rho * cos(self.theta1))
+        thetas = vs / rho + self.theta1
+        xs = rho * np.sin(thetas) * np.cos(phis)
+        ys = rho * np.sin(thetas) * np.sin(phis)
+        zs = rho * np.cos(thetas)
+        return np.stack((xs, ys, zs)).T + self.center
+
+    def normal(self, u, v):
+        rho = self.radius
+        phi = u / (rho * np.cos(self.theta1))
+        theta = v / rho + self.theta1
+        x, y, z = from_spherical(rho, phi, theta, mode="radians")
+        return np.array([x,y,z])
+
+    def normal_array(self, us, vs):
+        rho = self.radius
+        phis = us / (rho * cos(self.theta1))
+        thetas = vs / rho + self.theta1
+        xs = rho * np.sin(thetas) * np.cos(phis)
+        ys = rho * np.sin(thetas) * np.sin(phis)
+        zs = rho * np.cos(thetas)
+        return np.stack((xs, ys, zs)).T
+
+class SvExLambertSphere(SvExSurface):
+    def __init__(self, center, radius):
+        self.center = center
+        self.radius = radius
+        self.u_bounds = (0, 2*pi)
+        self.v_bounds = (-1.0, 1.0)
+
+    def get_u_min(self):
+        return self.u_bounds[0]
+
+    def get_u_max(self):
+        return self.u_bounds[1]
+
+    def get_v_min(self):
+        return self.v_bounds[0]
+
+    def get_v_max(self):
+        return self.v_bounds[1]
+
+    @property
+    def u_size(self):
+        return self.u_bounds[1] - self.u_bounds[0]
+
+    @property
+    def v_size(self):
+        return self.v_bounds[1] - self.v_bounds[0]
+
+    def evaluate(self, u, v):
+        rho = self.radius
+        phi = u
+        theta = np.arcsin(v)
+        x,y,z = from_spherical(rho, phi, theta, mode="radians")
+        return np.array([x,y,z]) + self.center
+
+    def evaluate_array(self, us, vs):
+        rho = self.radius
+        phis = us
+        thetas = np.arcsin(vs) + pi/2
+        xs = rho * np.sin(thetas) * np.cos(phis)
+        ys = rho * np.sin(thetas) * np.sin(phis)
+        zs = rho * np.cos(thetas)
+        return np.stack((xs, ys, zs)).T + self.center
+
+    def normal(self, u, v):
+        rho = self.radius
+        phi = u
+        theta = np.arcsin(v) + pi/2
+        x,y,z = from_spherical(rho, phi, theta, mode="radians")
+        return np.array([x,y,z])
+
+    def normal_array(self, us, vs):
+        rho = self.radius
+        phis = us
+        thetas = np.arcsin(vs) + pi/2
+        xs = rho * np.sin(thetas) * np.cos(phis)
+        ys = rho * np.sin(thetas) * np.sin(phis)
+        zs = rho * np.cos(thetas)
+        return np.stack((xs, ys, zs)).T
+
+class SvExGallSphere(SvExSurface):
+    def __init__(self, center, radius):
+        self.center = center
+        self.radius = radius
+        self.u_bounds = (0, radius * 2*pi / sqrt(2))
+        self.v_bounds = (- radius * (1 + sqrt(2)/2), radius * (1 + sqrt(2)/2))
+
+    def get_u_min(self):
+        return self.u_bounds[0]
+
+    def get_u_max(self):
+        return self.u_bounds[1]
+
+    def get_v_min(self):
+        return self.v_bounds[0]
+
+    def get_v_max(self):
+        return self.v_bounds[1]
+
+    @property
+    def u_size(self):
+        return self.u_bounds[1] - self.u_bounds[0]
+
+    @property
+    def v_size(self):
+        return self.v_bounds[1] - self.v_bounds[0]
+
+    def evaluate(self, u, v):
+        rho = self.radius
+        phi = u * sqrt(2) / rho
+        theta = 2 * atan(v / (rho * (1 + sqrt(2)/2))) + pi/2
+        x,y,z = from_spherical(rho, phi, theta, mode="radians")
+        return np.array([x,y,z]) + self.center
+
+    def evaluate_array(self, us, vs):
+        rho = self.radius
+        phis = us * sqrt(2) / rho
+        thetas = 2 * np.arctan(vs / (rho * (1 + sqrt(2)/2))) + pi/2
+        xs = rho * np.sin(thetas) * np.cos(phis)
+        ys = rho * np.sin(thetas) * np.sin(phis)
+        zs = rho * np.cos(thetas)
+        return np.stack((xs, ys, zs)).T + self.center
+
+    def normal(self, u, v):
+        rho = self.radius
+        phi = u * sqrt(2) / rho
+        theta = 2 * atan(v / (rho * (1 + sqrt(2)/2))) + pi/2
+        x,y,z = from_spherical(rho, phi, theta, mode="radians")
+        return np.array([x,y,z])
+
+    def normal_array(self, us, vs):
+        rho = self.radius
+        phis = us * sqrt(2) / rho
+        thetas = 2 * np.arctan(vs / (rho * (1 + sqrt(2)/2))) + pi/2
+        xs = rho * np.sin(thetas) * np.cos(phis)
+        ys = rho * np.sin(thetas) * np.sin(phis)
+        zs = rho * np.cos(thetas)
+        return np.stack((xs, ys, zs)).T
 
 class SvExLambdaSurface(SvExSurface):
     def __init__(self, function):
