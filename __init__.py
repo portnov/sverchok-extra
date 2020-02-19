@@ -90,7 +90,8 @@ def nodes_index():
                 ("field.bend_along_surface", "SvExBendAlongSurfaceFieldNode"),
                 ("field.differential_operations", "SvExFieldDiffOpsNode"),
                 ("field.vector_field_graph", "SvExVectorFieldGraphNode"),
-                ("field.vector_field_lines", "SvExVectorFieldLinesNode")
+                ("field.vector_field_lines", "SvExVectorFieldLinesNode"),
+                ("field.scalar_field_graph", "SvExScalarFieldGraphNode")
             ]),
             ("Spatial", [
                 ("spatial.voronoi3d", "SvExVoronoi3DNode"),
