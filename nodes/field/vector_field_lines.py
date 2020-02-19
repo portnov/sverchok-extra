@@ -104,8 +104,12 @@ class SvExVectorFieldLinesNode(bpy.types.Node, SverchCustomTreeNode):
                     new_edges = [[(i,i+1) for i in range(iterations-1)]] * len(vertices)
                     if self.join:
                         new_verts, new_edges, _ = mesh_join(new_verts, new_edges, [[]] * len(new_verts))
-                field_verts.append(new_verts)
-                field_edges.append(new_edges)
+                if self.join:
+                    field_verts.append(new_verts)
+                    field_edges.append(new_edges)
+                else:
+                    field_verts.extend(new_verts)
+                    field_edges.extend(new_edges)
 
             verts_out.extend(field_verts)
             edges_out.extend(field_edges)
