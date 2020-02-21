@@ -80,6 +80,7 @@ class SvExPreferences(AddonPreferences):
         draw_message("geomdl")
         draw_message("skimage")
         draw_message("mcubes")
+        draw_message("circlify")
 
         if any(package.module is None for package in dependencies.values()):
             box.operator('wm.url_open', text="Read installation instructions for missing dependencies").url = "https://github.com/portnov/sverchok-extra"

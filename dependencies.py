@@ -82,6 +82,17 @@ except ImportError:
     info(mcubes_d.message)
     mcubes = None
 
+circlify_d = dependencies["circlify"] = Dependency("circlify", "https://github.com/elmotec/circlify")
+try:
+    import circlify
+    circlify_d.message = "Circlify package is available"
+    circlify_d.module = circlify
+except ImportError:
+    circlify_d.message = "Circlify package is not available. Circlify node will not be available"
+    circlify_d.pip_installable = True
+    info(circlify_d.message)
+    circlify = None
+
 good_names = [d.package for d in dependencies.values() if d.module is not None and d.package is not None]
 if good_names:
     info("Dependencies available: %s.", ", ".join(good_names))
