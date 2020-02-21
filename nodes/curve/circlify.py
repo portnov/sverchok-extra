@@ -55,6 +55,8 @@ if circlify is not None:
 
             self.inputs.new('SvStringsSocket', "MajorRadius").prop_name = 'major_radius'
             self.outputs.new('SvExCurveSocket', "Circles").display_shape = 'DIAMOND'
+            self.outputs.new('SvVerticesSocket', "Centers")
+            self.outputs.new('SvStringsSocket', "Radiuses")
 
         def to_2d(self, v):
             x,y,z = v
@@ -94,6 +96,8 @@ if circlify is not None:
             major_radius_s = ensure_nesting_level(major_radius_s, 2)
 
             curves_out = []
+            centers_out = []
+            radius_out = []
             for radiuses, centers, major_radiuses in zip_long_repeat(radiuses_s, center_s, major_radius_s):
                 for radiuses, center, major_radius in zip_long_repeat(radiuses, centers, major_radiuses):
                     center_2d = self.to_2d(center)
@@ -101,8 +105,12 @@ if circlify is not None:
                     circles = circlify.circlify(radiuses, target_enclosure=enclosure, show_enclosure=self.show_enclosure)
                     curves = [self.circle_to_curve(center, circle) for circle in circles]
                     curves_out.extend(curves)
+                    centers_out.append([tuple(curve.center) for curve in curves])
+                    radius_out.append([curve.radius for curve in curves])
 
             self.outputs['Circles'].sv_set(curves_out)
+            self.outputs['Centers'].sv_set(centers_out)
+            self.outputs['Radiuses'].sv_set(radius_out)
 
 def register():
     if circlify is not None:
