@@ -128,13 +128,13 @@ class SvExFieldRandomProbeNode(bpy.types.Node, SverchCustomTreeNode):
                     batch_ys.append(y)
                     batch_zs.append(z)
                     batch.append((x, y, z))
-                batch_xs = np.array(batch_xs)[np.newaxis][np.newaxis]
-                batch_ys = np.array(batch_ys)[np.newaxis][np.newaxis]
-                batch_zs = np.array(batch_zs)[np.newaxis][np.newaxis]
+                batch_xs = np.array(batch_xs)#[np.newaxis][np.newaxis]
+                batch_ys = np.array(batch_ys)#[np.newaxis][np.newaxis]
+                batch_zs = np.array(batch_zs)#[np.newaxis][np.newaxis]
                 batch = np.array(batch)
 
                 values = field.evaluate_grid(batch_xs, batch_ys, batch_zs)
-                values = values[0][0]
+                #values = values[0][0]
                 good_idxs = values >= threshold
                 if not self.proportional:
                     batch_verts = batch[good_idxs].tolist()
