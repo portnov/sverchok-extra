@@ -80,6 +80,7 @@ if geomdl is not None:
             self.inputs.new('SvStringsSocket', "Knots")
             self.inputs.new('SvStringsSocket', "Degree").prop_name = 'degree'
             self.outputs.new('SvExCurveSocket', "Curve").display_shape = 'DIAMOND'
+            self.outputs.new('SvStringsSocket', "Knots")
             self.update_sockets(context)
 
         def process(self):
@@ -93,6 +94,7 @@ if geomdl is not None:
             degree_s = self.inputs['Degree'].sv_get()
 
             curves_out = []
+            knots_out = []
             for vertices, weights, knots, degree in zip_long_repeat(vertices_s, weights_s, knots_s, degree_s):
                 if isinstance(degree, (tuple, list)):
                     degree = degree[0]
@@ -144,8 +146,10 @@ if geomdl is not None:
                     u_max = max(curve.knotvector)
                     new_curve.u_bounds = (u_min, u_max)
                 curves_out.append(new_curve)
+                knots_out.append(curve.knotvector)
 
             self.outputs['Curve'].sv_set(curves_out)
+            self.outputs['Knots'].sv_set(knots_out)
 
 def register():
     if geomdl is not None:
