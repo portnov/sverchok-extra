@@ -24,6 +24,7 @@ class SvExMergeScalarFieldsNode(bpy.types.Node, SverchCustomTreeNode):
         ('MAX', "Maximum", "Maximal value of all fields", 1),
         ('AVG', "Average", "Average value of all fields", 2),
         ('SUM', "Sum", "Sum value of all fields", 3),
+        ('MINDIFF', "Voronoi", "Voronoi-like: difference between values of two minimal fields in each point", 4)
     ]
 
     mode : EnumProperty(

@@ -22,8 +22,7 @@ class SvExScalarField(object):
         raise Exception("not implemented")
 
 class SvExConstantScalarField(SvExScalarField):
-    def __init__(self, value):
-        self.value = value
+    def __init__(self, value): self.value = value
 
     def evaluate(self, x, y, z):
         return self.value
@@ -164,6 +163,10 @@ class SvExMergedScalarField(SvExScalarField):
         self.mode = mode
         self.fields = fields
 
+    def _minimal_diff(self, array, **kwargs):
+        v1,v2 = np.partition(array, 1, **kwargs)[0:2]
+        return abs(v1 - v2)
+
     def evaluate(self, x, y, z):
         values = np.array([field.evaluate(x, y, z) for field in self.fields])
         if self.mode == 'MIN':
@@ -174,6 +177,8 @@ class SvExMergedScalarField(SvExScalarField):
             value = np.sum(values)
         elif self.mode == 'AVG':
             value = np.mean(values)
+        elif self.mode == 'MINDIFF':
+            value = self._minimal_diff(values)
         else:
             raise Exception("unsupported operation")
         return value
@@ -188,6 +193,8 @@ class SvExMergedScalarField(SvExScalarField):
             value = np.sum(values, axis=0)
         elif self.mode == 'AVG':
             value = np.mean(values, axis=0)
+        elif self.mode == 'MINDIFF':
+            value = self._minimal_diff(values, axis=0)
         else:
             raise Exception("unsupported operation")
         return value
