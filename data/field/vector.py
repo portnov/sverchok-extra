@@ -310,9 +310,10 @@ class SvExKdtVectorField(SvExVectorField):
             return vectors
 
 class SvExVectorFieldPointDistance(SvExVectorField):
-    def __init__(self, center, falloff=None):
+    def __init__(self, center, metric='EUCLIDEAN', falloff=None):
         self.center = center
         self.falloff = falloff
+        self.metric = metric
 
     def evaluate_grid(self, xs, ys, zs):
         x0, y0, z0 = tuple(self.center)
@@ -320,23 +321,36 @@ class SvExVectorFieldPointDistance(SvExVectorField):
         ys = y0 - ys
         zs = z0 - zs
         vectors = np.stack((xs, ys, zs))
-        if self.falloff is not None:
+        if self.metric == 'EUCLIDEAN':
             norms = np.linalg.norm(vectors, axis=0)
+        elif self.metric == 'CHEBYSHEV':
+            norms = np.max(np.abs(vectors), axis=0)
+        elif self.metric == 'MANHATTAN':
+            norms = np.sum(np.abs(vectors), axis=0)
+        else:
+            raise Exception('Unknown metric')
+        if self.falloff is not None:
             lens = self.falloff(norms)
-            R = (lens * vectors)
-            return R[0], R[1], R[2]
+            R = lens * vectors / norms
         else:
             R = vectors
-            return R[0], R[1], R[2]
+        return R[0], R[1], R[2]
 
     def evaluate(self, x, y, z):
-        vector = np.array([x, y, z]) - self.center
-        if self.falloff is not None:
-            norm = np.linalg.norm(vector)
-            value = self.falloff(np.array([norm]))[0]
-            return value * vector / norm
+        point = np.array([x, y, z]) - self.center
+        if self.metric == 'EUCLIDEAN':
+            norm = np.linalg.norm(point)
+        elif self.metric == 'CHEBYSHEV':
+            norm = np.max(point)
+        elif self.metric == 'MANHATTAN':
+            norm = np.sum(np.abs(point))
         else:
-            return vector
+            raise Exception('Unknown metric')
+        if self.falloff is not None:
+            value = self.falloff(np.array([norm]))[0]
+            return value * point / norm
+        else:
+            return point
 
 class SvExLineAttractorVectorField(SvExVectorField):
     def __init__(self, center, direction, falloff=None):

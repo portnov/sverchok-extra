@@ -82,9 +82,10 @@ class SvExScalarFieldLambda(SvExScalarField):
         return self.function(x, y, z, V)
 
 class SvExScalarFieldPointDistance(SvExScalarField):
-    def __init__(self, center, falloff=None):
+    def __init__(self, center, metric='EUCLIDEAN', falloff=None):
         self.center = center
         self.falloff = falloff
+        self.metric = metric
 
     def evaluate_grid(self, xs, ys, zs):
         x0, y0, z0 = tuple(self.center)
@@ -92,7 +93,14 @@ class SvExScalarFieldPointDistance(SvExScalarField):
         ys = ys - y0
         zs = zs - z0
         points = np.stack((xs, ys, zs))
-        norms = np.linalg.norm(points, axis=0)
+        if self.metric == 'EUCLIDEAN':
+            norms = np.linalg.norm(points, axis=0)
+        elif self.metric == 'CHEBYSHEV':
+            norms = np.max(np.abs(points), axis=0)
+        elif self.metric == 'MANHATTAN':
+            norms = np.sum(np.abs(points), axis=0)
+        else:
+            raise Exception('Unknown metric')
         if self.falloff is not None:
             result = self.falloff(norms)
             return result
@@ -100,7 +108,19 @@ class SvExScalarFieldPointDistance(SvExScalarField):
             return norms
 
     def evaluate(self, x, y, z):
-        return np.linalg.norm( np.array([x, y, z]) - self.center)
+        point = np.array([x, y, z]) - self.center
+        if self.metric == 'EUCLIDEAN':
+            norm = np.linalg.norm(point)
+        elif self.metric == 'CHEBYSHEV':
+            norm = np.max(np.abs(point))
+        elif self.metric == 'MANHATTAN':
+            norm = np.sum(np.abs(point))
+        else:
+            raise Exception('Unknown metric')
+        if self.falloff is not None:
+            return self.falloff(np.array([norm]))[0]
+        else:
+            return norm
 
 class SvExScalarFieldBinOp(SvExScalarField):
     def __init__(self, field1, field2, function):
