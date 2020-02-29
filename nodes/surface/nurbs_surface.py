@@ -210,7 +210,7 @@ if geomdl is not None:
                     if self.is_cyclic_u:
                         vertices.extend(vertices[:degree_u+1])
                         weights.extend(weights[:degree_u+1])
-                    self.debug("UxV: ", len(vertices), len(vertices[0]))
+                    self.debug("UxV: %s x %s", len(vertices), len(vertices[0]))
 
                 # Control points
                 if self.surface_mode == 'NURBS':
