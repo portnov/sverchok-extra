@@ -100,6 +100,7 @@ def nodes_index():
                 ("spatial.field_random_probe", "SvExFieldRandomProbeNode")
             ]),
             ("Exchange", [
+                ("exchange.nurbs_in", "SvExNurbsInNode"),
                 ("exchange.import_rw3dm_json", "SvExJsonToNurbsNode"),
                 ("exchange.export_rw3dm_json", "SvExNurbsToJsonNode")
             ])
