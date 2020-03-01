@@ -252,7 +252,7 @@ if geomdl is not None:
                                     face_vert_weights, face_tangent_weights, face_weight,
                                     edge_weights_dict, edge_planes_dict)
                     surface_out.append(surface)
-                    control_points_out.append(ctrlpts)
+                    control_points_out.append(list(map(tuple,ctrlpts)))
                     weights_out.append(weights)
 
             self.outputs['Surfaces'].sv_set(surface_out)
