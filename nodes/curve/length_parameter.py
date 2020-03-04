@@ -124,9 +124,9 @@ class SvExCurveLengthParameterNode(bpy.types.Node, SverchCustomTreeNode):
                 input_lengths = np.array(input_lengths)
 
             spline = self.make_spline(tknots, length_params)
-            ts = self.solve(spline, input_lengths).tolist()
+            ts = self.solve(spline, input_lengths)
 
-            ts_out.append(ts)
+            ts_out.append(ts.tolist())
             if need_eval:
                 verts = curve.evaluate_array(ts).tolist()
                 verts_out.append(verts)
