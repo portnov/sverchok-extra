@@ -105,12 +105,12 @@ class SvExAttractorFieldNode(bpy.types.Node, SverchCustomTreeNode):
     def to_point(self, centers, falloff):
         n = len(centers)
         if n == 1:
-            sfield = SvExScalarFieldPointDistance(centers[0], falloff)
-            vfield = SvExVectorFieldPointDistance(centers[0], falloff)
+            sfield = SvExScalarFieldPointDistance(centers[0], falloff=falloff)
+            vfield = SvExVectorFieldPointDistance(centers[0], falloff=falloff)
         elif self.point_mode == 'AVG':
-            sfields = [SvExScalarFieldPointDistance(center, falloff) for center in centers]
+            sfields = [SvExScalarFieldPointDistance(center, falloff=falloff) for center in centers]
             sfield = SvExMergedScalarField('AVG', sfields)
-            vfields = [SvExVectorFieldPointDistance(center, falloff) for center in centers]
+            vfields = [SvExVectorFieldPointDistance(center, falloff=falloff) for center in centers]
             vfield = SvExAverageVectorField(vfields)
         else: # MIN
             kdt = kdtree.KDTree(len(centers))
@@ -122,13 +122,13 @@ class SvExAttractorFieldNode(bpy.types.Node, SverchCustomTreeNode):
         return vfield, sfield
 
     def to_line(self, center, direction, falloff):
-        sfield = SvExLineAttractorScalarField(np.array(center), np.array(direction), falloff)
-        vfield = SvExLineAttractorVectorField(np.array(center), np.array(direction), falloff)
+        sfield = SvExLineAttractorScalarField(np.array(center), np.array(direction), falloff=falloff)
+        vfield = SvExLineAttractorVectorField(np.array(center), np.array(direction), falloff=falloff)
         return vfield, sfield
 
     def to_plane(self, center, direction, falloff):
-        sfield = SvExPlaneAttractorScalarField(np.array(center), np.array(direction), falloff)
-        vfield = SvExPlaneAttractorVectorField(np.array(center), np.array(direction), falloff)
+        sfield = SvExPlaneAttractorScalarField(np.array(center), np.array(direction), falloff=falloff)
+        vfield = SvExPlaneAttractorVectorField(np.array(center), np.array(direction), falloff=falloff)
         return vfield, sfield
 
     def to_mesh(self, verts, faces, falloff):
