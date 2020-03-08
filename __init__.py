@@ -60,6 +60,7 @@ def nodes_index():
                 ("curve.curve_formula", "SvExCurveFormulaNode"),
                 ("curve.interpolation_curve", "SvExSplineCurveNode"),
                 ("curve.rbf_curve", "SvExRbfCurveNode"),
+                ("curve.catenary_curve", "SvExCatenaryCurveNode"),
                 ("curve.nurbs_curve", "SvExNurbsCurveNode"),
                 ("curve.interpolate_nurbs_curve", "SvExInterpolateNurbsCurveNode"),
                 ("curve.approximate_nurbs_curve", "SvExApproxNurbsCurveNode"),
