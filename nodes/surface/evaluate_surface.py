@@ -156,7 +156,6 @@ class SvExEvalSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
             matrix = surface.get_input_matrix()
             verts = verts - matrix.translation
             np_matrix = np.array(matrix.to_3x3())
-            print(verts.shape)
             verts = np.apply_along_axis(lambda v : np_matrix @ v, 1, verts)
         return verts
 

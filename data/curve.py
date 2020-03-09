@@ -37,7 +37,7 @@ class SvExCurve(object):
 class SvExLine(SvExCurve):
     def __init__(self, point, direction):
         self.point = point
-        self.direction = direction
+        self.direction = np.array(direction)
         self.u_bounds = (0.0, 1.0)
 
     def get_u_bounds(self):

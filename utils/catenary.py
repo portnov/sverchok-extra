@@ -6,7 +6,7 @@ from sverchok_extra.dependencies import scipy
 from sverchok_extra.data.curve import SvExCurve
 from scipy.optimize import root_scalar
 
-class CatenaryFormula(SvExCurve):
+class SvExCatenaryCurve(SvExCurve):
     def __init__(self, A, x0, point1, force, x_direction, x_range):
         self.A = A
         self.x0 = x0
@@ -20,13 +20,15 @@ class CatenaryFormula(SvExCurve):
         return self.A * cosh((x - self.x0) / self.A)
 
     def evaluate(self, t):
-        dx = t * self.x_direction[np.newaxis].T
+        t = t * self.x_range
+        dx = t * self.x_direction#[np.newaxis].T
         y = self.A * np.cosh((t - self.x0) / self.A)
         y1 = self.A * np.cosh((- self.x0) / self.A)
-        dy = - (y-y1) * self.force[np.newaxis].T
+        dy = - (y-y1) * self.force#[np.newaxis].T
         return self.point1 + dx + dy
 
     def evaluate_array(self, ts):
+        ts = ts * self.x_range
         dxs = ts * self.x_direction[np.newaxis].T
         ys = self.A * np.cosh((ts - self.x0) / self.A)
         y1 = self.A * np.cosh((- self.x0) / self.A)
@@ -34,17 +36,19 @@ class CatenaryFormula(SvExCurve):
         return self.point1 + (dxs + dys).T
 
     def tangent(self, t):
+        t = t * self.x_range
         point = self.evaluate(t)
         point_h = self.function(t+self.tangent_delta)
         return (point_h - point) / self.tangent_delta
 
     def tangent_array(self, ts):
+        ts = ts * self.x_range
         points = self.evaluate_array(ts)
         points_h = self.evaluate_array(ts + self.tangent_delta)
         return (points_h - points) / self.tangent_delta
     
     def get_u_bounds(self):
-        return (0.0, self.x_range)
+        return (0.0, 1.0)
 
 class CatenarySolver(object):
     # Equations:
@@ -146,5 +150,5 @@ class CatenarySolver(object):
         x3 = self.dx / 2.0
         x0 = x3 - A * atanh(self.dy / self.length)
         
-        return CatenaryFormula(A, x0, self.point1, self.force, self.x_direction, self.dx)
+        return SvExCatenaryCurve(A, x0, self.point1, self.force, self.x_direction, self.dx)
 
