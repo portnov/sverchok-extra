@@ -6,11 +6,11 @@ from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_
 
 class SvExCurveRangeNode(bpy.types.Node, SverchCustomTreeNode):
     """
-    Triggers: Curve Range
+    Triggers: Curve Domain / Range
     Tooltip: Output minimum and maximum values of T parameter allowed by the curve
     """
     bl_idname = 'SvExCurveRangeNode'
-    bl_label = 'Curve Range'
+    bl_label = 'Curve Domain'
     bl_icon = 'MESH_CIRCLE'
 
     def sv_init(self, context):

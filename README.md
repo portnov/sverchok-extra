@@ -29,17 +29,24 @@ At the moment, this addon includes the following nodes for Sverchok:
 
 * *Curve* category:
   * Straight line curve
+  * Circle (Curve)
   * Formula-defined curve
-  * Interpolation Curve (cubic spline, uses numpy only)
+  * Interpolation Curve (cubic or linear spline, uses numpy only)
   * Minimal (interpolation) Curve (uses [SciPy][4])
+  * Catenary Curve (uses [SciPy][4])
   * NURBS Curve (uses [Geomdl][3] library)
   * NURBS Interpolation Curve (uses Geomdl library)
   * NURBS Approximation Curve (uses Geomdl library)
+  * Circlify (pack a set of circles into another circle) (uses [Circlify][15] library)
   * Apply Vector Field to Curve
+  * Curve Domain
+  * Curve Length (can also calculate length of part of the curve)
+  * Curve Length Parameter
   * Evaluate Curve
   * Marching Squares (uses [Scikit-Image][5] library)
 * *Surface* category:
   * Plane Surface
+  * Sphere Surface (several projections available)
   * Formula-defined Surface
   * Smooth Bivariate Spline (uses [SciPy][4])
   * NURBS Surface (uses Geomdl)
@@ -77,7 +84,11 @@ At the moment, this addon includes the following nodes for Sverchok:
   * Apply vector field
   * Evaluate vector field
   * Evaluate scalar field
+  * Vector Field Graph
+  * Vector Field Lines
+  * Scalar Field Graph
 * *Exchange* category:
+  * NURBS In (input Blender's NURBS curve or surface objects into Sverchok tree)
   * NURBS to JSON (uses Geomdl to represent NURBS surfaces or curves in JSON format which can be converted to Rhino's `3dm` by [rw3dm][12]
   * JSON to NURBS (uses Geomdl to read NURBS surfaces or curves from the same JSON format)
 
@@ -234,4 +245,5 @@ LICENSE: GPL-3.
 [12]: https://github.com/orbingol/rw3dm
 [13]: https://bootstrap.pypa.io/get-pip.py
 [14]: https://pip.pypa.io/en/stable/installing/
+[15]: https://github.com/elmotec/circlify
 
