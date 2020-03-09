@@ -173,6 +173,10 @@ Please refer to [official pip site][14] for official installation instructions.
 
     $ /path/to/blender/2.xx/python/bin/python3.7m -m pip install -U scikit-image
 
+### Install Circlify
+
+    $ /path/to/blender/2.xx/python/bin/python3.7m -m pip install -U circlify
+
 ### Install PyMCubes
 
 This is more complex. First, you have to install [Cython][7]:
