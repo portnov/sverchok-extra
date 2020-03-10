@@ -15,6 +15,34 @@ from sverchok_extra.dependencies import geomdl
 if geomdl is not None:
     from geomdl import operations
 
+def rotate_vector_around_vector_np(v, k, theta):
+    """
+    Rotate vector v around vector k by theta angle.
+    input: v, k - np.array of shape (3,); theta - float, in radians.
+    output: np.array.
+
+    This implements Rodrigues' formula: https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula
+    """
+    if not isinstance(v, np.ndarray):
+        v = np.array(v)
+    if not isinstance(k, np.ndarray):
+        k = np.array(k)
+    if k.ndim == 1:
+        k = k[np.newaxis]
+    k = k / np.linalg.norm(k, axis=1)
+
+    if isinstance(theta, np.ndarray):
+        ct, st = np.cos(theta)[np.newaxis].T, np.sin(theta)[np.newaxis].T
+    else:
+        ct, st = cos(theta), sin(theta)
+
+    s1 = ct * v
+    s2 = st * np.cross(k, v)
+    p1 = 1.0 - ct
+    p2 = np.apply_along_axis(lambda v : k.dot(v), 1, v)
+    s3 = p1 * p2 * k
+    return s1 + s2 + s3
+
 ##################
 #                #
 #  Surfaces      #
@@ -612,6 +640,70 @@ class SvExDeformedByFieldSurface(SvExSurface):
         vxs, vys, vzs = self.field.evaluate_grid(xs, ys, zs)
         vecs = np.stack((vxs, vys, vzs)).T
         return ps + self.coefficient * vecs
+
+    def normal(self, u, v):
+        h = self.normal_delta
+        p = self.evaluate(u, v)
+        p_u = self.evaluate(u+h, v)
+        p_v = self.evaluate(u, v+h)
+        du = (p_u - p) / h
+        dv = (p_v - p) / h
+        normal = np.cross(du, dv)
+        n = np.linalg.norm(normal)
+        normal = normal / n
+        return normal
+
+    def normal_array(self, us, vs):
+        surf_vertices = self.evaluate_array(us, vs)
+        u_plus = self.evaluate_array(us + self.normal_delta, vs)
+        v_plus = self.evaluate_array(us, vs + self.normal_delta)
+        du = u_plus - surf_vertices
+        dv = v_plus - surf_vertices
+        #self.info("Du: %s", du)
+        #self.info("Dv: %s", dv)
+        normal = np.cross(du, dv)
+        norm = np.linalg.norm(normal, axis=1)[np.newaxis].T
+        #if norm != 0:
+        normal = normal / norm
+        #self.info("Normals: %s", normal)
+        return normal
+
+class SvExRevolutionSurface(SvExSurface):
+    def __init__(self, curve, point, direction):
+        self.curve = curve
+        self.point = point
+        self.direction = direction
+
+    def evaluate(self, u, v):
+        point_on_curve = self.curve.evaluate(u)
+        dv = point_on_curve - self.point
+        return rotate_vector_around_vector_np(dv, self.direction, v)
+
+    def evaluate_array(self, us, vs):
+        points_on_curve = self.curve.evaluate_array(us)
+        dvs = points_on_curve - self.point
+        return rotate_vector_around_vector_np(dvs, self.direction, vs)
+
+    def get_u_min(self):
+        return self.curve.get_u_bounds()[0]
+
+    def get_u_max(self):
+        return self.curve.get_u_bounds()[1]
+
+    def get_v_min(self):
+        return 0.0
+
+    def get_v_max(self):
+        return 2*pi
+
+    @property
+    def u_size(self):
+        m,M = self.curve.get_u_bounds()
+        return M - m
+
+    @property
+    def v_size(self):
+        return 2*pi
 
     def normal(self, u, v):
         h = self.normal_delta
