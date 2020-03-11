@@ -48,6 +48,14 @@ class SvExCurve(object):
         v2s = self.evaluate_array(ts+h)
         return (v2s - 2*v1s + v0s) / (h * h)
 
+    def third_derivative_array(self, ts):
+        h = 0.001
+        v0s = self.evaluate_array(ts)
+        v1s = self.evaluate_array(ts+h)
+        v2s = self.evaluate_array(ts+2*h)
+        v3s = self.evaluate_array(ts+3*h)
+        return (- v0s + 3*v1s - 3*v2s + v3s) / (h * h * h)
+
     def main_normal(self, t, normalize=True):
         tangent = self.tangent(t)
         binormal = self.binormal(t, normalize)
@@ -97,6 +105,17 @@ class SvExCurve(object):
         tangents_norm = np.linalg.norm(tangents, axis=1)
         denominator = tangents_norm * tangents_norm * tangents_norm
         return numerator / denominator
+
+    def twist_array(self, ts):
+        tangents = self.tangent_array(ts)
+        seconds = self.second_derivative_array(ts)
+        thirds = self.third_derivative_array(ts)
+        seconds_thirds = np.cross(seconds, thirds)
+        numerator = (tangents * seconds_thirds).sum(axis=1)
+        #numerator = np.apply_along_axis(lambda tangent: tangent.dot(seconds_thirds), 1, tangents)
+        first_second = np.cross(tangents, seconds)
+        denominator = np.linalg.norm(first_second, axis=1)
+        return numerator / (denominator * denominator)
 
     def get_u_bounds(self):
         raise Exception("not implemented!")
