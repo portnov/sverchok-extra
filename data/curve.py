@@ -31,6 +31,50 @@ class SvExCurve(object):
     def tangent_array(self, ts):
         raise Exception("not implemented!")
 
+    def second_derivative(self, t):
+        if hasattr(self, 'tangent_delta'):
+            h = self.tangent_delta
+        else:
+            h = 0.0001
+        v0 = self.evaluate(t-h)
+        v1 = self.evaluate(t)
+        v2 = self.evaluate(t+h)
+        return (v0 - 2*v1 + v2) / (h * h)
+
+    def second_derivative_array(self, ts):
+        if hasattr(self, 'tangent_delta'):
+            h = self.tangent_delta
+        else:
+            h = 0.0001
+        v0s = self.evaluate_array(ts-h)
+        v1s = self.evaluate_array(ts)
+        v2s = self.evaluate_array(ts+h)
+        return (v0s - 2*v1s + v2s) / (h * h)
+
+    def main_normal(self, t):
+        tangent = self.tangent(t)
+        binormal = self.binormal(t)
+        v = np.cross(binormal, tangent)
+        return v / np.linalg.norm(v)
+
+    def binormal(self, t):
+        tangent = self.tangent(t)
+        second = self.second_derivative(t)
+        v = np.cross(tangent, second)
+        return v / np.linalg.norm(v)
+
+    def main_normal_array(self, ts):
+        tangents = self.tangent_array(ts)
+        binormals = self.binormal_array(ts)
+        v = np.cross(binormals, tangents)
+        return v / np.linalg.norm(v, axis=1)
+
+    def binormal_array(self, ts):
+        tangents = self.tangent_array(ts)
+        seconds = self.second_derivative_array(ts)
+        v = np.cross(tangents, seconds)
+        return v / np.linalg.norm(v, axis=1)
+
     def get_u_bounds(self):
         raise Exception("not implemented!")
 
