@@ -35,45 +35,68 @@ class SvExCurve(object):
         if hasattr(self, 'tangent_delta'):
             h = self.tangent_delta
         else:
-            h = 0.0001
+            h = 0.001
         v0 = self.evaluate(t-h)
         v1 = self.evaluate(t)
         v2 = self.evaluate(t+h)
-        return (v0 - 2*v1 + v2) / (h * h)
+        return (v2 - 2*v1 + v0) / (h * h)
 
     def second_derivative_array(self, ts):
-        if hasattr(self, 'tangent_delta'):
-            h = self.tangent_delta
-        else:
-            h = 0.0001
+        h = 0.001
         v0s = self.evaluate_array(ts-h)
         v1s = self.evaluate_array(ts)
         v2s = self.evaluate_array(ts+h)
-        return (v0s - 2*v1s + v2s) / (h * h)
+        return (v2s - 2*v1s + v0s) / (h * h)
 
-    def main_normal(self, t):
+    def main_normal(self, t, normalize=True):
         tangent = self.tangent(t)
-        binormal = self.binormal(t)
+        binormal = self.binormal(t, normalize)
         v = np.cross(binormal, tangent)
-        return v / np.linalg.norm(v)
+        if normalize:
+            v = v / np.linalg.norm(v)
+        return v
 
-    def binormal(self, t):
+    def binormal(self, t, normalize=True):
         tangent = self.tangent(t)
         second = self.second_derivative(t)
         v = np.cross(tangent, second)
-        return v / np.linalg.norm(v)
+        if normalize:
+            v = v / np.linalg.norm(v)
+        return v
 
-    def main_normal_array(self, ts):
+    def main_normal_array(self, ts, normalize=True):
         tangents = self.tangent_array(ts)
-        binormals = self.binormal_array(ts)
+        binormals = self.binormal_array(ts, normalize)
         v = np.cross(binormals, tangents)
-        return v / np.linalg.norm(v, axis=1)
+        if normalize:
+            v = v / np.linalg.norm(v, axis=1)[np.newaxis].T
+        return v
 
-    def binormal_array(self, ts):
+    def binormal_array(self, ts, normalize=True):
         tangents = self.tangent_array(ts)
         seconds = self.second_derivative_array(ts)
         v = np.cross(tangents, seconds)
-        return v / np.linalg.norm(v, axis=1)
+        if normalize:
+            v = v / np.linalg.norm(v, axis=1)[np.newaxis].T
+        return v
+
+    def frame_array(self, ts):
+        normals = self.main_normal_array(ts)
+        binormals = self.binormal_array(ts)
+        tangents = self.tangent_array(ts)
+        tangents = tangents / np.linalg.norm(tangents, axis=1)
+        matrices_np = np.dstack((normals, binormals, tangents))
+        matrices_np = np.transpose(matrices_np, axes=(0,2,1))
+        matrices_np = np.linalg.inv(matrices_np)
+        return matrices_np, normals, binormals
+
+    def curvature_array(self, ts):
+        tangents = self.tangent_array(ts)
+        seconds = self.second_derivative_array(ts)
+        numerator = np.linalg.norm(np.cross(tangents, seconds), axis=1)
+        tangents_norm = np.linalg.norm(tangents, axis=1)
+        denominator = tangents_norm * tangents_norm * tangents_norm
+        return numerator / denominator
 
     def get_u_bounds(self):
         raise Exception("not implemented!")
@@ -130,17 +153,24 @@ class SvExCircle(SvExCurve):
         return np.apply_along_axis(lambda v: self.matrix @ v, 1, vertices) + self.center
 
     def tangent(self, t):
-        x = - sin(t)
-        y = cos(t)
+        x = - self.radius * sin(t)
+        y = self.radius * cos(t)
         z = 0
         return self.matrix @ np.array([x, y, z])
 
     def tangent_array(self, ts):
-        xs = - np.sin(ts)
-        ys = np.cos(ts)
+        xs = - self.radius * np.sin(ts)
+        ys = self.radius * np.cos(ts)
         zs = np.zeros_like(xs)
         vectors = np.stack((xs, ys, zs)).T
         return np.apply_along_axis(lambda v: self.matrix @ v, 1, vectors)
+
+#     def second_derivative_array(self, ts):
+#         xs = - np.cos(ts)
+#         ys = - np.sin(ts)
+#         zs = np.zeros_like(xs)
+#         vectors = np.stack((xs, ys, zs)).T
+#         return np.apply_along_axis(lambda v: self.matrix @ v, 1, vectors)
 
 class SvExLambdaCurve(SvExCurve):
     def __init__(self, function):

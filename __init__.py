@@ -70,6 +70,7 @@ def nodes_index():
                 ("curve.curve_range", "SvExCurveRangeNode"),
                 ("curve.curve_length", "SvExCurveLengthNode"),
                 ("curve.curve_frame", "SvExCurveFrameNode"),
+                ("curve.curvature", "SvExCurveCurvatureNode"),
                 ("curve.length_parameter", "SvExCurveLengthParameterNode"),
                 ("curve.eval_curve", "SvExEvalCurveNode"),
                 ("curve.marching_squares", "SvExMarchingSquaresNode")

@@ -37,13 +37,7 @@ class SvExCurveFrameNode(bpy.types.Node, SverchCustomTreeNode):
                 ts = np.array(ts)
 
                 verts = curve.evaluate_array(ts)
-                normals = curve.main_normal_array(ts)
-                binormals = curve.binormal_array(ts)
-                tangents = curve.tangent_array(ts)
-                tangents = tangents / np.linalg.norm(tangents, axis=1)
-                matrices_np = np.dstack((normals, binormals, tangents))
-                matrices_np = np.transpose(matrices_np, axes=(0,2,1))
-                matrices_np = np.linalg.inv(matrices_np)
+                matrices_np, normals, binormals = curve.frame_array(ts)
                 new_matrices = []
                 for matrix_np, point in zip(matrices_np, verts):
                     matrix = Matrix(matrix_np.tolist()).to_4x4()
