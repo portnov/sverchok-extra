@@ -84,7 +84,7 @@ class SvExCurve(object):
         normals = self.main_normal_array(ts)
         binormals = self.binormal_array(ts)
         tangents = self.tangent_array(ts)
-        tangents = tangents / np.linalg.norm(tangents, axis=1)
+        tangents = tangents / np.linalg.norm(tangents, axis=1)[np.newaxis].T
         matrices_np = np.dstack((normals, binormals, tangents))
         matrices_np = np.transpose(matrices_np, axes=(0,2,1))
         matrices_np = np.linalg.inv(matrices_np)
