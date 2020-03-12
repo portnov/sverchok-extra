@@ -72,6 +72,7 @@ def nodes_index():
                 ("curve.curve_frame", "SvExCurveFrameNode"),
                 ("curve.curvature", "SvExCurveCurvatureNode"),
                 ("curve.torsion", "SvExCurveTorsionNode"),
+                ("curve.zero_twist_frame", "SvExCurveZeroTwistFrameNode"),
                 ("curve.length_parameter", "SvExCurveLengthParameterNode"),
                 ("curve.eval_curve", "SvExEvalCurveNode"),
                 ("curve.marching_squares", "SvExMarchingSquaresNode")

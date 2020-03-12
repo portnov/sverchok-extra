@@ -10,7 +10,7 @@ from sverchok.data_structure import updateNode, zip_long_repeat, fullList
 class SvExCurveFrameNode(bpy.types.Node, SverchCustomTreeNode):
         """
         Triggers: Curve Frame
-        Tooltip: Calculate frame matrix at any point of the curve
+        Tooltip: Calculate (Frenet) frame matrix at any point of the curve
         """
         bl_idname = 'SvExCurveFrameNode'
         bl_label = 'Curve Frame'

@@ -106,7 +106,7 @@ class SvExCurve(object):
         denominator = tangents_norm * tangents_norm * tangents_norm
         return numerator / denominator
 
-    def twist_array(self, ts):
+    def torsion_array(self, ts):
         tangents = self.tangent_array(ts)
         seconds = self.second_derivative_array(ts)
         thirds = self.third_derivative_array(ts)
@@ -226,16 +226,36 @@ class SvExGeomdlCurve(SvExCurve):
         return np.array(v)
 
     def evaluate_array(self, ts):
+        t_min, t_max = self.get_u_bounds()
+        ts[ts < t_min] = t_min
+        ts[ts > t_max] = t_max
         vs = self.curve.evaluate_list(list(ts))
         return np.array(vs)
 
     def tangent(self, t):
-        v = self.curve.tangent(t)
+        v = self.curve.tangent(t, normalize=False)
         return np.array(v)
 
     def tangent_array(self, ts):
-        vs = self.curve.tangent(list(ts))
+        t_min, t_max = self.get_u_bounds()
+        ts[ts < t_min] = t_min
+        ts[ts > t_max] = t_max
+        vs = self.curve.tangent(list(ts), normalize=False)
         return np.array([t[1] for t in vs])
+
+    def second_derivative(self, t):
+        p, first, second = self.curve.derivatives(t, order=2)
+        return np.array(second)
+
+    def second_derivative_array(self, ts):
+        return np.vectorize(self.second_derivative, signature='()->(3)')(ts)
+
+    def third_derivative(self, t):
+        p, first, second, third = self.curve.derivatives(t, order=3)
+        return np.array(third)
+
+    def third_derivative_array(self, ts):
+        return np.vectorize(self.third_derivative, signature='()->(3)')(ts)
 
     def get_u_bounds(self):
         return self.u_bounds

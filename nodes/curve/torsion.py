@@ -28,13 +28,13 @@ class SvExCurveTorsionNode(bpy.types.Node, SverchCustomTreeNode):
             curve_s = self.inputs['Curve'].sv_get()
             ts_s = self.inputs['T'].sv_get()
 
-            twist_out = []
+            torsion_out = []
             for curve, ts in zip_long_repeat(curve_s, ts_s):
                 ts = np.array(ts)
-                twists = curve.twist_array(ts)
-                twist_out.append(twists.tolist())
+                torsions = curve.torsion_array(ts)
+                torsion_out.append(torsions.tolist())
 
-            self.outputs['Torsion'].sv_set(twist_out)
+            self.outputs['Torsion'].sv_set(torsion_out)
 
 def register():
     bpy.utils.register_class(SvExCurveTorsionNode)
