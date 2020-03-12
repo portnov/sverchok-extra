@@ -57,10 +57,31 @@ class SvExSurface(object):
         raise Exception("not implemented!")
 
     def normal(self, u, v):
-        raise Exception("not implemented!")
+        h = self.normal_delta
+        p = self.evaluate(u, v)
+        p_u = self.evaluate(u+h, v)
+        p_v = self.evaluate(u, v+h)
+        du = (p_u - p) / h
+        dv = (p_v - p) / h
+        normal = np.cross(du, dv)
+        n = np.linalg.norm(normal)
+        normal = normal / n
+        return normal
 
     def normal_array(self, us, vs):
-        raise Exception("not implemented!")
+        surf_vertices = self.evaluate_array(us, vs)
+        u_plus = self.evaluate_array(us + self.normal_delta, vs)
+        v_plus = self.evaluate_array(us, vs + self.normal_delta)
+        du = u_plus - surf_vertices
+        dv = v_plus - surf_vertices
+        #self.info("Du: %s", du)
+        #self.info("Dv: %s", dv)
+        normal = np.cross(du, dv)
+        norm = np.linalg.norm(normal, axis=1)[np.newaxis].T
+        #if norm != 0:
+        normal = normal / norm
+        #self.info("Normals: %s", normal)
+        return normal
 
     def get_coord_mode(self):
         return 'UV'
@@ -673,6 +694,7 @@ class SvExRevolutionSurface(SvExSurface):
         self.curve = curve
         self.point = point
         self.direction = direction
+        self.normal_delta = 0.001
 
     def evaluate(self, u, v):
         point_on_curve = self.curve.evaluate(u)
@@ -705,32 +727,40 @@ class SvExRevolutionSurface(SvExSurface):
     def v_size(self):
         return 2*pi
 
-    def normal(self, u, v):
-        h = self.normal_delta
-        p = self.evaluate(u, v)
-        p_u = self.evaluate(u+h, v)
-        p_v = self.evaluate(u, v+h)
-        du = (p_u - p) / h
-        dv = (p_v - p) / h
-        normal = np.cross(du, dv)
-        n = np.linalg.norm(normal)
-        normal = normal / n
-        return normal
+class SvExExtrudeCurveVectorSurface(SvExSurface):
+    def __init__(self, curve, vector):
+        self.curve = curve
+        self.vector = vector
+        self.normal_delta = 0.001
 
-    def normal_array(self, us, vs):
-        surf_vertices = self.evaluate_array(us, vs)
-        u_plus = self.evaluate_array(us + self.normal_delta, vs)
-        v_plus = self.evaluate_array(us, vs + self.normal_delta)
-        du = u_plus - surf_vertices
-        dv = v_plus - surf_vertices
-        #self.info("Du: %s", du)
-        #self.info("Dv: %s", dv)
-        normal = np.cross(du, dv)
-        norm = np.linalg.norm(normal, axis=1)[np.newaxis].T
-        #if norm != 0:
-        normal = normal / norm
-        #self.info("Normals: %s", normal)
-        return normal
+    def evaluate(self, u, v):
+        point_on_curve = self.curve.evaluate(u)
+        return point_on_curve + v * self.vector
+
+    def evaluate_array(self, us, vs):
+        points_on_curve = self.curve.evaluate_array(us)
+        return points_on_curve + vs[np.newaxis].T * self.vector
+
+    def get_u_min(self):
+        return self.curve.get_u_bounds()[0]
+
+    def get_u_max(self):
+        return self.curve.get_u_bounds()[1]
+
+    def get_v_min(self):
+        return 0.0
+
+    def get_v_max(self):
+        return 1.0
+
+    @property
+    def u_size(self):
+        m,M = self.curve.get_u_bounds()
+        return M - m
+
+    @property
+    def v_size(self):
+        return 1.0
 
 def register():
     pass
