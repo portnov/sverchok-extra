@@ -762,6 +762,48 @@ class SvExExtrudeCurveVectorSurface(SvExSurface):
     def v_size(self):
         return 1.0
 
+class SvExExtrudeCurveCurveSurface(SvExSurface):
+    def __init__(self, u_curve, v_curve):
+        self.u_curve = u_curve
+        self.v_curve = v_curve
+        self.normal_delta = 0.001
+
+    def evaluate(self, u, v):
+        u_point = self.u_curve.evaluate(u)
+        v_min, v_max = self.v_curve.get_u_bounds()
+        v0 = self.v_curve.evaluate(v_min)
+        v_point = self.v_curve.evaluate(v)
+        return u_point + (v_point - v0)
+
+    def evaluate_array(self, us, vs):
+        u_points = self.u_curve.evaluate_array(us)
+        v_min, v_max = self.v_curve.get_u_bounds()
+        v0 = self.v_curve.evaluate(v_min)
+        v_points = self.v_curve.evaluate_array(vs)
+        return u_points + (v_points - v0)
+
+    def get_u_min(self):
+        return self.u_curve.get_u_bounds()[0]
+
+    def get_u_max(self):
+        return self.u_curve.get_u_bounds()[1]
+
+    def get_v_min(self):
+        return self.v_curve.get_u_bounds()[0]
+
+    def get_v_max(self):
+        return self.v_curve.get_u_bounds()[1]
+
+    @property
+    def u_size(self):
+        m,M = self.u_curve.get_u_bounds()
+        return M - m
+
+    @property
+    def v_size(self):
+        m,M = self.v_curve.get_u_bounds()
+        return M - m
+
 def register():
     pass
 
