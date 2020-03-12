@@ -77,7 +77,9 @@ class SvExCurve(object):
         binormals = self.binormal_array(ts, normalize)
         v = np.cross(binormals, tangents)
         if normalize:
-            v = v / np.linalg.norm(v, axis=1)[np.newaxis].T
+            norms = np.linalg.norm(v, axis=1, keepdims=True)
+            nonzero = (norms > 0)[:,0]
+            v[nonzero] = v[nonzero] / norms[nonzero][:,0][np.newaxis].T
         return v
 
     def binormal_array(self, ts, normalize=True):
@@ -85,7 +87,9 @@ class SvExCurve(object):
         seconds = self.second_derivative_array(ts)
         v = np.cross(tangents, seconds)
         if normalize:
-            v = v / np.linalg.norm(v, axis=1)[np.newaxis].T
+            norms = np.linalg.norm(v, axis=1, keepdims=True)
+            nonzero = (norms > 0)[:,0]
+            v[nonzero] = v[nonzero] / norms[nonzero][:,0][np.newaxis].T
         return v
 
     def frame_array(self, ts):
