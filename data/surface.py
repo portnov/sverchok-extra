@@ -880,7 +880,6 @@ class SvExExtrudeCurveZeroTwistSurface(SvExSurface):
         row2 = np.stack((-np.sin(angles), np.cos(angles), zeros)).T # (n, 3)
         row3 = np.stack((zeros, zeros, ones)).T # (n, 3)
         rotation_matrices = np.dstack((row1, row2, row3))
-        #print("S:", rotation_matrices)
 
         profile_vectors = (frenet @ rotation_matrices @ profile_vectors)[:,:,0]
         return extrusion_vectors + profile_vectors
@@ -906,6 +905,48 @@ class SvExExtrudeCurveZeroTwistSurface(SvExSurface):
     def v_size(self):
         m,M = self.extrusion.get_u_bounds()
         return M - m
+
+class SvExCurveLerpSurface(SvExSurface):
+    def __init__(self, curve1, curve2):
+        self.curve1 = curve1
+        self.curve2 = curve2
+        self.normal_delta = 0.001
+        self.v_bounds = (0.0, 1.0)
+        self.u_bounds = (0.0, 1.0)
+        self.c1_min, self.c1_max = curve1.get_u_bounds()
+        self.c2_min, self.c2_max = curve2.get_u_bounds()
+
+    def evaluate(self, u, v):
+        return self.evaluate_array(np.array([u]), np.array([v]))[0]
+
+    def evaluate_array(self, us, vs):
+        us1 = (self.c1_max - self.c1_min) * us + self.c1_min
+        us2 = (self.c2_max - self.c2_min) * us + self.c2_min
+        c1_points = self.curve1.evaluate_array(us1)
+        c2_points = self.curve2.evaluate_array(us2)
+        vs = vs[np.newaxis].T
+        return (1.0 - vs) * c1_points + vs * c2_points
+
+    def get_u_min(self):
+        return self.u_bounds[0]
+
+    def get_u_max(self):
+        return self.u_bounds[1]
+
+    def get_v_min(self):
+        return self.v_bounds[0]
+
+    def get_v_max(self):
+        return self.v_bounds[1]
+
+    @property
+    def u_size(self):
+        return self.u_bounds[1] - self.u_bounds[0]
+
+    @property
+    def v_size(self):
+        return self.v_bounds[1] - self.v_bounds[0]
+
 
 def register():
     pass
