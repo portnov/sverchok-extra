@@ -6,6 +6,8 @@ from mathutils import noise
 from mathutils import kdtree
 from mathutils import bvhtree
 
+from sverchok_extra.utils.integrate import TrapezoidIntegral
+
 ##################
 #                #
 #  Curves        #
@@ -120,6 +122,20 @@ class SvExCurve(object):
         first_second = np.cross(tangents, seconds)
         denominator = np.linalg.norm(first_second, axis=1)
         return numerator / (denominator * denominator)
+
+    def pre_calc_torsion_integral(self, resolution):
+        t_min, t_max = self.get_u_bounds()
+        ts = np.linspace(t_min, t_max, resolution)
+        vectors = self.evaluate_array(ts)
+        dvs = vectors[1:] - vectors[:-1]
+        lengths = np.linalg.norm(dvs, axis=1)
+        xs = np.insert(np.cumsum(lengths), 0, 0)
+        ys = self.torsion_array(ts)
+        self._torsion_integral = TrapezoidIntegral(ts, xs, ys)
+        self._torsion_integral.calc()
+
+    def torsion_integral(self, ts):
+        return self._torsion_integral.evaluate_cubic(ts)
 
     def get_u_bounds(self):
         raise Exception("not implemented!")

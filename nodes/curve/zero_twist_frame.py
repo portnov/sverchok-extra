@@ -16,8 +16,14 @@ class SvExCurveZeroTwistFrameNode(bpy.types.Node, SverchCustomTreeNode):
         bl_label = 'Curve Zero-Twist Frame'
         bl_icon = 'CURVE_NCURVE'
 
+        resolution : IntProperty(
+            name = "Resolution",
+            min = 10, default = 50,
+            update = updateNode)
+
         def sv_init(self, context):
             self.inputs.new('SvExCurveSocket', "Curve").display_shape = 'DIAMOND'
+            self.inputs.new('SvStringsSocket', "Resolution").prop_name = 'resolution'
             self.inputs.new('SvStringsSocket', "T")
             self.outputs.new('SvStringsSocket', "CumulativeTorsion")
             self.outputs.new('SvMatrixSocket', 'Matrix')
@@ -28,21 +34,21 @@ class SvExCurveZeroTwistFrameNode(bpy.types.Node, SverchCustomTreeNode):
 
             curve_s = self.inputs['Curve'].sv_get()
             ts_s = self.inputs['T'].sv_get()
+            resolution_s = self.inputs['Resolution'].sv_get()
 
             torsion_out = []
             matrix_out = []
-            for curve, ts in zip_long_repeat(curve_s, ts_s):
+            for curve, resolution, ts in zip_long_repeat(curve_s, resolution_s, ts_s):
+                if isinstance(resolution, (list, tuple)):
+                    resolution = resolution[0]
+                    
                 ts = np.array(ts)
 
                 vectors = curve.evaluate_array(ts)
-                torsions = curve.torsion_array(ts)
                 matrices_np, normals, binormals = curve.frame_array(ts)
 
-                dvs = vectors[1:] - vectors[:-1]
-                lengths = np.linalg.norm(dvs, axis=1)
-                lengths = np.insert(lengths, 0, 0)
-                summands = lengths * torsions
-                integral = np.cumsum(np.insert(summands, 0, 0))
+                curve.pre_calc_torsion_integral(resolution)
+                integral = curve.torsion_integral(ts)
 
                 new_matrices = []
                 for matrix_np, point, angle in zip(matrices_np, vectors, integral):
