@@ -643,7 +643,7 @@ class SvExVectorFieldRotor(SvExVectorField):
         return R[0], R[1], R[2]
 
 class SvExBendAlongCurveField(SvExVectorField):
-    def __init__(self, curve, algorithm, scale_all, axis, t_min, t_max, up_axis=None):
+    def __init__(self, curve, algorithm, scale_all, axis, t_min, t_max, up_axis=None, resolution=50):
         self.curve = curve
         self.axis = axis
         self.t_min = t_min
@@ -651,6 +651,8 @@ class SvExBendAlongCurveField(SvExVectorField):
         self.algorithm = algorithm
         self.scale_all = scale_all
         self.up_axis = up_axis
+        if algorithm == 'ZERO':
+            self.curve.pre_calc_torsion_integral(resolution)
 
     def get_matrix(self, tangent, scale):
         x = Vector((1.0, 0.0, 0.0))
@@ -684,6 +686,35 @@ class SvExBendAlongCurveField(SvExVectorField):
 
         return np.matmul(rot, scale_matrix)
 
+    def get_matrices(self, ts, scale):
+        frenet, _ , _ = self.curve.frame_array(ts)
+        if self.scale_all:
+            scale_matrix = np.array([
+                [1/scale, 0, 0],
+                [0, scale, 0],
+                [0, 0, scale]
+            ])
+        else:
+            scale_matrix = np.array([
+                [1/scale, 0, 0],
+                [0, 1, 0],
+                [0, 0, 1]
+            ])
+        n = len(ts)
+        if self.algorithm == 'FRENET':
+            return frenet @ scale_matrix
+        elif self.algorithm == 'ZERO':
+            angles = - self.curve.torsion_integral(ts)
+            zeros = np.zeros((n,))
+            ones = np.ones((n,))
+            row1 = np.stack((np.cos(angles), np.sin(angles), zeros)).T # (n, 3)
+            row2 = np.stack((-np.sin(angles), np.cos(angles), zeros)).T # (n, 3)
+            row3 = np.stack((zeros, zeros, ones)).T # (n, 3)
+            rotation_matrices = np.dstack((row1, row2, row3))
+            return frenet @ rotation_matrices @ scale_matrix
+        else:
+            raise Exception("Unsupported algorithm")
+
     def get_t_value(self, x, y, z):
         curve_t_min, curve_t_max = self.curve.get_u_bounds()
         t = [x, y, z][self.axis]
@@ -705,7 +736,10 @@ class SvExBendAlongCurveField(SvExVectorField):
         spline_tangent = self.curve.tangent(t)
         spline_vertex = self.curve.evaluate(t)
         scale = self.get_scale()
-        matrix = self.get_matrix(spline_tangent, scale)
+        if self.algorithm in {'ZERO', 'FRENET'}:
+            matrix = self.get_matrices(np.array([t]), scale)
+        else:
+            matrix = self.get_matrix(spline_tangent, scale)
         src_vector_projection = np.array([x, y, z])
         src_vector_projection[self.axis] = 0
         new_vertex = np.matmul(matrix, src_vertex_projection) + spline_vertex
@@ -717,7 +751,10 @@ class SvExBendAlongCurveField(SvExVectorField):
         spline_tangents = self.curve.tangent_array(ts)
         spline_vertices = self.curve.evaluate_array(ts)
         scale = self.get_scale()
-        matrices = np.vectorize(lambda t : self.get_matrix(t, scale), signature='(3)->(3,3)')(spline_tangents)
+        if self.algorithm in {'ZERO', 'FRENET'}:
+            matrices = self.get_matrices(ts, scale)
+        else:
+            matrices = np.vectorize(lambda t : self.get_matrix(t, scale), signature='(3)->(3,3)')(spline_tangents)
         src_vectors = np.stack((xs, ys, zs)).T
         src_vector_projections = src_vectors.copy()
         src_vector_projections[:,self.axis] = 0

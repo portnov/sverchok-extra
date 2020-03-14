@@ -23,12 +23,21 @@ class SvExBendAlongCurveFieldNode(bpy.types.Node, SverchCustomTreeNode):
     algorithms = [
             ("householder", "Householder", "Use Householder reflection matrix", 1),
             ("track", "Tracking", "Use quaternion-based tracking", 2),
-            ("diff", "Rotation difference", "Use rotational difference calculation", 3)
+            ("diff", "Rotation difference", "Use rotational difference calculation", 3),
+            ('FRENET', "Frenet", "Use Frenet frames", 4),
+            ('ZERO', "Zero-Twist", "Use zero-twist frames", 5)
         ]
+
+    @throttled
+    def update_sockets(self, context):
+        self.inputs['Resolution'].hide_safe = self.algorithm != 'ZERO'
+        if self.algorithm in {'ZERO', 'FRENET'}:
+            self.orient_axis_ = 'Z'
 
     algorithm: EnumProperty(
         name="Algorithm", description="Rotation calculation algorithm",
-        default="householder", items=algorithms, update=updateNode)
+        default="householder", items=algorithms,
+        update=update_sockets)
 
     axes = [
             ("X", "X", "X axis", 1),
@@ -70,15 +79,24 @@ class SvExBendAlongCurveFieldNode(bpy.types.Node, SverchCustomTreeNode):
         name="Scale all axes", description="Scale objects along all axes or only along orientation axis",
         default=True, update=updateNode)
 
+    resolution : IntProperty(
+        name = "Resolution",
+        min = 10, default = 50,
+        update = updateNode)
+
     def sv_init(self, context):
         self.inputs.new('SvExCurveSocket', 'Curve').display_shape = 'DIAMOND'
         self.inputs.new('SvStringsSocket', 'TMin').prop_name = 't_min'
         self.inputs.new('SvStringsSocket', 'TMax').prop_name = 't_max'
+        self.inputs.new('SvStringsSocket', "Resolution").prop_name = 'resolution'
         self.outputs.new('SvExVectorFieldSocket', 'Field')
+        self.update_sockets(context)
 
     def draw_buttons(self, context, layout):
         layout.label(text="Orientation:")
-        layout.prop(self, "orient_axis_", expand=True)
+        row = layout.row()
+        row.prop(self, "orient_axis_", expand=True)
+        row.enabled = self.algorithm not in {'ZERO', 'FRENET'}
 
         col = layout.column(align=True)
         col.prop(self, "scale_all", toggle=True)
@@ -93,16 +111,21 @@ class SvExBendAlongCurveFieldNode(bpy.types.Node, SverchCustomTreeNode):
         curves_s = self.inputs['Curve'].sv_get()
         t_min_s = self.inputs['TMin'].sv_get()
         t_max_s = self.inputs['TMax'].sv_get()
+        resolution_s = self.inputs['Resolution'].sv_get()
 
         fields_out = []
-        for curve, t_min, t_max in zip_long_repeat(curves_s, t_min_s, t_max_s):
+        for curve, t_min, t_max, resolution in zip_long_repeat(curves_s, t_min_s, t_max_s, resolution_s):
             if isinstance(t_min, (list, int)):
                 t_min = t_min[0]
             if isinstance(t_max, (list, int)):
                 t_max = t_max[0]
+            if isinstance(resolution, (list, int)):
+                resolution = resolution[0]
 
             field = SvExBendAlongCurveField(curve, self.algorithm, self.scale_all,
-                        self.orient_axis, t_min, t_max, self.up_axis)
+                        self.orient_axis, t_min, t_max,
+                        up_axis = self.up_axis,
+                        resolution = resolution)
             fields_out.append(field)
 
         self.outputs['Field'].sv_set(fields_out)

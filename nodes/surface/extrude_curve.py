@@ -49,6 +49,7 @@ class SvExExtrudeCurveCurveSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
         self.inputs.new('SvExCurveSocket', "Extrusion").display_shape = 'DIAMOND'
         self.inputs.new('SvStringsSocket', "Resolution").prop_name = 'resolution'
         self.outputs.new('SvExSurfaceSocket', "Surface").display_shape = 'DIAMOND'
+        self.update_sockets(context)
 
     def process(self):
         if not any(socket.is_linked for socket in self.outputs):
