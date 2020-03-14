@@ -690,15 +690,15 @@ class SvExBendAlongCurveField(SvExVectorField):
         frenet, _ , _ = self.curve.frame_array(ts)
         if self.scale_all:
             scale_matrix = np.array([
-                [1/scale, 0, 0],
+                [scale, 0, 0],
                 [0, scale, 0],
-                [0, 0, scale]
+                [0, 0, 1/scale]
             ])
         else:
             scale_matrix = np.array([
-                [1/scale, 0, 0],
+                [1, 0, 0],
                 [0, 1, 0],
-                [0, 0, 1]
+                [0, 0, 1/scale]
             ])
         n = len(ts)
         if self.algorithm == 'FRENET':
