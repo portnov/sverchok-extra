@@ -822,7 +822,7 @@ class SvExExtrudeCurveFrenetSurface(SvExSurface):
         profile_vectors = np.transpose(profile_vectors[np.newaxis], axes=(1, 2, 0))
         extrusion_start = self.extrusion.evaluate(v_min)
         extrusion_points = self.extrusion.evaluate_array(vs)
-        extrusion_vectors = extrusion_points # - extrusion_start
+        extrusion_vectors = extrusion_points - extrusion_start
         frenet, _ , _ = self.extrusion.frame_array(vs)
         profile_vectors = (frenet @ profile_vectors)[:,:,0]
         return extrusion_vectors + profile_vectors
