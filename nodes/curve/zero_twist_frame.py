@@ -54,6 +54,7 @@ class SvExCurveZeroTwistFrameNode(bpy.types.Node, SverchCustomTreeNode):
                 for matrix_np, point, angle in zip(matrices_np, vectors, integral):
                     frenet_matrix = Matrix(matrix_np.tolist()).to_4x4()
                     rotation_matrix = Matrix.Rotation(-angle, 4, 'Z')
+                    #print("Z:", rotation_matrix)
                     matrix = frenet_matrix @ rotation_matrix
                     matrix.translation = Vector(point)
                     new_matrices.append(matrix)

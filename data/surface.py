@@ -804,6 +804,109 @@ class SvExExtrudeCurveCurveSurface(SvExSurface):
         m,M = self.v_curve.get_u_bounds()
         return M - m
 
+class SvExExtrudeCurveFrenetSurface(SvExSurface):
+    def __init__(self, profile, extrusion):
+        self.profile = profile
+        self.extrusion = extrusion
+        self.normal_delta = 0.001
+
+    def evaluate(self, u, v):
+        return self.evaluate_array(np.array([u]), np.array([v]))[0]
+
+    def evaluate_array(self, us, vs):
+        profile_points = self.profile.evaluate_array(us)
+        u_min, u_max = self.profile.get_u_bounds()
+        v_min, v_max = self.extrusion.get_u_bounds()
+        profile_start = self.extrusion.evaluate(u_min)
+        profile_vectors = profile_points # - profile_start
+        profile_vectors = np.transpose(profile_vectors[np.newaxis], axes=(1, 2, 0))
+        extrusion_start = self.extrusion.evaluate(v_min)
+        extrusion_points = self.extrusion.evaluate_array(vs)
+        extrusion_vectors = extrusion_points # - extrusion_start
+        frenet, _ , _ = self.extrusion.frame_array(vs)
+        profile_vectors = (frenet @ profile_vectors)[:,:,0]
+        return extrusion_vectors + profile_vectors
+
+    def get_u_min(self):
+        return self.profile.get_u_bounds()[0]
+
+    def get_u_max(self):
+        return self.profile.get_u_bounds()[1]
+
+    def get_v_min(self):
+        return self.extrusion.get_u_bounds()[0]
+
+    def get_v_max(self):
+        return self.extrusion.get_u_bounds()[1]
+
+    @property
+    def u_size(self):
+        m,M = self.profile.get_u_bounds()
+        return M - m
+
+    @property
+    def v_size(self):
+        m,M = self.extrusion.get_u_bounds()
+        return M - m
+
+class SvExExtrudeCurveZeroTwistSurface(SvExSurface):
+    def __init__(self, profile, extrusion, resolution):
+        self.profile = profile
+        self.extrusion = extrusion
+        self.normal_delta = 0.001
+        self.extrusion.pre_calc_torsion_integral(resolution)
+
+    def evaluate(self, u, v):
+        return self.evaluate_array(np.array([u]), np.array([v]))[0]
+
+    def evaluate_array(self, us, vs):
+        profile_points = self.profile.evaluate_array(us)
+        u_min, u_max = self.profile.get_u_bounds()
+        v_min, v_max = self.extrusion.get_u_bounds()
+        profile_start = self.extrusion.evaluate(u_min)
+        profile_vectors = profile_points # - profile_start
+        profile_vectors = np.transpose(profile_vectors[np.newaxis], axes=(1, 2, 0))
+        extrusion_start = self.extrusion.evaluate(v_min)
+        extrusion_points = self.extrusion.evaluate_array(vs)
+        extrusion_vectors = extrusion_points - extrusion_start
+
+        frenet, _ , _ = self.extrusion.frame_array(vs)
+
+        angles = - self.extrusion.torsion_integral(vs)
+        n = len(us)
+        zeros = np.zeros((n,))
+        ones = np.ones((n,))
+        row1 = np.stack((np.cos(angles), np.sin(angles), zeros)).T # (n, 3)
+        row2 = np.stack((-np.sin(angles), np.cos(angles), zeros)).T # (n, 3)
+        row3 = np.stack((zeros, zeros, ones)).T # (n, 3)
+        rotation_matrices = np.dstack((row1, row2, row3))
+        #print("S:", rotation_matrices)
+
+        profile_vectors = (frenet @ rotation_matrices @ profile_vectors)[:,:,0]
+        return extrusion_vectors + profile_vectors
+
+    def get_u_min(self):
+        return self.profile.get_u_bounds()[0]
+
+    def get_u_max(self):
+        return self.profile.get_u_bounds()[1]
+
+    def get_v_min(self):
+        return self.extrusion.get_u_bounds()[0]
+
+    def get_v_max(self):
+        return self.extrusion.get_u_bounds()[1]
+
+    @property
+    def u_size(self):
+        m,M = self.profile.get_u_bounds()
+        return M - m
+
+    @property
+    def v_size(self):
+        m,M = self.extrusion.get_u_bounds()
+        return M - m
+
 def register():
     pass
 

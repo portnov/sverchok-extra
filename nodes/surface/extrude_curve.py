@@ -9,7 +9,7 @@ from sverchok.data_structure import updateNode, zip_long_repeat, fullList, ensur
 from sverchok.utils.logging import info, exception
 
 from sverchok_extra.data.curve import SvExCurve
-from sverchok_extra.data.surface import SvExExtrudeCurveCurveSurface
+from sverchok_extra.data.surface import SvExExtrudeCurveCurveSurface, SvExExtrudeCurveFrenetSurface, SvExExtrudeCurveZeroTwistSurface
 
 class SvExExtrudeCurveCurveSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
     """
@@ -20,9 +20,34 @@ class SvExExtrudeCurveCurveSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
     bl_label = 'Extrude Curve Along Curve'
     bl_icon = 'MOD_THICKNESS'
 
+    modes = [
+        ('NONE', "None", "No rotation", 0),
+        ('FRENET', "Frenet", "Frenet / native rotation", 1),
+        ('ZERO', "Zero-twist", "Zero-twist rotation", 2)
+    ]
+
+    @throttled
+    def update_sockets(self, context):
+        self.inputs['Resolution'].hide_safe = self.algorithm != 'ZERO'
+
+    algorithm : EnumProperty(
+            name = "Algorithm",
+            items = modes,
+            default = 'NONE',
+            update = update_sockets)
+
+    resolution : IntProperty(
+        name = "Resolution",
+        min = 10, default = 50,
+        update = updateNode)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "algorithm")
+
     def sv_init(self, context):
         self.inputs.new('SvExCurveSocket', "Profile").display_shape = 'DIAMOND'
         self.inputs.new('SvExCurveSocket', "Extrusion").display_shape = 'DIAMOND'
+        self.inputs.new('SvStringsSocket', "Resolution").prop_name = 'resolution'
         self.outputs.new('SvExSurfaceSocket', "Surface").display_shape = 'DIAMOND'
 
     def process(self):
@@ -31,6 +56,7 @@ class SvExExtrudeCurveCurveSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
 
         profile_s = self.inputs['Profile'].sv_get()
         extrusion_s = self.inputs['Extrusion'].sv_get()
+        resolution_s = self.inputs['Resolution'].sv_get()
 
         if isinstance(profile_s[0], SvExCurve):
             profile_s = [profile_s]
@@ -38,9 +64,19 @@ class SvExExtrudeCurveCurveSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
             extrusion_s = [extrusion_s]
 
         surface_out = []
-        for profiles, extrusions in zip_long_repeat(profile_s, extrusion_s):
+        for profiles, extrusions, resolution in zip_long_repeat(profile_s, extrusion_s, resolution_s):
+            if isinstance(resolution, (list, tuple)):
+                resolution = resolution[0]
+
             for profile, extrusion in zip_long_repeat(profiles, extrusions):
-                surface = SvExExtrudeCurveCurveSurface(profile, extrusion)
+                if self.algorithm == 'NONE':
+                    surface = SvExExtrudeCurveCurveSurface(profile, extrusion)
+                elif self.algorithm == 'FRENET':
+                    surface = SvExExtrudeCurveFrenetSurface(profile, extrusion)
+                elif self.algorithm == 'ZERO':
+                    surface = SvExExtrudeCurveZeroTwistSurface(profile, extrusion, resolution)
+                else:
+                    raise Exception("Unsupported algorithm")
                 surface_out.append(surface)
 
         self.outputs['Surface'].sv_set(surface_out)
