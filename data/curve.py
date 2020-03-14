@@ -58,6 +58,30 @@ class SvExCurve(object):
         v3s = self.evaluate_array(ts+3*h)
         return (- v0s + 3*v1s - 3*v2s + v3s) / (h * h * h)
 
+    def derivatives_array(self, n, ts):
+        result = []
+        if n >= 1:
+            first = self.tangent_array(ts)
+            result.append(first)
+
+        h = 0.001
+        if n >= 2:
+            minus_h = self.evaluate_array(ts-h)
+            points = self.evaluate_array(ts)
+            plus_h = self.evaluate_array(ts+h)
+            second = (plus_h - 2*points + minus_h) / (h * h)
+            result.append(second)
+
+        if n >= 3:
+            v0s = points
+            v1s = plus_h
+            v2s = self.evaluate_array(ts+2*h)
+            v3s = self.evaluate_array(ts+3*h)
+            third = (- v0s + 3*v1s - 3*v2s + v3s) / (h * h * h)
+            result.append(third)
+
+        return result
+
     def main_normal(self, t, normalize=True):
         tangent = self.tangent(t)
         binormal = self.binormal(t, normalize)
@@ -85,8 +109,7 @@ class SvExCurve(object):
         return v
 
     def binormal_array(self, ts, normalize=True):
-        tangents = self.tangent_array(ts)
-        seconds = self.second_derivative_array(ts)
+        tangents, seconds = self.derivatives_array(2, ts)
         v = np.cross(tangents, seconds)
         if normalize:
             norms = np.linalg.norm(v, axis=1, keepdims=True)
@@ -94,10 +117,22 @@ class SvExCurve(object):
             v[nonzero] = v[nonzero] / norms[nonzero][:,0][np.newaxis].T
         return v
 
+    def tangent_normal_binormal_array(self, ts, normalize=True):
+        tangents, seconds = self.derivatives_array(2, ts)
+        binormals = np.cross(tangents, seconds)
+        if normalize:
+            norms = np.linalg.norm(binormals, axis=1, keepdims=True)
+            nonzero = (norms > 0)[:,0]
+            binormals[nonzero] = binormals[nonzero] / norms[nonzero][:,0][np.newaxis].T
+        normals = np.cross(binormals, tangents)
+        if normalize:
+            norms = np.linalg.norm(normals, axis=1, keepdims=True)
+            nonzero = (norms > 0)[:,0]
+            normals[nonzero] = normals[nonzero] / norms[nonzero][:,0][np.newaxis].T
+        return tangents, normals, binormals
+
     def frame_array(self, ts):
-        normals = self.main_normal_array(ts)
-        binormals = self.binormal_array(ts)
-        tangents = self.tangent_array(ts)
+        tangents, normals, binormals = self.tangent_normal_binormal_array(ts)
         tangents = tangents / np.linalg.norm(tangents, axis=1)[np.newaxis].T
         matrices_np = np.dstack((normals, binormals, tangents))
         matrices_np = np.transpose(matrices_np, axes=(0,2,1))
@@ -105,17 +140,14 @@ class SvExCurve(object):
         return matrices_np, normals, binormals
 
     def curvature_array(self, ts):
-        tangents = self.tangent_array(ts)
-        seconds = self.second_derivative_array(ts)
+        tangents, seconds = self.derivatives_array(2, ts)
         numerator = np.linalg.norm(np.cross(tangents, seconds), axis=1)
         tangents_norm = np.linalg.norm(tangents, axis=1)
         denominator = tangents_norm * tangents_norm * tangents_norm
         return numerator / denominator
 
     def torsion_array(self, ts):
-        tangents = self.tangent_array(ts)
-        seconds = self.second_derivative_array(ts)
-        thirds = self.third_derivative_array(ts)
+        tangents, seconds, thirds = self.derivatives_array(3, ts)
         seconds_thirds = np.cross(seconds, thirds)
         numerator = (tangents * seconds_thirds).sum(axis=1)
         #numerator = np.apply_along_axis(lambda tangent: tangent.dot(seconds_thirds), 1, tangents)
@@ -276,6 +308,14 @@ class SvExGeomdlCurve(SvExCurve):
 
     def third_derivative_array(self, ts):
         return np.vectorize(self.third_derivative, signature='()->(3)')(ts)
+
+    def derivatives_array(self, n, ts):
+        def derivatives(t):
+            result = self.curve.derivatives(t, order=n)
+            return np.array(result[1:])
+        result = np.vectorize(derivatives, signature='()->(n,3)')(ts)
+        result = np.transpose(result, axes=(1, 0, 2))
+        return result
 
     def get_u_bounds(self):
         return self.u_bounds
