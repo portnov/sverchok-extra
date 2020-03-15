@@ -205,18 +205,50 @@ class SvExConcatCurve(SvExCurve):
     def get_u_bounds(self):
         return (0.0, self.u_max)
 
-    def evaluate(self, t):
-        return self.evaluate_array(np.array([t]))[0]
-
-    def evaluate_array(self, ts):
+    def _get_ts_grouped(self, ts):
         index = self.min_bounds.searchsorted(ts, side='left') - 1
         index = index.clip(0, len(self.curves) - 1)
         left_bounds = self.min_bounds[index]
         curve_left_bounds = self.src_min_bounds[index]
         dts = ts - left_bounds + curve_left_bounds
         dts_grouped = np.split(dts, np.cumsum(np.unique(index, return_counts=True)[1])[:-1])
+        return dts_grouped
+
+    def evaluate(self, t):
+        return self.evaluate_array(np.array([t]))[0]
+
+    def evaluate_array(self, ts):
+        dts_grouped = self._get_ts_grouped(ts)
         points_grouped = [curve.evaluate_array(dts) for curve, dts in zip(self.curves, dts_grouped)]
         return np.concatenate(points_grouped)
+
+    def tangent(self, t):
+        return self.tangent_array(np.array([t]))[0]
+
+    def tangent_array(self, ts):
+        dts_grouped = self._get_ts_grouped(ts)
+        tangents_grouped = [curve.tangent_array(dts) for curve, dts in zip(self.curves, dts_grouped)]
+        return np.concatenate(tangents_grouped)
+
+    def second_derivative_array(self, ts):
+        dts_grouped = self._get_ts_grouped(ts)
+        vectors = [curve.second_derivative_array(dts) for curve, dts in zip(self.curves, dts_grouped)]
+        return np.concatenate(vectors)
+
+    def third_derivative_array(self, ts):
+        dts_grouped = self._get_ts_grouped(ts)
+        vectors = [curve.third_derivative_array(dts) for curve, dts in zip(self.curves, dts_grouped)]
+        return np.concatenate(vectors)
+
+    def derivatives_array(self, n, ts):
+        dts_grouped = self._get_ts_grouped(ts)
+        derivs = [curve.derivatives_array(n, dts) for curve, dts in zip(self.curves, dts_grouped)]
+        result = []
+        for i in range(n):
+            ith_derivs_grouped = [curve_derivs[i] for curve_derivs in derivs]
+            ith_derivs = np.concatenate(ith_derivs_grouped)
+            result.append(ith_derivs)
+        return result
 
 class SvExLine(SvExCurve):
     def __init__(self, point, direction):
