@@ -37,7 +37,7 @@ class SvExCurve(object):
     def tangent_array(self, ts):
         vs = self.evaluate_array(ts)
         h = self.tangent_delta
-        u_max = self.curve.get_u_bounds()[1]
+        u_max = self.get_u_bounds()[1]
         bad_idxs = (ts+h) > u_max
         good_idxs = (ts+h) <= u_max
         ts_h = ts + h
@@ -488,6 +488,30 @@ class SvExCastCurveToCylinder(SvExCurve):
 
     def get_u_bounds(self):
         return self.curve.get_u_bounds()
+
+class SvExCurveLerpCurve(SvExCurve):
+    def __init__(self, curve1, curve2, coefficient):
+        self.curve1 = curve1
+        self.curve2 = curve2
+        self.coefficient = coefficient
+        self.u_bounds = (0.0, 1.0)
+        self.c1_min, self.c1_max = curve1.get_u_bounds()
+        self.c2_min, self.c2_max = curve2.get_u_bounds()
+        self.tangent_delta = 0.001
+
+    def get_u_bounds(self):
+        return self.u_bounds
+
+    def evaluate(self, t):
+        return self.evaluate_array(np.array([t]))[0]
+
+    def evaluate_array(self, ts):
+        us1 = (self.c1_max - self.c1_min) * ts + self.c1_min
+        us2 = (self.c2_max - self.c2_min) * ts + self.c2_min
+        c1_points = self.curve1.evaluate_array(us1)
+        c2_points = self.curve2.evaluate_array(us2)
+        k = self.coefficient
+        return (1.0 - k) * c1_points + k * c2_points
 
 def register():
     pass

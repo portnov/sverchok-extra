@@ -71,6 +71,7 @@ def nodes_index():
                 ("curve.circlify", "SvExCirclifyNode"),
                 ("curve.apply_field_to_curve", "SvExApplyFieldToCurveNode"),
                 ("curve.cast_curve", "SvExCastCurveNode"),
+                ("curve.curve_lerp", "SvExCurveLerpCurveNode"),
                 ("curve.curve_range", "SvExCurveRangeNode"),
                 ("curve.curve_length", "SvExCurveLengthNode"),
                 ("curve.curve_frame", "SvExCurveFrameNode"),
