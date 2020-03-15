@@ -6,6 +6,7 @@ from mathutils import noise
 from mathutils import kdtree
 from mathutils import bvhtree
 
+from sverchok.utils.geom import PlaneEquation, LineEquation
 from sverchok_extra.utils.integrate import TrapezoidIntegral
 
 ##################
@@ -28,10 +29,28 @@ class SvExCurve(object):
         raise Exception("not implemented!")
 
     def tangent(self, t):
-        raise Exception("not implemented!")
-    
+        v = self.evaluate(t)
+        h = self.tangent_delta
+        v_h = self.evaluate(t+h)
+        return (v_h - v) / h
+
     def tangent_array(self, ts):
-        raise Exception("not implemented!")
+        vs = self.evaluate_array(ts)
+        h = self.tangent_delta
+        u_max = self.curve.get_u_bounds()[1]
+        bad_idxs = (ts+h) > u_max
+        good_idxs = (ts+h) <= u_max
+        ts_h = ts + h
+        ts_h[bad_idxs] = (ts - h)[bad_idxs]
+
+        vs_h = self.evaluate_array(ts_h)
+        tangents_plus = (vs_h - vs) / h
+        tangents_minus = (vs - vs_h) / h
+        tangents_x = np.where(good_idxs, tangents_plus[:,0], tangents_minus[:,0])
+        tangents_y = np.where(good_idxs, tangents_plus[:,1], tangents_minus[:,1])
+        tangents_z = np.where(good_idxs, tangents_plus[:,2], tangents_minus[:,2])
+        tangents = np.stack((tangents_x, tangents_y, tangents_z)).T
+        return tangents
 
     def second_derivative(self, t):
         if hasattr(self, 'tangent_delta'):
@@ -391,29 +410,84 @@ class SvExDeformedByFieldCurve(SvExCurve):
         vecs = np.stack((vxs, vys, vzs)).T
         return vs + self.coefficient * vecs
 
-    def tangent(self, t):
-        v = self.evaluate(t)
-        h = self.tangent_delta
-        v_h = self.evaluate(t+h)
-        return (v_h - v) / h
+class SvExCastCurveToPlane(SvExCurve):
+    def __init__(self, curve, point, normal, coefficient):
+        self.curve = curve
+        self.point = point
+        self.normal = normal
+        self.coefficient = coefficient
+        self.plane = PlaneEquation.from_normal_and_point(normal, point)
+        self.tangent_delta = 0.001
 
-    def tangent_array(self, ts):
-        vs = self.evaluate_array(ts)
-        h = self.tangent_delta
-        u_max = self.curve.get_u_bounds()[1]
-        bad_idxs = (ts+h) > u_max
-        good_idxs = (ts+h) <= u_max
-        ts_h = ts + h
-        ts_h[bad_idxs] = (ts - h)[bad_idxs]
+    def evaluate(self, t):
+        point = self.curve.evaluate(t)
+        target = np.array(self.plane.projection_of_point(point))
+        k = self.coefficient
+        return (1 - k) * point + k * target
 
-        vs_h = self.evaluate_array(ts_h)
-        tangents_plus = (vs_h - vs) / h
-        tangents_minus = (vs - vs_h) / h
-        tangents_x = np.where(good_idxs, tangents_plus[:,0], tangents_minus[:,0])
-        tangents_y = np.where(good_idxs, tangents_plus[:,1], tangents_minus[:,1])
-        tangents_z = np.where(good_idxs, tangents_plus[:,2], tangents_minus[:,2])
-        tangents = np.stack((tangents_x, tangents_y, tangents_z)).T
-        return tangents
+    def evaluate_array(self, ts):
+        points = self.curve.evaluate_array(ts)
+        targets = self.plane.projection_of_points(points)
+        k = self.coefficient
+        return (1 - k) * points + k * targets
+
+    def get_u_bounds(self):
+        return self.curve.get_u_bounds()
+
+class SvExCastCurveToSphere(SvExCurve):
+    def __init__(self, curve, center, radius, coefficient):
+        self.curve = curve
+        self.center = center
+        self.radius = radius
+        self.coefficient = coefficient
+        self.tangent_delta = 0.001
+
+    def evaluate(self, t):
+        return self.evaluate_array(np.array([t]))[0]
+
+    def evaluate_array(self, ts):
+        points = self.curve.evaluate_array(ts)
+        points = points - self.center
+        norms = np.linalg.norm(points, axis=1)[np.newaxis].T
+        normalized = points / norms
+        targets = self.radius * normalized + self.center
+        k = self.coefficient
+        return (1 - k) * points + k * targets
+
+    def get_u_bounds(self):
+        return self.curve.get_u_bounds()
+
+class SvExCastCurveToCylinder(SvExCurve):
+    def __init__(self, curve, center, direction, radius, coefficient):
+        self.curve = curve
+        self.center = center
+        self.direction = direction
+        self.radius = radius
+        self.coefficient = coefficient
+        self.line = LineEquation.from_direction_and_point(direction, center)
+        self.tangent_delta = 0.001
+
+    def evaluate(self, t):
+        point = self.curve.evaluate(t)
+        projection_to_line = self.line.projection_of_point(point)
+        projection_to_line = np.array(projection_to_line)
+        radial = point - projection_to_line
+        radius = self.radius * radial / np.linalg.norm(radial)
+        projection = projection_to_line + radius
+        k = self.coefficient
+        return (1 - k) * point + k * projection
+    
+    def evaluate_array(self, ts):
+        points = self.curve.evaluate_array(ts)
+        projection_to_line = self.line.projection_of_points(points)
+        radial = points - projection_to_line
+        radius = self.radius * radial / np.linalg.norm(radial, axis=1, keepdims=True)
+        projections = projection_to_line + radius
+        k = self.coefficient
+        return (1 - k) * points + k * projections
+
+    def get_u_bounds(self):
+        return self.curve.get_u_bounds()
 
 def register():
     pass
