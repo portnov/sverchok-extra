@@ -135,15 +135,19 @@ class CatenarySolver(object):
                 return (A0 - dA), (A0 + dA)
             dA = dA * coeff
             counter += 1
-            if counter > 10:
-                raise Exception("Can't find initial range")
+            if counter > 15:
+                return None
 
     def solve(self):
         # Solve (1) equation
         A0 = self._init_guess()
-        left, right = self._bracket(A0)
+        init_range = self._bracket(A0)
+        if init_range is None:
+            dp = np.linalg.norm(self.point1 - self.point2)
+            raise Exception("Can't find initial range for A, starting from {}, for points {} and {}, (distance {}) and length {}".format(A0, self.point1, self.point2, dp, self.length))
+
         S = self.S
-        result = root_scalar(lambda A: self._goal(A) - S, method='ridder', bracket=(left, right), x0=A0)
+        result = root_scalar(lambda A: self._goal(A) - S, method='ridder', bracket=init_range, x0=A0)
         A = result.root
 
         # Solve (2) equation
