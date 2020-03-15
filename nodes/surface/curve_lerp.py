@@ -13,11 +13,11 @@ from sverchok_extra.data.surface import SvExCurveLerpSurface
 
 class SvExCurveLerpNode(bpy.types.Node, SverchCustomTreeNode):
     """
-    Triggers: Curve Lerp
+    Triggers: Curve Lerp Linear Surface
     Tooltip: Generate a linear surface between two curves (curves linear interpolation)
     """
     bl_idname = 'SvExCurveLerpNode'
-    bl_label = 'Curve Lerp'
+    bl_label = 'Linear Surface'
     bl_icon = 'MOD_THICKNESS'
 
     v_min : FloatProperty(
