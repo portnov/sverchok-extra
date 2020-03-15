@@ -28,7 +28,7 @@ Features
 At the moment, this addon includes the following nodes for Sverchok:
 
 * *Curve* category:
-  * Straight line curve
+  * Straight line curve (segment)
   * Circle (Curve)
   * Formula-defined curve
   * Interpolation Curve (cubic or linear spline, uses numpy only)
@@ -38,10 +38,19 @@ At the moment, this addon includes the following nodes for Sverchok:
   * NURBS Interpolation Curve (uses Geomdl library)
   * NURBS Approximation Curve (uses Geomdl library)
   * Circlify (pack a set of circles into another circle) (uses [Circlify][15] library)
+  * Cast Curve (project curve to plane, sphere or cylinder)
+  * Curve on Surface (curve in UV space of the surface)
+  * Curve Lerp (linear interpolation between two curves, extrapolation is also possible)
+  * Concatenate Curves (make single curve from several curves, assuming their endpoints coincide)
+  * Blend Curves (by BSpline curve, uses [Geomdl][3] library)
   * Apply Vector Field to Curve
   * Curve Domain
   * Curve Length (can also calculate length of part of the curve)
   * Curve Length Parameter
+  * Curve Curvature
+  * Curve Torsion
+  * Curve Frame ([Frenet][16] frame for the curve)
+  * Curve Zero-Twist Frame (similar to previous, but rotates Frenet frame around the tangent to compensate curve's torsion)
   * Evaluate Curve
   * Marching Squares (uses [Scikit-Image][5] library)
 * *Surface* category:
@@ -52,7 +61,12 @@ At the moment, this addon includes the following nodes for Sverchok:
   * NURBS Surface (uses Geomdl)
   * NURBS Interpolation Surface (uses Geomdl)
   * NURBS Approximation Surface (uses Geomdl)
+  * Surface of revolution
+  * Extrude Curve along Vector
+  * Extrude Curve along Curve
+  * Linear Surface (ruled surface made by linear interpolation of two curves; extrapolation is also possible)
   * Quads to NURBS (uses Geomdl)
+  * Surface Domain (minimal / maximum values of U/V parameters of the surface)
   * Minimal Surface (uses SciPy)
   * Curves to Surface (optionally uses SciPy and/or Geomdl)
   * Apply Vector Field to Surface
@@ -250,4 +264,5 @@ LICENSE: GPL-3.
 [13]: https://bootstrap.pypa.io/get-pip.py
 [14]: https://pip.pypa.io/en/stable/installing/
 [15]: https://github.com/elmotec/circlify
+[16]: https://en.wikipedia.org/wiki/Differentiable_curve#Frenet_frame
 
