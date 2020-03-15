@@ -58,6 +58,8 @@ class SvExEvalCurveNode(bpy.types.Node, SverchCustomTreeNode):
             ts_s = self.inputs['T'].sv_get(default=[[]])
             samples_s = self.inputs['Samples'].sv_get(default=[[]])
 
+            need_tangent = self.outputs['Tangents'].is_linked
+
             verts_out = []
             edges_out = []
             tangents_out = []
@@ -74,13 +76,14 @@ class SvExEvalCurveNode(bpy.types.Node, SverchCustomTreeNode):
 
                 new_verts = curve.evaluate_array(ts)
                 new_verts = new_verts.tolist()
-                new_tangents = curve.tangent_array(ts).tolist()
                 n = len(ts)
                 new_edges = [(i,i+1) for i in range(n-1)]
                 
                 verts_out.append(new_verts)
                 edges_out.append(new_edges)
-                tangents_out.append(new_tangents)
+                if need_tangent:
+                    new_tangents = curve.tangent_array(ts).tolist()
+                    tangents_out.append(new_tangents)
 
             self.outputs['Vertices'].sv_set(verts_out)
             self.outputs['Edges'].sv_set(edges_out)

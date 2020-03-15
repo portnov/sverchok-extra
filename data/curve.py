@@ -191,6 +191,33 @@ class SvExCurve(object):
     def get_u_bounds(self):
         raise Exception("not implemented!")
 
+class SvExConcatCurve(SvExCurve):
+    def __init__(self, curves):
+        self.curves = curves
+        bounds = [curve.get_u_bounds() for curve in curves]
+        self.src_min_bounds = np.array([bound[0] for bound in bounds])
+        #self.max_bounds = np.array([bound[1] for bound in bounds])
+        self.ranges = np.array([bound[1] - bound[0] for bound in bounds])
+        self.u_max = self.ranges.sum()
+        self.min_bounds = np.insert(np.cumsum(self.ranges), 0, 0)
+        self.tangent_delta = 0.001
+
+    def get_u_bounds(self):
+        return (0.0, self.u_max)
+
+    def evaluate(self, t):
+        return self.evaluate_array(np.array([t]))[0]
+
+    def evaluate_array(self, ts):
+        index = self.min_bounds.searchsorted(ts, side='left') - 1
+        index = index.clip(0, len(self.curves) - 1)
+        left_bounds = self.min_bounds[index]
+        curve_left_bounds = self.src_min_bounds[index]
+        dts = ts - left_bounds + curve_left_bounds
+        dts_grouped = np.split(dts, np.cumsum(np.unique(index, return_counts=True)[1])[:-1])
+        points_grouped = [curve.evaluate_array(dts) for curve, dts in zip(self.curves, dts_grouped)]
+        return np.concatenate(points_grouped)
+
 class SvExLine(SvExCurve):
     def __init__(self, point, direction):
         self.point = point

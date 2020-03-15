@@ -74,6 +74,7 @@ def nodes_index():
                 ("curve.cast_curve", "SvExCastCurveNode"),
                 ("curve.curve_on_surface", "SvExCurveOnSurfaceNode"),
                 ("curve.curve_lerp", "SvExCurveLerpCurveNode"),
+                ("curve.concat_curves", "SvExConcatCurvesNode"),
                 ("curve.curve_range", "SvExCurveRangeNode"),
                 ("curve.curve_length", "SvExCurveLengthNode"),
                 ("curve.curve_frame", "SvExCurveFrameNode"),
