@@ -363,8 +363,8 @@ class SvExGeomdlCurve(SvExCurve):
         return np.array(vs)
 
     def tangent(self, t):
-        v = self.curve.tangent(t, normalize=False)
-        return np.array(v)
+        p, t = self.curve.tangent(t, normalize=False)
+        return np.array(t)
 
     def tangent_array(self, ts):
         t_min, t_max = self.get_u_bounds()
