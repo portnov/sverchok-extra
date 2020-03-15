@@ -513,6 +513,37 @@ class SvExCurveLerpCurve(SvExCurve):
         k = self.coefficient
         return (1.0 - k) * c1_points + k * c2_points
 
+class SvExCurveOnSurface(SvExCurve):
+    def __init__(self, curve, surface, axis=0):
+        self.curve = curve
+        self.surface = surface
+        self.axis = axis
+        self.tangent_delta = 0.001
+
+    def get_u_bounds(self):
+        return self.curve.get_u_bounds()
+
+    def evaluate(self, t):
+        return self.evaluate_array(np.array([t]))[0]
+
+    def evaluate_array(self, ts):
+        points = self.curve.evaluate_array(ts)
+        xs = points[:,0]
+        ys = points[:,1]
+        zs = points[:,2]
+        if self.axis == 0:
+            us = ys
+            vs = zs
+        elif self.axis == 1:
+            us = xs
+            vs = zs
+        elif self.axis == 2:
+            us = xs
+            vs = ys
+        else:
+            raise Exception("Unsupported orientation axis")
+        return self.surface.evaluate_array(us, vs)
+
 def register():
     pass
 
