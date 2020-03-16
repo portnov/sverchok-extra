@@ -1,5 +1,6 @@
 
 import numpy as np
+
 from math import sin, cos, pi
 from mathutils import Matrix, Vector
 from mathutils import noise
@@ -211,15 +212,41 @@ class SvExConcatCurve(SvExCurve):
         left_bounds = self.min_bounds[index]
         curve_left_bounds = self.src_min_bounds[index]
         dts = ts - left_bounds + curve_left_bounds
-        dts_grouped = np.split(dts, np.cumsum(np.unique(index, return_counts=True)[1])[:-1])
+        #dts_grouped = np.split(dts, np.cumsum(np.unique(index, return_counts=True)[1])[:-1])
+        # TODO: this should be vectorized somehow
+        dts_grouped = []
+        prev_i = None
+        prev_dts = []
+
+        for i, dt in zip(index, dts):
+            if i == prev_i:
+                prev_dts.append(dt)
+            else:
+                if prev_dts:
+                    dts_grouped.append((prev_i, prev_dts[:]))
+                    prev_dts = [dt]
+                else:
+                    prev_dts = [dt]
+                    if prev_i is not None:
+                        dts_grouped.append((prev_i, prev_dts[:]))
+            prev_i = i
+
+        if prev_dts:
+            dts_grouped.append((i, prev_dts))
+
         return dts_grouped
 
     def evaluate(self, t):
-        return self.evaluate_array(np.array([t]))[0]
+        index = self.min_bounds.searchsorted(t, side='left') - 1
+        index = index.clip(0, len(self.curves) - 1)
+        left_bound = self.min_bounds[index]
+        curve_left_bound = self.src_min_bounds[index]
+        dt = t - left_bound + curve_left_bound
+        return self.curves[index].evaluate(dt)
 
     def evaluate_array(self, ts):
         dts_grouped = self._get_ts_grouped(ts)
-        points_grouped = [curve.evaluate_array(dts) for curve, dts in zip(self.curves, dts_grouped)]
+        points_grouped = [self.curves[i].evaluate_array(np.array(dts)) for i, dts in dts_grouped]
         return np.concatenate(points_grouped)
 
     def tangent(self, t):
@@ -227,22 +254,22 @@ class SvExConcatCurve(SvExCurve):
 
     def tangent_array(self, ts):
         dts_grouped = self._get_ts_grouped(ts)
-        tangents_grouped = [curve.tangent_array(dts) for curve, dts in zip(self.curves, dts_grouped)]
+        tangents_grouped = [self.curves[i].tangent_array(np.array(dts)) for i, dts in dts_grouped]
         return np.concatenate(tangents_grouped)
 
     def second_derivative_array(self, ts):
         dts_grouped = self._get_ts_grouped(ts)
-        vectors = [curve.second_derivative_array(dts) for curve, dts in zip(self.curves, dts_grouped)]
+        vectors = [self.curves[i].second_derivative_array(np.array(dts)) for i, dts in dts_grouped]
         return np.concatenate(vectors)
 
     def third_derivative_array(self, ts):
         dts_grouped = self._get_ts_grouped(ts)
-        vectors = [curve.third_derivative_array(dts) for curve, dts in zip(self.curves, dts_grouped)]
+        vectors = [self.curves[i].third_derivative_array(np.array(dts)) for i, dts in dts_grouped]
         return np.concatenate(vectors)
 
     def derivatives_array(self, n, ts):
         dts_grouped = self._get_ts_grouped(ts)
-        derivs = [curve.derivatives_array(n, dts) for curve, dts in zip(self.curves, dts_grouped)]
+        derivs = [self.curves[i].derivatives_array(n, np.array(dts)) for i, dts in dts_grouped]
         result = []
         for i in range(n):
             ith_derivs_grouped = [curve_derivs[i] for curve_derivs in derivs]
