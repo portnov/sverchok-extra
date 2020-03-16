@@ -925,7 +925,8 @@ class SvExCurveLerpSurface(SvExSurface):
         c1_points = self.curve1.evaluate_array(us1)
         c2_points = self.curve2.evaluate_array(us2)
         vs = vs[np.newaxis].T
-        return (1.0 - vs) * c1_points + vs * c2_points
+        points = (1.0 - vs)*c1_points + vs*c2_points
+        return points
 
     def get_u_min(self):
         return self.u_bounds[0]

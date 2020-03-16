@@ -630,6 +630,31 @@ class SvExCurveOnSurface(SvExCurve):
             raise Exception("Unsupported orientation axis")
         return self.surface.evaluate_array(us, vs)
 
+class SvExIsoUvCurve(SvExCurve):
+    def __init__(self, surface, fixed_axis, value):
+        self.surface = surface
+        self.fixed_axis = fixed_axis
+        self.value = value
+        self.tangent_delta = 0.001
+
+    def get_u_bounds(self):
+        if self.fixed_axis == 0:
+            return self.surface.get_v_min(), self.surface.get_v_max()
+        else:
+            return self.surface.get_u_min(), self.surface.get_u_max()
+
+    def evaluate(self, t):
+        if self.fixed_axis == 0:
+            return self.surface.evaluate(self.value, t)
+        else:
+            return self.surface.evaluate(t, self.value)
+
+    def evaluate_array(self, ts):
+        if self.fixed_axis == 0:
+            return self.surface.evaluate_array(self.value, ts)
+        else:
+            return self.surface.evaluate_array(ts, self.value)
+
 def register():
     pass
 

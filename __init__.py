@@ -73,6 +73,7 @@ def nodes_index():
                 ("curve.circlify", "SvExCirclifyNode"),
                 ("curve.apply_field_to_curve", "SvExApplyFieldToCurveNode"),
                 ("curve.cast_curve", "SvExCastCurveNode"),
+                ("curve.iso_uv_curve", "SvExIsoUvCurveNode"),
                 ("curve.curve_on_surface", "SvExCurveOnSurfaceNode"),
                 ("curve.curve_lerp", "SvExCurveLerpCurveNode"),
                 ("curve.concat_curves", "SvExConcatCurvesNode"),
