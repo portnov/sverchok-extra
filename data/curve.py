@@ -651,9 +651,9 @@ class SvExIsoUvCurve(SvExCurve):
 
     def evaluate_array(self, ts):
         if self.fixed_axis == 0:
-            return self.surface.evaluate_array(self.value, ts)
+            return self.surface.evaluate_array(np.repeat(self.value, len(ts)), ts)
         else:
-            return self.surface.evaluate_array(ts, self.value)
+            return self.surface.evaluate_array(ts, np.repeat(self.value, len(ts)))
 
 def register():
     pass

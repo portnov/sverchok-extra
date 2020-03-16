@@ -44,7 +44,7 @@ class SvExIsoUvCurveNode(bpy.types.Node, SverchCustomTreeNode):
         u_curves_out = []
         v_curves_out = []
         for surfaces, values in zip_long_repeat(surface_s, value_s):
-            for surface, value in zip_long_repeat(surface, value):
+            for surface, value in zip_long_repeat(surfaces, values):
                 u_curve = SvExIsoUvCurve(surface, 1, value)
                 v_curve = SvExIsoUvCurve(surface, 0, value)
                 u_curves_out.append(u_curve)
