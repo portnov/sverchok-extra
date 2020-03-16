@@ -114,7 +114,7 @@ class SvExInterpolatingSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
 
     def draw_buttons(self, context, layout):
         layout.label(text='Interpolation mode:')
-        layout.prop(self, 'interp_mode', text='')
+        layout.prop(self, 'interp_mode', text='', expand=True))
         if self.interp_mode in {'LIN', 'CUBIC'}:
             layout.prop(self, 'is_cyclic', toggle=True)
         if self.interp_mode == 'BSPLINE':
