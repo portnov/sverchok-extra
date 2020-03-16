@@ -113,7 +113,8 @@ class SvExInterpolatingSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
             raise Exception("Unsupported spline type: " + self.interp_mode)
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'interp_mode', expand=True)
+        layout.label(text='Interpolation mode:')
+        layout.prop(self, 'interp_mode', text='')
         if self.interp_mode in {'LIN', 'CUBIC'}:
             layout.prop(self, 'is_cyclic', toggle=True)
         if self.interp_mode == 'BSPLINE':
