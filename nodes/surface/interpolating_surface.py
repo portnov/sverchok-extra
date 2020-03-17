@@ -114,7 +114,7 @@ class SvExInterpolatingSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
 
     def draw_buttons(self, context, layout):
         layout.label(text='Interpolation mode:')
-        layout.prop(self, 'interp_mode', expand=True)
+        layout.prop(self, 'interp_mode', text='')
         if self.interp_mode in {'LIN', 'CUBIC'}:
             layout.prop(self, 'is_cyclic', toggle=True)
         if self.interp_mode == 'BSPLINE':
@@ -152,9 +152,7 @@ class SvExInterpolatingSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
                 smooth = smooth[0]
 
             u_spline_constructor = self.get_u_spline_constructor(degree, smooth, epsilon)
-            # Technically, different input curves can have different U bounds.
-            # Here we use U bounds from the first curve only.
-            v_bounds = curves[0].get_u_bounds()
+            v_bounds = (0.0, 1.0)
             u_bounds = (0.0, 1.0)
             surface = SvExInterpolatingSurface(u_bounds, v_bounds, u_spline_constructor, curves)
             surfaces_out.append(surface)

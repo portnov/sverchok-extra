@@ -551,7 +551,13 @@ class SvExInterpolatingSurface(SvExSurface):
             return spline
 
     def _evaluate(self, u, v):
-        spline_vertices = [spline.evaluate(v) for spline in self.v_splines]
+        spline_vertices = []
+        for spline in self.v_splines:
+            v_min, v_max = spline.get_u_bounds()
+            vx = (v_max - v_min) * v + v_min
+            point = spline.evaluate(vx)
+            spline_vertices.append(point)
+        #spline_vertices = [spline.evaluate(v) for spline in self.v_splines]
         u_spline = self.get_u_spline(v, spline_vertices)
         result = u_spline.evaluate(u)
         return result
