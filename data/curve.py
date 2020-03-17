@@ -277,6 +277,52 @@ class SvExConcatCurve(SvExCurve):
             result.append(ith_derivs)
         return result
 
+class SvExFlipCurve(SvExCurve):
+    def __init__(self, curve):
+        self.curve = curve
+        if hasattr(curve, 'tangent_delta'):
+            self.tangent_delta = curve.tangent_delta
+        else:
+            self.tangent_delta = 0.001
+
+    def get_u_bounds(self):
+        return self.curve.get_u_bounds()
+
+    def evaluate(self, t):
+        m, M = self.curve.get_u_bounds()
+        t = M - t + m
+        return self.curve.evaluate(t)
+
+    def evaluate_array(self, ts):
+        m, M = self.curve.get_u_bounds()
+        ts = M - ts + m
+        return self.curve.evaluate_array(ts)
+
+    def tangent(self, t):
+        m, M = self.curve.get_u_bounds()
+        t = M - t + m
+        return self.curve.tangent(t)
+        
+    def tangent_array(self, ts):
+        m, M = self.curve.get_u_bounds()
+        ts = M - ts + m
+        return self.curve.tangent_array(ts)
+
+    def second_derivative_array(self, ts):
+        m, M = self.curve.get_u_bounds()
+        ts = M - ts + m
+        return self.curve.second_derivative_array(ts)
+
+    def third_derivative_array(self, ts):
+        m, M = self.curve.get_u_bounds()
+        ts = M - ts + m
+        return self.curve.third_derivative_array(ts)
+
+    def derivatives_array(self, ts):
+        m, M = self.curve.get_u_bounds()
+        ts = M - ts + m
+        return self.curve.derivatives_array(ts)
+
 class SvExLine(SvExCurve):
     def __init__(self, point, direction):
         self.point = point
