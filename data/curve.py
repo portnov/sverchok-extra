@@ -7,7 +7,7 @@ from mathutils import noise
 from mathutils import kdtree
 from mathutils import bvhtree
 
-from sverchok.utils.geom import PlaneEquation, LineEquation
+from sverchok.utils.geom import PlaneEquation, LineEquation, LinearSpline, CubicSpline
 from sverchok_extra.utils.integrate import TrapezoidIntegral
 
 ##################
@@ -28,6 +28,13 @@ class SvExCurve(object):
 
     def evaluate_array(self, ts):
         raise Exception("not implemented!")
+
+    def calc_length(self, t_min, t_max, resolution = 50):
+        ts = np.linspace(t_min, t_max, num=resolution)
+        vectors = self.evaluate_array(ts)
+        dvs = vectors[1:] - vectors[:-1]
+        lengths = np.linalg.norm(dvs, axis=1)
+        return np.sum(lengths)
 
     def tangent(self, t):
         v = self.evaluate(t)
@@ -191,6 +198,46 @@ class SvExCurve(object):
 
     def get_u_bounds(self):
         raise Exception("not implemented!")
+
+class SvExCurveLengthSolver(object):
+    def __init__(self, curve):
+        self.curve = curve
+        self._spline = None
+
+    def calc_length_segments(self, tknots):
+        vectors = self.curve.evaluate_array(tknots)
+        dvs = vectors[1:] - vectors[:-1]
+        lengths = np.linalg.norm(dvs, axis=1)
+        return lengths
+    
+    def get_total_length(self):
+        if self._spline is None:
+            raise Exception("You have to call solver.prepare() first")
+        return self._length_params[-1]
+
+    def prepare(self, mode, resolution=50):
+        t_min, t_max = self.curve.get_u_bounds()
+        tknots = np.linspace(t_min, t_max, num=resolution)
+        lengths = self.calc_length_segments(tknots)
+        self._length_params = np.cumsum(np.insert(lengths, 0, 0))
+        self._spline = self._make_spline(mode, tknots)
+
+    def _make_spline(self, mode, tknots):
+        zeros = np.zeros(len(tknots))
+        control_points = np.vstack((self._length_params, tknots, zeros)).T
+        if mode == 'LIN':
+            spline = LinearSpline(control_points, tknots = self._length_params, is_cyclic = False)
+        elif mode == 'SPL':
+            spline = CubicSpline(control_points, tknots = self._length_params, is_cyclic = False)
+        else:
+            raise Exception("Unsupported mode; supported are LIN and SPL.")
+        return spline
+
+    def solve(self, input_lengths):
+        if self._spline is None:
+            raise Exception("You have to call solver.prepare() first")
+        spline_verts = self._spline.eval(input_lengths)
+        return spline_verts[:,1]
 
 class SvExConcatCurve(SvExCurve):
     def __init__(self, curves):

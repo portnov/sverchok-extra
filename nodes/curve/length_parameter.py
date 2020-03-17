@@ -6,7 +6,8 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
 
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
-from sverchok.utils.geom import LinearSpline, CubicSpline
+
+from sverchok_extra.data.curve import SvExCurveLengthSolver
 
 class SvExCurveLengthParameterNode(bpy.types.Node, SverchCustomTreeNode):
     """
@@ -69,25 +70,6 @@ class SvExCurveLengthParameterNode(bpy.types.Node, SverchCustomTreeNode):
         layout.prop(self, 'mode', expand=True)
         layout.prop(self, 'eval_mode', expand=True)
 
-    def make_spline(self, tknots, length_params):
-        zeros = np.zeros(len(tknots))
-        control_points = np.vstack((length_params, tknots, zeros)).T
-        if self.mode == 'LIN':
-            spline = LinearSpline(control_points, tknots = length_params, is_cyclic = False)
-        else:
-            spline = CubicSpline(control_points, tknots = length_params, is_cyclic = False)
-        return spline
-
-    def solve(self, spline, input_lengths):
-        spline_verts = spline.eval(input_lengths)
-        return spline_verts[:,1]
-    
-    def calc_lengths(self, curve, tknots):
-        vectors = curve.evaluate_array(tknots)
-        dvs = vectors[1:] - vectors[:-1]
-        lengths = np.linalg.norm(dvs, axis=1)
-        return lengths
-
     def process(self):
 
         if not any((s.is_linked for s in self.outputs)):
@@ -112,19 +94,16 @@ class SvExCurveLengthParameterNode(bpy.types.Node, SverchCustomTreeNode):
             if isinstance(resolution, (list, tuple)):
                 resolution = resolution[0]
 
-            t_min, t_max = curve.get_u_bounds()
-            tknots = np.linspace(t_min, t_max, num=resolution)
-            lengths = self.calc_lengths(curve, tknots)
-            length_params = np.cumsum(np.insert(lengths, 0, 0))
+            solver = SvExCurveLengthSolver(curve)
+            solver.prepare(self.mode, resolution)
 
             if self.eval_mode == 'AUTO':
-                total_length = length_params[-1]
+                total_length = solver.get_total_length()
                 input_lengths = np.linspace(0.0, total_length, num = samples)
             else:
                 input_lengths = np.array(input_lengths)
 
-            spline = self.make_spline(tknots, length_params)
-            ts = self.solve(spline, input_lengths)
+            ts = solver.solve(input_lengths)
 
             ts_out.append(ts.tolist())
             if need_eval:

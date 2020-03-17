@@ -54,13 +54,6 @@ class SvExCurveLengthNode(bpy.types.Node, SverchCustomTreeNode):
         layout.label(text='T mode:')
         layout.prop(self, 'mode', expand=True)
 
-    def calc_length(self, curve, t_min, t_max, resolution):
-        ts = np.linspace(t_min, t_max, num=resolution)
-        vectors = curve.evaluate_array(ts)
-        dvs = vectors[1:] - vectors[:-1]
-        lengths = np.linalg.norm(dvs, axis=1)
-        return np.sum(lengths)
-
     def process(self):
         if not any(socket.is_linked for socket in self.outputs):
             return
@@ -92,7 +85,7 @@ class SvExCurveLengthNode(bpy.types.Node, SverchCustomTreeNode):
                     resolution = int(resolution * (t_max - t_min) / (curve_t_max - curve_t_min))
                     if resolution < 1:
                         resolution = 1
-                    length = self.calc_length(curve, t_min, t_max, resolution)
+                    length = curve.calc_length(t_min, t_max, resolution)
 
                 length_out.append([length])
 
