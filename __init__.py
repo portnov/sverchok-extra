@@ -57,6 +57,7 @@ def nodes_index():
                 ("surface.surface_domain", "SvExSurfaceDomainNode"),
                 ("surface.marching_cubes", "SvExMarchingCubesNode"),
                 ("surface.apply_field_to_surface", "SvExApplyFieldToSurfaceNode"),
+                ("surface.tessellate_trim", "SvExTessellateTrimSurfaceNode"),
                 ("surface.evaluate_surface", "SvExEvalSurfaceNode")
             ]),
             ("Curve", [
