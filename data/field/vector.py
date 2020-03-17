@@ -9,6 +9,7 @@ from mathutils import bvhtree
 from sverchok.utils.geom import autorotate_householder, autorotate_track, autorotate_diff, diameter
 from sverchok.utils.math import from_cylindrical, from_spherical, to_cylindrical, to_spherical
 
+from sverchok_extra.data.curve import SvExCurveLengthSolver
 
 ##################
 #                #
@@ -643,7 +644,7 @@ class SvExVectorFieldRotor(SvExVectorField):
         return R[0], R[1], R[2]
 
 class SvExBendAlongCurveField(SvExVectorField):
-    def __init__(self, curve, algorithm, scale_all, axis, t_min, t_max, up_axis=None, resolution=50):
+    def __init__(self, curve, algorithm, scale_all, axis, t_min, t_max, up_axis=None, resolution=50, length_mode='T'):
         self.curve = curve
         self.axis = axis
         self.t_min = t_min
@@ -651,8 +652,12 @@ class SvExBendAlongCurveField(SvExVectorField):
         self.algorithm = algorithm
         self.scale_all = scale_all
         self.up_axis = up_axis
+        self.length_mode = length_mode
         if algorithm == 'ZERO':
             self.curve.pre_calc_torsion_integral(resolution)
+        if length_mode == 'L':
+            self.length_solver = SvExCurveLengthSolver(curve)
+            self.length_solver.prepare('SPL', resolution)
 
     def get_matrix(self, tangent, scale):
         x = Vector((1.0, 0.0, 0.0))
@@ -718,18 +723,32 @@ class SvExBendAlongCurveField(SvExVectorField):
     def get_t_value(self, x, y, z):
         curve_t_min, curve_t_max = self.curve.get_u_bounds()
         t = [x, y, z][self.axis]
-        t = (curve_t_max - curve_t_min) * (t - self.t_min) / (self.t_max - self.t_min) + curve_t_min
+        if self.length_mode == 'T':
+            t = (curve_t_max - curve_t_min) * (t - self.t_min) / (self.t_max - self.t_min) + curve_t_min
+        else:
+            t = (t - self.t_min) / (self.t_max - self.t_min) # 0 .. 1
+            t = t * self.length_solver.get_total_length()
+            t = self.length_solver.solve(np.array([t]))[0]
         return t
 
     def get_t_values(self, xs, ys, zs):
         curve_t_min, curve_t_max = self.curve.get_u_bounds()
         ts = [xs, ys, zs][self.axis]
-        ts = (curve_t_max - curve_t_min) * (ts - self.t_min) / (self.t_max - self.t_min) + curve_t_min
+        if self.length_mode == 'T':
+            ts = (curve_t_max - curve_t_min) * (ts - self.t_min) / (self.t_max - self.t_min) + curve_t_min
+        else:
+            ts = (ts - self.t_min) / (self.t_max - self.t_min) # 0 .. 1
+            ts = ts * self.length_solver.get_total_length()
+            ts = self.length_solver.solve(ts)
         return ts
 
     def get_scale(self):
-        curve_t_min, curve_t_max = self.curve.get_u_bounds()
-        return (self.t_max - self.t_min) / (curve_t_max - curve_t_min)
+        if self.length_mode == 'T':
+            curve_t_min, curve_t_max = self.curve.get_u_bounds()
+            t_range = curve_t_max - curve_t_min
+        else:
+            t_range = self.length_solver.get_total_length()
+        return (self.t_max - self.t_min) / t_range
 
     def evaluate(self, x, y, z):
         t = self.get_t_value(x, y, z)

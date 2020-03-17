@@ -30,7 +30,7 @@ class SvExBendAlongCurveFieldNode(bpy.types.Node, SverchCustomTreeNode):
 
     @throttled
     def update_sockets(self, context):
-        self.inputs['Resolution'].hide_safe = self.algorithm != 'ZERO'
+        self.inputs['Resolution'].hide_safe = not(self.algorithm == 'ZERO' or self.length_mode == 'L')
         if self.algorithm in {'ZERO', 'FRENET'}:
             self.orient_axis_ = 'Z'
 
@@ -84,6 +84,17 @@ class SvExBendAlongCurveFieldNode(bpy.types.Node, SverchCustomTreeNode):
         min = 10, default = 50,
         update = updateNode)
 
+    length_modes = [
+        ('T', "Curve parameter", "Scaling along curve is depending on curve parametrization", 0),
+        ('L', "Curve length", "Scaling along curve is proportional to curve segment length", 1)
+    ]
+
+    length_mode : EnumProperty(
+        name = "Scale along curve",
+        items = length_modes,
+        default = 'T',
+        update = update_sockets)
+
     def sv_init(self, context):
         self.inputs.new('SvExCurveSocket', 'Curve').display_shape = 'DIAMOND'
         self.inputs.new('SvStringsSocket', 'TMin').prop_name = 't_min'
@@ -103,6 +114,8 @@ class SvExBendAlongCurveFieldNode(bpy.types.Node, SverchCustomTreeNode):
         layout.prop(self, "algorithm")
         if self.algorithm == 'track':
             layout.prop(self, "up_axis")
+        layout.label(text="Scale along curve:")
+        layout.prop(self, 'length_mode', text='')
 
     def process(self):
         if not any(socket.is_linked for socket in self.outputs):
@@ -125,7 +138,8 @@ class SvExBendAlongCurveFieldNode(bpy.types.Node, SverchCustomTreeNode):
             field = SvExBendAlongCurveField(curve, self.algorithm, self.scale_all,
                         self.orient_axis, t_min, t_max,
                         up_axis = self.up_axis,
-                        resolution = resolution)
+                        resolution = resolution,
+                        length_mode = self.length_mode)
             fields_out.append(field)
 
         self.outputs['Field'].sv_set(fields_out)
