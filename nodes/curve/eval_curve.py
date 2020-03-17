@@ -5,7 +5,9 @@ import bpy
 from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
 
 from sverchok.node_tree import SverchCustomTreeNode, throttled
-from sverchok.data_structure import updateNode, zip_long_repeat, fullList
+from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
+
+from sverchok_extra.data.curve import SvExCurve
 
 class SvExEvalCurveNode(bpy.types.Node, SverchCustomTreeNode):
         """
@@ -60,30 +62,37 @@ class SvExEvalCurveNode(bpy.types.Node, SverchCustomTreeNode):
 
             need_tangent = self.outputs['Tangents'].is_linked
 
+            if isinstance(curve_s[0], SvExCurve):
+                curve_s = [curve_s]
+
+            ts_s = ensure_nesting_level(ts_s, 2)
+            samples_s = ensure_nesting_level(samples_s, 2)
+
             verts_out = []
             edges_out = []
             tangents_out = []
-            for curve, ts, samples in zip_long_repeat(curve_s, ts_s, samples_s):
+            for curves, ts_i, samples_i in zip_long_repeat(curve_s, ts_s, samples_s):
                 if self.eval_mode == 'AUTO':
-                    if isinstance(samples, (list, tuple)):
-                        samples = samples[0]
-
-                if self.eval_mode == 'AUTO':
-                    t_min, t_max = curve.get_u_bounds()
-                    ts = np.linspace(t_min, t_max, num=samples, dtype=np.float64)
+                    ts_i = [None]
                 else:
-                    ts = np.array(ts)
+                    samples_i = [None]
+                for curve, ts, samples in zip_long_repeat(curves, ts_i, samples_i):
+                    if self.eval_mode == 'AUTO':
+                        t_min, t_max = curve.get_u_bounds()
+                        ts = np.linspace(t_min, t_max, num=samples, dtype=np.float64)
+                    else:
+                        ts = np.array(ts)
 
-                new_verts = curve.evaluate_array(ts)
-                new_verts = new_verts.tolist()
-                n = len(ts)
-                new_edges = [(i,i+1) for i in range(n-1)]
-                
-                verts_out.append(new_verts)
-                edges_out.append(new_edges)
-                if need_tangent:
-                    new_tangents = curve.tangent_array(ts).tolist()
-                    tangents_out.append(new_tangents)
+                    new_verts = curve.evaluate_array(ts)
+                    new_verts = new_verts.tolist()
+                    n = len(ts)
+                    new_edges = [(i,i+1) for i in range(n-1)]
+                    
+                    verts_out.append(new_verts)
+                    edges_out.append(new_edges)
+                    if need_tangent:
+                        new_tangents = curve.tangent_array(ts).tolist()
+                        tangents_out.append(new_tangents)
 
             self.outputs['Vertices'].sv_set(verts_out)
             self.outputs['Edges'].sv_set(edges_out)

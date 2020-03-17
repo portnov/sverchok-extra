@@ -9,6 +9,8 @@ from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, get_data_nesting_level
 from sverchok.utils.logging import info, exception
 
+from sverchok_extra.data.surface import SvExSurface
+
 U_SOCKET = 1
 V_SOCKET = 2
 
@@ -201,39 +203,47 @@ class SvExEvalSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
         samples_u_s = self.inputs['SamplesU'].sv_get()
         samples_v_s = self.inputs['SamplesV'].sv_get()
 
+        if isinstance(surfaces_s[0], SvExSurface):
+            surfaces_s = [surfaces_s]
+
+        samples_u_s = ensure_nesting_level(samples_u_s, 2)
+        samples_v_s = ensure_nesting_level(samples_v_s, 2)
+        target_us_s = ensure_nesting_level(target_us_s, 3)
+        target_vs_s = ensure_nesting_level(target_vs_s, 3)
+        target_verts_s = ensure_nesting_level(target_verts_s, 4)
+
         verts_out = []
         edges_out = []
         faces_out = []
 
         inputs = zip_long_repeat(surfaces_s, target_us_s, target_vs_s, target_verts_s, samples_u_s, samples_v_s)
-        for surface, target_us, target_vs, target_verts, samples_u, samples_v in inputs:
-            if isinstance(samples_u, (list, tuple)):
-                samples_u = samples_u[0]
-            if isinstance(samples_v, (list, tuple)):
-                samples_v = samples_v[0]
+        for surfaces, target_us_i, target_vs_i, target_verts_i, samples_u_i, samples_v_i in inputs:
+            objects = zip_long_repeat(surfaces, target_us_i, target_vs_i, target_verts_i, samples_u_i, samples_v_i)
+            for surface, target_us, target_vs, target_verts, samples_u, samples_v in objects:
 
-            if self.eval_mode == 'GRID':
-                target_us, target_vs = self.make_grid_input(surface, samples_u, samples_v)
-                new_edges = self.make_edges_xy(samples_u, samples_v)
-                new_faces = self.make_faces_xy(samples_u, samples_v)
-            else:
-                if self.input_mode == 'VERTICES':
-                    target_us, target_vs = self.parse_input(target_verts)
+                if self.eval_mode == 'GRID':
+                    target_us, target_vs = self.make_grid_input(surface, samples_u, samples_v)
+                    new_edges = self.make_edges_xy(samples_u, samples_v)
+                    new_faces = self.make_faces_xy(samples_u, samples_v)
                 else:
-                    target_us, target_vs = np.array(target_us), np.array(target_vs)
-                if self.clamp_mode == 'CLAMP':
-                    target_us, target_vs = self._clamp(surface, target_us, target_vs)
-                elif self.clamp_mode == 'WRAP':
-                    target_us, target_vs = self._wrap(surface, target_us, target_vs)
-                new_edges = []
-                new_faces = []
-            new_verts = surface.evaluate_array(target_us, target_vs)
+                    if self.input_mode == 'VERTICES':
+                        print(target_verts)
+                        target_us, target_vs = self.parse_input(target_verts)
+                    else:
+                        target_us, target_vs = np.array(target_us), np.array(target_vs)
+                    if self.clamp_mode == 'CLAMP':
+                        target_us, target_vs = self._clamp(surface, target_us, target_vs)
+                    elif self.clamp_mode == 'WRAP':
+                        target_us, target_vs = self._wrap(surface, target_us, target_vs)
+                    new_edges = []
+                    new_faces = []
+                new_verts = surface.evaluate_array(target_us, target_vs)
 
-            new_verts = self.build_output(surface, new_verts)
-            new_verts = new_verts.tolist()
-            verts_out.append(new_verts)
-            edges_out.append(new_edges)
-            faces_out.append(new_faces)
+                new_verts = self.build_output(surface, new_verts)
+                new_verts = new_verts.tolist()
+                verts_out.append(new_verts)
+                edges_out.append(new_edges)
+                faces_out.append(new_faces)
 
         self.outputs['Vertices'].sv_set(verts_out)
         self.outputs['Edges'].sv_set(edges_out)
