@@ -631,28 +631,37 @@ class SvExCurveOnSurface(SvExCurve):
         return self.surface.evaluate_array(us, vs)
 
 class SvExIsoUvCurve(SvExCurve):
-    def __init__(self, surface, fixed_axis, value):
+    def __init__(self, surface, fixed_axis, value, flip=False):
         self.surface = surface
         self.fixed_axis = fixed_axis
         self.value = value
+        self.flip = flip
         self.tangent_delta = 0.001
 
     def get_u_bounds(self):
-        if self.fixed_axis == 0:
+        if self.fixed_axis == 'U':
             return self.surface.get_v_min(), self.surface.get_v_max()
         else:
             return self.surface.get_u_min(), self.surface.get_u_max()
 
     def evaluate(self, t):
-        if self.fixed_axis == 0:
+        if self.fixed_axis == 'U':
+            if self.flip:
+                t = self.surface.get_v_max() - t + self.surface.get_v_min()
             return self.surface.evaluate(self.value, t)
         else:
+            if self.flip:
+                t = self.surface.get_u_max() - t + self.surface.get_u_min()
             return self.surface.evaluate(t, self.value)
 
     def evaluate_array(self, ts):
-        if self.fixed_axis == 0:
+        if self.fixed_axis == 'U':
+            if self.flip:
+                ts = self.surface.get_v_max() - ts + self.surface.get_v_min()
             return self.surface.evaluate_array(np.repeat(self.value, len(ts)), ts)
         else:
+            if self.flip:
+                ts = self.surface.get_u_max() - ts + self.surface.get_u_min()
             return self.surface.evaluate_array(ts, np.repeat(self.value, len(ts)))
 
 def register():
