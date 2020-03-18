@@ -101,7 +101,7 @@ if geomdl is not None:
                     for curve1, curve2, factor1, factor2 in zip(curves, curves[1:], factor1s, factor2s):
                         yield curve1, curve2, factor1, factor2
                     if self.cyclic:
-                        yield curves[-1], curves[0], factor1s[-1], factor1s[-1]
+                        yield curves[-1], curves[0], factor1s[-1], factor2s[-1]
 
         def process(self):
             if not any(socket.is_linked for socket in self.outputs):
