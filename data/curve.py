@@ -380,51 +380,53 @@ class SvExCurveSegment(SvExCurve):
         self.rescale = rescale
         if self.rescale:
             self.u_bounds = (0.0, 1.0)
+            self.target_u_bounds = (u_min, u_max)
         else:
             self.u_bounds = (u_min, u_max)
+            self.target_u_bounds = (u_min, u_max)
 
     def get_u_bounds(self):
         return self.u_bounds
 
     def evaluate(self, t):
         if self.rescale:
-            m,M = self.curve.get_u_bounds()
+            m,M = self.target_u_bounds
             t = (M - m)*t + m
         return self.curve.evaluate(t)
 
     def evaluate_array(self, ts):
         if self.rescale:
-            m,M = self.curve.get_u_bounds()
+            m,M = self.target_u_bounds
             ts = (M - m)*ts + m
         return self.curve.evaluate_array(ts)
 
     def tangent(self, t):
         if self.rescale:
-            m,M = self.curve.get_u_bounds()
+            m,M = self.target_u_bounds
             t = (M - m)*t + m
         return self.curve.tangent(t)
         
     def tangent_array(self, ts):
         if self.rescale:
-            m,M = self.curve.get_u_bounds()
+            m,M = self.target_u_bounds
             ts = (M - m)*ts + m
         return self.curve.tangent_array(ts)
 
     def second_derivative_array(self, ts):
         if self.rescale:
-            m,M = self.curve.get_u_bounds()
+            m,M = self.target_u_bounds
             ts = (M - m)*ts + m
         return self.curve.second_derivative_array(ts)
 
     def third_derivative_array(self, ts):
         if self.rescale:
-            m,M = self.curve.get_u_bounds()
+            m,M = self.target_u_bounds
             ts = (M - m)*ts + m
         return self.curve.third_derivative_array(ts)
 
     def derivatives_array(self, ts):
         if self.rescale:
-            m,M = self.curve.get_u_bounds()
+            m,M = self.target_u_bounds
             ts = (M - m)*ts + m
         return self.curve.derivatives_array(ts)
 

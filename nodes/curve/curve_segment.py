@@ -39,6 +39,9 @@ class SvExCurveSegmentNode(bpy.types.Node, SverchCustomTreeNode):
         self.inputs.new('SvStringsSocket', "TMax").prop_name = 't_max'
         self.outputs.new('SvExCurveSocket', "Segment").display_shape = 'DIAMOND'
 
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "rescale", toggle=True)
+
     def process(self):
         if not any(socket.is_linked for socket in self.outputs):
             return
