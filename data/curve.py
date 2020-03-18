@@ -370,6 +370,64 @@ class SvExFlipCurve(SvExCurve):
         ts = M - ts + m
         return self.curve.derivatives_array(ts)
 
+class SvExCurveSegment(SvExCurve):
+    def __init__(self, curve, u_min, u_max, rescale=False):
+        self.curve = curve
+        if hasattr(curve, 'tangent_delta'):
+            self.tangent_delta = curve.tangent_delta
+        else:
+            self.tangent_delta = 0.001
+        self.rescale = rescale
+        if self.rescale:
+            self.u_bounds = (0.0, 1.0)
+        else:
+            self.u_bounds = (u_min, u_max)
+
+    def get_u_bounds(self):
+        return self.u_bounds
+
+    def evaluate(self, t):
+        if self.rescale:
+            m,M = self.curve.get_u_bounds()
+            t = (M - m)*t + m
+        return self.curve.evaluate(t)
+
+    def evaluate_array(self, ts):
+        if self.rescale:
+            m,M = self.curve.get_u_bounds()
+            ts = (M - m)*ts + m
+        return self.curve.evaluate_array(ts)
+
+    def tangent(self, t):
+        if self.rescale:
+            m,M = self.curve.get_u_bounds()
+            t = (M - m)*t + m
+        return self.curve.tangent(t)
+        
+    def tangent_array(self, ts):
+        if self.rescale:
+            m,M = self.curve.get_u_bounds()
+            ts = (M - m)*ts + m
+        return self.curve.tangent_array(ts)
+
+    def second_derivative_array(self, ts):
+        if self.rescale:
+            m,M = self.curve.get_u_bounds()
+            ts = (M - m)*ts + m
+        return self.curve.second_derivative_array(ts)
+
+    def third_derivative_array(self, ts):
+        if self.rescale:
+            m,M = self.curve.get_u_bounds()
+            ts = (M - m)*ts + m
+        return self.curve.third_derivative_array(ts)
+
+    def derivatives_array(self, ts):
+        if self.rescale:
+            m,M = self.curve.get_u_bounds()
+            ts = (M - m)*ts + m
+        return self.curve.derivatives_array(ts)
+
 class SvExLine(SvExCurve):
     def __init__(self, point, direction):
         self.point = point

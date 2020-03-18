@@ -82,6 +82,7 @@ def nodes_index():
                 ("curve.concat_curves", "SvExConcatCurvesNode"),
                 ("curve.blend_curves", "SvExBlendCurvesNode"),
                 ("curve.flip_curve", "SvExFlipCurveNode"),
+                ("curve.curve_segment", "SvExCurveSegmentNode"),
                 ("curve.curve_range", "SvExCurveRangeNode"),
                 ("curve.curve_length", "SvExCurveLengthNode"),
                 ("curve.curve_frame", "SvExCurveFrameNode"),
