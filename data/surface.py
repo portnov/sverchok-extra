@@ -954,6 +954,52 @@ class SvExCurveLerpSurface(SvExSurface):
     def v_size(self):
         return self.v_bounds[1] - self.v_bounds[0]
 
+class SvExSurfaceLerpSurface(SvExSurface):
+    def __init__(self, surface1, surface2, coefficient):
+        self.surface1 = surface1
+        self.surface2 = surface2
+        self.coefficient = coefficient
+        self.normal_delta = 0.001
+        self.v_bounds = (0.0, 1.0)
+        self.u_bounds = (0.0, 1.0)
+        self.s1_u_min, self.s1_u_max = surface1.get_u_min(), surface1.get_u_max()
+        self.s1_v_min, self.s1_v_max = surface1.get_v_min(), surface1.get_v_max()
+        self.s2_u_min, self.s2_u_max = surface2.get_u_min(), surface2.get_u_max()
+        self.s2_v_min, self.s2_v_max = surface2.get_v_min(), surface2.get_v_max()
+
+    def get_u_min(self):
+        return self.u_bounds[0]
+
+    def get_u_max(self):
+        return self.u_bounds[1]
+
+    def get_v_min(self):
+        return self.v_bounds[0]
+
+    def get_v_max(self):
+        return self.v_bounds[1]
+
+    @property
+    def u_size(self):
+        return self.u_bounds[1] - self.u_bounds[0]
+
+    @property
+    def v_size(self):
+        return self.v_bounds[1] - self.v_bounds[0]
+
+    def evaluate(self, u, v):
+        return self.evaluate_array(np.array([u]), np.array([v]))[0]
+    
+    def evaluate_array(self, us, vs):
+        us1 = (self.s1_u_max - self.s1_u_min) * us + self.s1_u_min
+        us2 = (self.s2_u_max - self.s2_u_min) * us + self.s2_u_min
+        vs1 = (self.s1_v_max - self.s1_v_min) * vs + self.s1_v_min
+        vs2 = (self.s2_v_max - self.s2_v_min) * vs + self.s2_v_min
+        s1_points = self.surface1.evaluate_array(us1, vs1)
+        s2_points = self.surface2.evaluate_array(us2, vs2)
+        k = self.coefficient
+        points = (1.0 - k) * s1_points + k * s2_points
+        return points
 
 def register():
     pass

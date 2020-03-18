@@ -53,6 +53,7 @@ def nodes_index():
                 ("surface.extrude_vector", "SvExExtrudeCurveVectorNode"),
                 ("surface.extrude_curve", "SvExExtrudeCurveCurveSurfaceNode"),
                 ("surface.curve_lerp", "SvExCurveLerpNode"),
+                ("surface.surface_lerp", "SvExSurfaceLerpNode"),
                 ("surface.quads_to_nurbs", "SvExQuadsToNurbsNode"),
                 ("surface.surface_domain", "SvExSurfaceDomainNode"),
                 ("surface.marching_cubes", "SvExMarchingCubesNode"),
