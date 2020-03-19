@@ -38,7 +38,7 @@ class SvExCatenaryCurve(SvExCurve):
     def tangent(self, t):
         t = t * self.x_range
         point = self.evaluate(t)
-        point_h = self.function(t+self.tangent_delta)
+        point_h = self.evaluate(t+self.tangent_delta)
         return (point_h - point) / self.tangent_delta
 
     def tangent_array(self, ts):
