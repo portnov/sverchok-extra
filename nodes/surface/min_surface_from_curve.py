@@ -78,7 +78,7 @@ if scipy is not None:
                 curve_points = curve_points[:-1]
                 last_segment_length = np.linalg.norm(curve_points[0] - curve_points[-1])
             # T=0 will correspond to the center of gap between first and last point
-            dt = last_segment_length / 2.0
+            dt = min(last_segment_length / 2.0, segment_lengths.min())
             cum_segment_lengths = np.insert(np.cumsum(segment_lengths), 0, 0)
             total_length = cum_segment_lengths[-1] + last_segment_length
             ts = cum_segment_lengths + dt
