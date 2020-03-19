@@ -686,9 +686,9 @@ class SvExCastCurveToSphere(SvExCurve):
 
     def evaluate_array(self, ts):
         points = self.curve.evaluate_array(ts)
-        points = points - self.center
-        norms = np.linalg.norm(points, axis=1)[np.newaxis].T
-        normalized = points / norms
+        centered_points = points - self.center
+        norms = np.linalg.norm(centered_points, axis=1)[np.newaxis].T
+        normalized = centered_points / norms
         targets = self.radius * normalized + self.center
         k = self.coefficient
         return (1 - k) * points + k * targets
