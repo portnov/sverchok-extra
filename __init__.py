@@ -51,6 +51,7 @@ def nodes_index():
                 ("surface.approximate_nurbs_surface", "SvExApproxNurbsSurfaceNode"),
                 ("surface.interpolating_surface", "SvExInterpolatingSurfaceNode"),
                 ("surface.revolution_surface", "SvExRevolutionSurfaceNode"),
+                ("surface.taper_sweep", "SvExTaperSweepSurfaceNode"),
                 ("surface.extrude_vector", "SvExExtrudeCurveVectorNode"),
                 ("surface.extrude_curve", "SvExExtrudeCurveCurveSurfaceNode"),
                 ("surface.curve_lerp", "SvExCurveLerpNode"),

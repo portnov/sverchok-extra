@@ -9,6 +9,7 @@ from mathutils import bvhtree
 
 from sverchok.utils.logging import info, exception
 from sverchok.utils.math import from_spherical
+from sverchok.utils.geom import LineEquation
 
 from sverchok_extra.dependencies import geomdl
 
@@ -107,6 +108,16 @@ class SvExSurface(object):
 
     def get_v_max(self):
         return 1.0
+
+    @property
+    def u_size(self):
+        m,M = self.profile.get_u_bounds()
+        return M - m
+
+    @property
+    def v_size(self):
+        m,M = self.extrusion.get_u_bounds()
+        return M - m
 
 class SvExPlane(SvExSurface):
     def __init__(self, point, vector1, vector2):
@@ -902,16 +913,6 @@ class SvExExtrudeCurveZeroTwistSurface(SvExSurface):
     def get_v_max(self):
         return self.extrusion.get_u_bounds()[1]
 
-    @property
-    def u_size(self):
-        m,M = self.profile.get_u_bounds()
-        return M - m
-
-    @property
-    def v_size(self):
-        m,M = self.extrusion.get_u_bounds()
-        return M - m
-
 class SvExCurveLerpSurface(SvExSurface):
     def __init__(self, curve1, curve2):
         self.curve1 = curve1
@@ -1000,6 +1001,41 @@ class SvExSurfaceLerpSurface(SvExSurface):
         k = self.coefficient
         points = (1.0 - k) * s1_points + k * s2_points
         return points
+
+class SvExTaperSweepSurface(SvExSurface):
+    def __init__(self, profile, taper, point, direction):
+        self.profile = profile
+        self.taper = taper
+        self.direction = direction
+        self.point = point
+        self.line = LineEquation.from_direction_and_point(direction, point)
+        self.normal_delta = 0.001
+
+    def get_u_min(self):
+        return self.profile.get_u_bounds()[0]
+
+    def get_u_max(self):
+        return self.profile.get_u_bounds()[1]
+
+    def get_v_min(self):
+        return self.taper.get_u_bounds()[0]
+
+    def get_v_max(self):
+        return self.taper.get_u_bounds()[1]
+
+    def evaluate(self, u, v):
+        taper_point = self.taper.evaluate(v)
+        taper_projection = np.array( self.line.projection_of_point(taper_point) )
+        scale = np.linalg.norm(taper_projection - taper_point)
+        profile_point = self.profile.evaluate(u)
+        return profile_point * scale + taper_projection
+
+    def evaluate_array(self, us, vs):
+        taper_points = self.taper.evaluate_array(vs)
+        taper_projections = self.line.projection_of_points(taper_points)
+        scale = np.linalg.norm(taper_projections - taper_points, axis=1, keepdims=True)
+        profile_points = self.profile.evaluate_array(us)
+        return profile_points * scale + taper_projections
 
 def register():
     pass
