@@ -54,6 +54,7 @@ def nodes_index():
                 ("surface.taper_sweep", "SvExTaperSweepSurfaceNode"),
                 ("surface.extrude_vector", "SvExExtrudeCurveVectorNode"),
                 ("surface.extrude_curve", "SvExExtrudeCurveCurveSurfaceNode"),
+                ("surface.extrude_point", "SvExExtrudeCurvePointNode"),
                 ("surface.curve_lerp", "SvExCurveLerpNode"),
                 ("surface.surface_lerp", "SvExSurfaceLerpNode"),
                 ("surface.quads_to_nurbs", "SvExQuadsToNurbsNode"),

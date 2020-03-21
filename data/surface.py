@@ -779,6 +779,42 @@ class SvExExtrudeCurveVectorSurface(SvExSurface):
     def v_size(self):
         return 1.0
 
+class SvExExtrudeCurvePointSurface(SvExSurface):
+    def __init__(self, curve, point):
+        self.curve = curve
+        self.point = point
+        self.normal_delta = 0.001
+
+    def evaluate(self, u, v):
+        point_on_curve = self.curve.evaluate(u)
+        return (1.0 - v) * point_on_curve + v * self.point
+
+    def evaluate_array(self, us, vs):
+        points_on_curve = self.curve.evaluate_array(us)
+        vs = vs[np.newaxis].T
+        return (1.0 - vs) * points_on_curve + vs * self.point
+
+    def get_u_min(self):
+        return self.curve.get_u_bounds()[0]
+
+    def get_u_max(self):
+        return self.curve.get_u_bounds()[1]
+
+    def get_v_min(self):
+        return 0.0
+
+    def get_v_max(self):
+        return 1.0
+
+    @property
+    def u_size(self):
+        m,M = self.curve.get_u_bounds()
+        return M - m
+
+    @property
+    def v_size(self):
+        return 1.0
+
 class SvExExtrudeCurveCurveSurface(SvExSurface):
     def __init__(self, u_curve, v_curve):
         self.u_curve = u_curve
