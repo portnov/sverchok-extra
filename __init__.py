@@ -59,6 +59,7 @@ def nodes_index():
                 ("surface.surface_lerp", "SvExSurfaceLerpNode"),
                 ("surface.quads_to_nurbs", "SvExQuadsToNurbsNode"),
                 ("surface.surface_domain", "SvExSurfaceDomainNode"),
+                ("surface.subdomain", "SvExSurfaceSubdomainNode"),
                 ("surface.marching_cubes", "SvExMarchingCubesNode"),
                 ("surface.apply_field_to_surface", "SvExApplyFieldToSurfaceNode"),
                 ("surface.tessellate_trim", "SvExTessellateTrimSurfaceNode"),

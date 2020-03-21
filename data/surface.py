@@ -111,13 +111,47 @@ class SvExSurface(object):
 
     @property
     def u_size(self):
-        m,M = self.profile.get_u_bounds()
+        m,M = self.get_u_min(), self.get_u_max()
         return M - m
 
     @property
     def v_size(self):
-        m,M = self.extrusion.get_u_bounds()
+        m,M = self.get_v_min(), self.get_v_max()
         return M - m
+
+class SvExSurfaceSubdomain(SvExSurface):
+    def __init__(self, surface, u_bounds, v_bounds):
+        self.surface = surface
+        self.u_bounds = u_bounds
+        self.v_bounds = v_bounds
+        if hasattr(surface, "normal_delta"):
+            self.normal_delta = surface.normal_delta
+        else:
+            self.normal_delta = 0.001
+
+    def evaluate(self, u, v):
+        return self.surface.evaluate(u, v)
+
+    def evaluate_array(self, us, vs):
+        return self.surface.evaluate_array(us, vs)
+
+    def normal(self, u, v):
+        return self.surface.normal(u, v)
+
+    def normal_array(self, us, vs):
+        return self.surface.normal_array(us, vs)
+
+    def get_u_min(self):
+        return self.u_bounds[0]
+
+    def get_u_max(self):
+        return self.u_bounds[1]
+
+    def get_v_min(self):
+        return self.v_bounds[0]
+
+    def get_v_max(self):
+        return self.v_bounds[1]
 
 class SvExPlane(SvExSurface):
     def __init__(self, point, vector1, vector2):
