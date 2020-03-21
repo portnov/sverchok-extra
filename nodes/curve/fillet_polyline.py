@@ -62,7 +62,10 @@ class SvExFilletPolylineNode(bpy.types.Node, SverchCustomTreeNode):
         centers = []
         for v1, v2, v3, radius in corners:
             fillet = calc_fillet(v1, v2, v3, radius)
-            edge = SvExLine.from_two_points(prev_edge_start, fillet.p1)
+            edge_direction = np.array(fillet.p1) - np.array(prev_edge_start)
+            edge_len = np.linalg.norm(edge_direction)
+            edge = SvExLine(prev_edge_start, edge_direction / edge_len)
+            edge.u_bounds = (0.0, edge_len)
             arc = fillet.get_curve()
             prev_edge_start = fillet.p2
             curves.append(edge)
@@ -70,7 +73,10 @@ class SvExFilletPolylineNode(bpy.types.Node, SverchCustomTreeNode):
             centers.append(fillet.matrix)
 
         if not self.cyclic:
-            edge = SvExLine.from_two_points(prev_edge_start, vertices[-1])
+            edge_direction = np.array(vertices[-1])
+            edge_len = np.linalg.norm(edge_direction)
+            edge = SvExLine(prev_edge_start, edge_direction / edge_len)
+            edge.u_bounds = (0.0, edge_len)
             curves.append(edge)
 
         if self.concat:
