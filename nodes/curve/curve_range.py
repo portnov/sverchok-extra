@@ -4,6 +4,8 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
 
+from sverchok_extra.data.curve import SvExCurve
+
 class SvExCurveRangeNode(bpy.types.Node, SverchCustomTreeNode):
     """
     Triggers: Curve Domain / Range
@@ -23,17 +25,21 @@ class SvExCurveRangeNode(bpy.types.Node, SverchCustomTreeNode):
         if not any(socket.is_linked for socket in self.outputs):
             return
 
-        curves = self.inputs['Curve'].sv_get()
+        curve_s = self.inputs['Curve'].sv_get()
         t_min_out = []
         t_max_out = []
         range_out = []
 
-        for curve in curves:
-            t_min, t_max = curve.get_u_bounds()
-            t_range = t_max - t_min
-            t_min_out.append(t_min)
-            t_max_out.append(t_max)
-            range_out.append(t_range)
+        if isinstance(curve_s[0], SvExCurve):
+            curve_s = [curve_s]
+
+        for curves in curve_s:
+            for curve in curves:
+                t_min, t_max = curve.get_u_bounds()
+                t_range = t_max - t_min
+                t_min_out.append(t_min)
+                t_max_out.append(t_max)
+                range_out.append(t_range)
 
         self.outputs['TMin'].sv_set(t_min_out)
         self.outputs['TMax'].sv_set(t_max_out)
