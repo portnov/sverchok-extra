@@ -70,6 +70,7 @@ def nodes_index():
                 ("curve.circle", "SvExCircleNode"),
                 ("curve.curve_formula", "SvExCurveFormulaNode"),
                 ("curve.polyline", "SvExPolylineNode"),
+                ("curve.fillet_polyline", "SvExFilletPolylineNode"),
                 ("curve.cubic_spline", "SvExCubicSplineNode"),
                 ("curve.rbf_curve", "SvExRbfCurveNode"),
                 ("curve.catenary_curve", "SvExCatenaryCurveNode"),

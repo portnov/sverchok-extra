@@ -432,9 +432,14 @@ class SvExCurveSegment(SvExCurve):
 
 class SvExLine(SvExCurve):
     def __init__(self, point, direction):
-        self.point = point
+        self.point = np.array(point)
         self.direction = np.array(direction)
         self.u_bounds = (0.0, 1.0)
+
+    @classmethod
+    def from_two_points(cls, point1, point2):
+        direction = np.array(point2) - np.array(point1)
+        return SvExLine(point1, direction)
 
     def get_u_bounds(self):
         return self.u_bounds
