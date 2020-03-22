@@ -112,7 +112,7 @@ def make_menu():
     menu = []
     index = nodes_index()
     for category, items in index:
-        identifier = "SVERCHOK_EXTRA_" + category
+        identifier = "SVERCHOK_EXTRA_" + category.replace(' ', '_')
         node_items = []
         for item in items:
             nodetype = item[1]
