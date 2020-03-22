@@ -3,8 +3,8 @@ import numpy as np
 
 from sverchok.utils.modules.eval_formula import get_variables, sv_compile, safe_eval_compiled
 
-from sverchok_extra.data.field.scalar import SvExScalarFieldLambda
-from sverchok_extra.data.field.vector import SvExVectorFieldLambda
+from sverchok.utils.field.scalar import SvExScalarFieldLambda
+from sverchok.utils.field.vector import SvExVectorFieldLambda
 
 def make_vector_field(formula1, formula2, formula3):
     in_field = None

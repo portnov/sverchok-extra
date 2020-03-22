@@ -4,6 +4,7 @@ import numpy as np
 from sverchok.utils.testing import SverchokTestCase
 from sverchok.utils.logging import info, debug, error, exception
 from sverchok.utils.modules.eval_formula import get_variables, sv_compile, safe_eval_compiled
+from sverchok.utils.field.scalar import *
 
 from sverchok_extra.data.field.scalar import *
 from sverchok_extra.tests.make_fields import make_vector_field
