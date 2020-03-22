@@ -10,7 +10,7 @@ from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match
 from sverchok.utils.logging import info, exception
 from sverchok.utils.sv_bmesh_utils import bmesh_from_pydata
 from sverchok.utils.logging import info, exception
-from sverchok.utils.data.field.vector import SvExBvhAttractorVectorField
+from sverchok.utils.field.vector import SvExBvhAttractorVectorField
 
 from sverchok_extra.data.field.vector import SvExBvhRbfNormalVectorField
 from sverchok_extra.utils import rbf_functions

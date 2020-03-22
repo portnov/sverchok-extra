@@ -14,7 +14,7 @@ from sverchok.utils.surface import SvExInterpolatingSurface
 from sverchok.utils.curve import SvExSplineCurve, make_euclidian_ts
 
 from sverchok_extra.utils import rbf_functions
-from sverchok_extra.data.curve import SvExGeomdlCurve, SvExSplineCurve, SvExRbfCurve, make_euclidian_ts
+from sverchok_extra.data.curve import SvExGeomdlCurve, SvExRbfCurve
 from sverchok_extra.dependencies import geomdl, scipy
 
 class SvExInterpolatingSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
