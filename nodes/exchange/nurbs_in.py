@@ -6,9 +6,11 @@ from mathutils import Vector
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, split_by_count
 from sverchok.utils.logging import info, exception
+from sverchok.utils.curve import SvExCurve
+from sverchok.utils.surface import SvExSurface
 
-from sverchok_extra.data.curve import SvExGeomdlCurve, SvExCurve
-from sverchok_extra.data.surface import SvExGeomdlSurface, SvExSurface
+from sverchok_extra.data.curve import SvExGeomdlCurve
+from sverchok_extra.data.surface import SvExGeomdlSurface
 from sverchok_extra.dependencies import geomdl
 
 if geomdl is not None:

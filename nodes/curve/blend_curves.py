@@ -6,8 +6,9 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
 
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, repeat_last_for_length
+from sverchok.utils.curve import SvExCurve
 
-from sverchok_extra.data.curve import SvExCurve, SvExGeomdlCurve
+from sverchok_extra.data.curve import SvExGeomdlCurve
 from sverchok_extra.dependencies import geomdl
 
 if geomdl is not None:

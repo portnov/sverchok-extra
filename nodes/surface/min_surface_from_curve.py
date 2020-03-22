@@ -10,8 +10,8 @@ import sverchok
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, get_data_nesting_level
 from sverchok.utils.logging import info, exception
+from sverchok.utils.curve import SvExCurve, SvExCurveOnSurface, SvExCircle
 
-from sverchok_extra.data.curve import SvExCurve, SvExCurveOnSurface, SvExCircle
 from sverchok_extra.data.surface import SvExRbfSurface
 from sverchok_extra.utils import rbf_functions
 from sverchok_extra.dependencies import scipy

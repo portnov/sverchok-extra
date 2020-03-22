@@ -7,8 +7,7 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, ensure_nesting_level
 from sverchok.utils.logging import info, exception
-
-from sverchok_extra.data.surface import SvExSurface, SvExSurfaceLerpSurface
+from sverchok.utils.surface import SvExSurface, SvExSurfaceLerpSurface
 
 class SvExSurfaceLerpNode(bpy.types.Node, SverchCustomTreeNode):
     """

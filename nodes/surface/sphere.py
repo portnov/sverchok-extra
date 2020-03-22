@@ -7,8 +7,7 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
 
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, get_data_nesting_level
-
-from sverchok_extra.data.surface import SvExLambertSphere, SvExEquirectSphere, SvExGallSphere
+from sverchok.utils.surface import SvExLambertSphere, SvExEquirectSphere, SvExGallSphere
 
 class SvExSphereNode(bpy.types.Node, SverchCustomTreeNode):
     """

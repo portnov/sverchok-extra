@@ -6,8 +6,8 @@ from mathutils import Vector, Matrix
 
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
+from sverchok.utils.curve import SvExCircle
 
-from sverchok_extra.data.curve import SvExCircle
 from sverchok_extra.dependencies import circlify
 
 if circlify is not None:

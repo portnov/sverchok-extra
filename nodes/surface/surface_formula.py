@@ -10,9 +10,8 @@ from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match
 from sverchok.utils.modules.eval_formula import get_variables, sv_compile, safe_eval_compiled
 from sverchok.utils.logging import info, exception
 from sverchok.utils.math import from_cylindrical, from_spherical, to_cylindrical, to_spherical
-
-from sverchok_extra.data import coordinate_modes
-from sverchok_extra.data.surface import SvExLambdaSurface
+from sverchok.utils.math import coordinate_modes
+from sverchok.utils.surface import SvExLambdaSurface
 
 class SvExSurfaceFormulaNode(bpy.types.Node, SverchCustomTreeNode):
     """

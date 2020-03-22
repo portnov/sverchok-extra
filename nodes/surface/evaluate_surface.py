@@ -8,8 +8,7 @@ import sverchok
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, get_data_nesting_level
 from sverchok.utils.logging import info, exception
-
-from sverchok_extra.data.surface import SvExSurface
+from sverchok.utils.surface import SvExSurface
 
 U_SOCKET = 1
 V_SOCKET = 2

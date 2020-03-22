@@ -10,9 +10,10 @@ from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, get_data_nesting_level
 from sverchok.utils.logging import info, exception
 from sverchok.utils.geom import LinearSpline, CubicSpline
+from sverchok.utils.surface import SvExInterpolatingSurface
+from sverchok.utils.curve import SvExSplineCurve, make_euclidian_ts
 
 from sverchok_extra.utils import rbf_functions
-from sverchok_extra.data.surface import SvExInterpolatingSurface
 from sverchok_extra.data.curve import SvExGeomdlCurve, SvExSplineCurve, SvExRbfCurve, make_euclidian_ts
 from sverchok_extra.dependencies import geomdl, scipy
 

@@ -7,8 +7,7 @@ from mathutils import Vector
 
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, get_data_nesting_level
-
-from sverchok_extra.data.surface import SvExPlane
+from sverchok.utils.surface import SvExPlane
 
 class SvExPlaneSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
     """
