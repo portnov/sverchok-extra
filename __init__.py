@@ -38,7 +38,7 @@ from sverchok_extra import settings
 from sverchok_extra.utils import show_welcome
 
 def nodes_index():
-    return [("Surface", [
+    return [("Extra Surfaces", [
                 ("surface.minimal_surface", "SvExMinimalSurfaceNode"),
                 ("surface.min_surface_from_curve", "SvExMinSurfaceFromCurveNode"),
                 ("surface.smooth_spline", "SvExBivariateSplineNode"),
@@ -49,7 +49,7 @@ def nodes_index():
                 ("surface.quads_to_nurbs", "SvExQuadsToNurbsNode"),
                 ("surface.marching_cubes", "SvExMarchingCubesNode")
             ]),
-            ("Curve", [
+            ("Extra Curves", [
                 ("curve.rbf_curve", "SvExRbfCurveNode"),
                 ("curve.catenary_curve", "SvExCatenaryCurveNode"),
                 ("curve.nurbs_curve", "SvExNurbsCurveNode"),
@@ -58,7 +58,7 @@ def nodes_index():
                 ("curve.circlify", "SvExCirclifyNode"),
                 ("curve.marching_squares", "SvExMarchingSquaresNode")
             ]),
-            ("Field", [
+            ("Extra Fields", [
                 ("field.mesh_normal_field", "SvExMeshNormalFieldNode"),
                 ("field.minimal_vfield", "SvExMinimalVectorFieldNode"),
                 ("field.minimal_sfield", "SvExMinimalScalarFieldNode"),
