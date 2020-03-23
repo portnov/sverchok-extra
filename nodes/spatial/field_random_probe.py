@@ -58,7 +58,7 @@ class SvExFieldRandomProbeNode(bpy.types.Node, SverchCustomTreeNode):
         layout.prop(self, "proportional", toggle=True)
 
     def sv_init(self, context):
-        self.inputs.new('SvExScalarFieldSocket', "Field").display_shape = 'CIRCLE_DOT'
+        self.inputs.new('SvExScalarFieldSocket', "Field")
         self.inputs.new('SvVerticesSocket', "Bounds")
         self.inputs.new('SvStringsSocket', "Count").prop_name = 'count'
         self.inputs.new('SvStringsSocket', "Threshold").prop_name = 'threshold'

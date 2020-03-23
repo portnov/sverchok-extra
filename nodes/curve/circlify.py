@@ -54,7 +54,7 @@ if circlify is not None:
             d.prop = (0.0, 0.0, 0.0)
 
             self.inputs.new('SvStringsSocket', "MajorRadius").prop_name = 'major_radius'
-            self.outputs.new('SvExCurveSocket', "Circles").display_shape = 'DIAMOND'
+            self.outputs.new('SvExCurveSocket', "Circles")
             self.outputs.new('SvVerticesSocket', "Centers")
             self.outputs.new('SvStringsSocket', "Radiuses")
 

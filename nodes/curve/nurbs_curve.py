@@ -79,7 +79,7 @@ if geomdl is not None:
             self.inputs.new('SvStringsSocket', "Weights")
             self.inputs.new('SvStringsSocket', "Knots")
             self.inputs.new('SvStringsSocket', "Degree").prop_name = 'degree'
-            self.outputs.new('SvExCurveSocket', "Curve").display_shape = 'DIAMOND'
+            self.outputs.new('SvExCurveSocket', "Curve")
             self.outputs.new('SvStringsSocket', "Knots")
             self.update_sockets(context)
 

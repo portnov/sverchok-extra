@@ -68,7 +68,7 @@ if geomdl is not None:
             self.inputs.new('SvStringsSocket', "TangentWeight").prop_name = 'tangent_weight'
             self.inputs.new('SvStringsSocket', "DegreeU").prop_name = 'degree_u'
             self.inputs.new('SvStringsSocket', "DegreeV").prop_name = 'degree_v'
-            self.outputs.new('SvExSurfaceSocket', "Surfaces").display_shape = 'DIAMOND'
+            self.outputs.new('SvExSurfaceSocket', "Surfaces")
             self.outputs.new('SvVerticesSocket', "ControlPoints")
             self.outputs.new('SvStringsSocket', "Weights")
 

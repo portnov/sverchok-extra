@@ -54,13 +54,13 @@ if scipy is not None:
                 update = updateNode)
 
         def sv_init(self, context):
-            self.inputs.new('SvExCurveSocket', "Curve").display_shape = 'DIAMOND'
+            self.inputs.new('SvExCurveSocket', "Curve")
             self.inputs.new('SvStringsSocket', "Samples").prop_name = 'samples_t'
             self.inputs.new('SvStringsSocket', "Epsilon").prop_name = 'epsilon'
             self.inputs.new('SvStringsSocket', "Smooth").prop_name = 'smooth'
-            self.outputs.new('SvExSurfaceSocket', "Surface").display_shape = 'DIAMOND'
-            self.outputs.new('SvExCurveSocket', "TrimCurve").display_shape = 'DIAMOND'
-            self.outputs.new('SvExCurveSocket', "Curve").display_shape = 'DIAMOND'
+            self.outputs.new('SvExSurfaceSocket', "Surface")
+            self.outputs.new('SvExCurveSocket', "TrimCurve")
+            self.outputs.new('SvExCurveSocket', "Curve")
 
         def draw_buttons(self, context, layout):
             layout.prop(self, "function")

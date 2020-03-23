@@ -67,12 +67,12 @@ if geomdl is not None:
                 layout.prop(self, 'output_src', toggle=True)
 
         def sv_init(self, context):
-            self.inputs.new('SvExCurveSocket', 'Curve1').display_shape = 'DIAMOND'
-            self.inputs.new('SvExCurveSocket', 'Curve2').display_shape = 'DIAMOND'
-            self.inputs.new('SvExCurveSocket', 'Curves').display_shape = 'DIAMOND'
+            self.inputs.new('SvExCurveSocket', 'Curve1')
+            self.inputs.new('SvExCurveSocket', 'Curve2')
+            self.inputs.new('SvExCurveSocket', 'Curves')
             self.inputs.new('SvStringsSocket', "Factor1").prop_name = 'factor1'
             self.inputs.new('SvStringsSocket', "Factor2").prop_name = 'factor2'
-            self.outputs.new('SvExCurveSocket', 'Curve').display_shape = 'DIAMOND'
+            self.outputs.new('SvExCurveSocket', 'Curve')
             self.update_sockets(context)
 
         def get_inputs(self):

@@ -83,7 +83,7 @@ if geomdl is not None:
             self.inputs.new('SvStringsSocket', "DegreeV").prop_name = 'degree_v'
             self.inputs.new('SvStringsSocket', "PointsCntU").prop_name = 'points_cnt_u'
             self.inputs.new('SvStringsSocket', "PointsCntV").prop_name = 'points_cnt_v'
-            self.outputs.new('SvExSurfaceSocket', "Surface").display_shape = 'DIAMOND'
+            self.outputs.new('SvExSurfaceSocket', "Surface")
             self.outputs.new('SvVerticesSocket', "ControlPoints")
             self.outputs.new('SvStringsSocket', "KnotsU")
             self.outputs.new('SvStringsSocket', "KnotsV")

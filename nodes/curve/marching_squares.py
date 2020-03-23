@@ -76,7 +76,7 @@ if skimage is not None:
                 update = updateNode)
 
         def sv_init(self, context):
-            self.inputs.new('SvExScalarFieldSocket', "Field").display_shape = 'CIRCLE_DOT'
+            self.inputs.new('SvExScalarFieldSocket', "Field")
             self.inputs.new('SvStringsSocket', "Value").prop_name = 'iso_value'
             self.inputs.new('SvStringsSocket', "Samples").prop_name = 'sample_size'
             self.inputs.new('SvStringsSocket', "MinX").prop_name = 'min_x'

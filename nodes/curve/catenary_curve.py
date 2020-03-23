@@ -41,7 +41,7 @@ if scipy is not None:
 
             self.inputs.new('SvStringsSocket', "Length").prop_name = 'length'
 
-            self.outputs.new('SvExCurveSocket', "Curve").display_shape = 'DIAMOND'
+            self.outputs.new('SvExCurveSocket', "Curve")
 
         def process(self):
             if not any(socket.is_linked for socket in self.outputs):

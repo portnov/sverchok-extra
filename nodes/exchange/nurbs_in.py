@@ -64,8 +64,8 @@ if geomdl is not None:
             update = updateNode)
 
         def sv_init(self, context):
-            self.outputs.new('SvExCurveSocket', 'Curves').display_shape = 'DIAMOND'
-            self.outputs.new('SvExSurfaceSocket', 'Surfaces').display_shape = 'DIAMOND'
+            self.outputs.new('SvExCurveSocket', 'Curves')
+            self.outputs.new('SvExSurfaceSocket', 'Surfaces')
             self.outputs.new('SvMatrixSocket', 'Matrices')
 
         def get_objects_from_scene(self, ops):

@@ -36,8 +36,8 @@ if geomdl is not None:
             layout.prop_search(self, 'text_block', bpy.data, 'texts', text='', icon='TEXT')
 
         def sv_init(self, context):
-            self.outputs.new('SvExCurveSocket', "Curves").display_shape = 'DIAMOND'
-            self.outputs.new('SvExSurfaceSocket', "Surfaces").display_shape = 'DIAMOND'
+            self.outputs.new('SvExCurveSocket', "Curves")
+            self.outputs.new('SvExSurfaceSocket', "Surfaces")
 
         def load_json(self):
             def callback(data):

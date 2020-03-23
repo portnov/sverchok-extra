@@ -55,7 +55,7 @@ class SvExMeshNormalFieldNode(bpy.types.Node, SverchCustomTreeNode):
     def sv_init(self, context):
         self.inputs.new('SvVerticesSocket', 'Vertices')
         self.inputs.new('SvStringsSocket', 'Faces')
-        self.outputs.new('SvExVectorFieldSocket', "Field").display_shape = 'CIRCLE_DOT'
+        self.outputs.new('SvExVectorFieldSocket', "Field")
 
     def process(self):
         if not any(socket.is_linked for socket in self.outputs):

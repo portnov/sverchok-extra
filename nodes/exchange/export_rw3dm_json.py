@@ -96,8 +96,8 @@ if geomdl is not None:
             export.treename = self.id_data.name
 
         def sv_init(self, context):
-            self.inputs.new('SvExCurveSocket', "Curves").display_shape = 'DIAMOND'
-            self.inputs.new('SvExSurfaceSocket', "Surfaces").display_shape = 'DIAMOND'
+            self.inputs.new('SvExCurveSocket', "Curves")
+            self.inputs.new('SvExSurfaceSocket', "Surfaces")
             self.update_sockets(context)
 
         def process(self):
