@@ -28,78 +28,31 @@ Features
 At the moment, this addon includes the following nodes for Sverchok:
 
 * *Curve* category:
-  * Straight line curve (segment)
-  * Circle (Curve)
-  * Formula-defined curve
-  * Interpolation Curve (cubic or linear spline, uses numpy only)
   * Minimal (interpolation) Curve (uses [SciPy][4])
   * Catenary Curve (uses [SciPy][4])
   * NURBS Curve (uses [Geomdl][3] library)
   * NURBS Interpolation Curve (uses Geomdl library)
   * NURBS Approximation Curve (uses Geomdl library)
   * Circlify (pack a set of circles into another circle) (uses [Circlify][15] library)
-  * Cast Curve (project curve to plane, sphere or cylinder)
-  * Curve on Surface (curve in UV space of the surface)
-  * Curve Lerp (linear interpolation between two curves, extrapolation is also possible)
-  * Concatenate Curves (make single curve from several curves, assuming their endpoints coincide)
   * Blend Curves (by BSpline curve, uses [Geomdl][3] library)
-  * Apply Vector Field to Curve
-  * Curve Domain
-  * Curve Length (can also calculate length of part of the curve)
-  * Curve Length Parameter
-  * Curve Curvature
-  * Curve Torsion
-  * Curve Frame ([Frenet][16] frame for the curve)
-  * Curve Zero-Twist Frame (similar to previous, but rotates Frenet frame around the tangent to compensate curve's torsion)
-  * Evaluate Curve
   * Marching Squares (uses [Scikit-Image][5] library)
 * *Surface* category:
-  * Plane Surface
-  * Sphere Surface (several projections available)
-  * Formula-defined Surface
   * Smooth Bivariate Spline (uses [SciPy][4])
   * NURBS Surface (uses Geomdl)
   * NURBS Interpolation Surface (uses Geomdl)
   * NURBS Approximation Surface (uses Geomdl)
-  * Surface of revolution
-  * Extrude Curve along Vector
-  * Extrude Curve along Curve
-  * Linear Surface (ruled surface made by linear interpolation of two curves; extrapolation is also possible)
   * Quads to NURBS (uses Geomdl)
-  * Surface Domain (minimal / maximum values of U/V parameters of the surface)
   * Minimal Surface (uses SciPy)
   * Curves to Surface (optionally uses SciPy and/or Geomdl)
-  * Apply Vector Field to Surface
-  * Evaluate Surface (universal node for NURBS / minimal surfaces)
   * Marching Cubes (uses either [PyMCubes][8] or [Scikit-Image][5])
 * *Spatial* category:
   * Voronoi 3D (uses SciPy)
   * Spherical Voronoi (uses SciPy)
   * Scalar Field Random Probe
 * *Field* category (please refer to the [wiki page][11] about used concept of the field; most of these nodes do not use external libraries, except for numpy):
-  * Generate Scalar field by formula
-  * Generate Vector field by formula
-  * Compose Vector Field (from three Scalar fields)
-  * Decompose Vector Field (into three Scalar fields)
-  * Scalar field of a point
-  * Attractor Field
   * Mesh Nearest Normals Field (optionally uses SciPy)
-  * Image Field (convert Image data block into scalar or vector field)
-  * Merge Scalar Fields
   * Minimal Scalar Field (uses SciPy)
   * Minimal Vector Field (uses SciPy)
-  * Voronoi 3D Scalar / Vector Field (uses Blender's mathutils only)
-  * Bend along Surface (universal node for NURBS / minimal surfaces)
-  * Bend along Curve (universal node for NURBS / interpolation curves)
-  * Noise Vector Field
-  * Scalar field math
-  * Vector field math
-  * Field differential operators (gradient, divergence, laplacian...)
-  * Apply vector field
-  * Evaluate vector field
-  * Evaluate scalar field
-  * Vector Field Graph
-  * Vector Field Lines
   * Scalar Field Graph
 * *Exchange* category:
   * NURBS In (input Blender's NURBS curve or surface objects into Sverchok tree)
