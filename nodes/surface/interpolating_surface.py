@@ -19,11 +19,11 @@ from sverchok_extra.dependencies import geomdl, scipy
 
 class SvExInterpolatingSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
     """
-    Triggers: Interpolating surface from curves
+    Triggers: Interpolating surface from curves Ex
     Tooltip: Generate interpolating surface across several curves
     """
     bl_idname = 'SvExInterpolatingSurfaceNode'
-    bl_label = 'Surface from Curves'
+    bl_label = 'Surface from Curves (Extra)'
     bl_icon = 'OUTLINER_OB_EMPTY'
 
     def get_interp_modes(self, context):
