@@ -64,7 +64,7 @@ if mcubes is not None or skimage is not None:
                 update = update_sockets)
 
         def sv_init(self, context):
-            self.inputs.new('SvExScalarFieldSocket', "Field")
+            self.inputs.new('SvScalarFieldSocket', "Field")
             self.inputs.new('SvVerticesSocket', "Bounds")
             self.inputs.new('SvStringsSocket', "Value").prop_name = 'iso_value'
             self.inputs.new('SvStringsSocket', "Samples").prop_name = 'sample_size'

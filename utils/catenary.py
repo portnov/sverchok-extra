@@ -3,10 +3,10 @@ import numpy as np
 from math import sqrt, atanh, sinh, cosh
 
 from sverchok_extra.dependencies import scipy
-from sverchok_extra.data.curve import SvExCurve
+from sverchok_extra.data.curve import SvCurve
 from scipy.optimize import root_scalar
 
-class SvExCatenaryCurve(SvExCurve):
+class SvExCatenaryCurve(SvCurve):
     def __init__(self, A, x0, point1, force, x_direction, x_range):
         self.A = A
         self.x0 = x0

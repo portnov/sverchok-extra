@@ -6,7 +6,7 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
 
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, repeat_last_for_length
-from sverchok.utils.curve import SvExCurve
+from sverchok.utils.curve import SvCurve
 
 from sverchok_extra.data.curve import SvExGeomdlCurve
 from sverchok_extra.dependencies import geomdl
@@ -67,12 +67,12 @@ if geomdl is not None:
                 layout.prop(self, 'output_src', toggle=True)
 
         def sv_init(self, context):
-            self.inputs.new('SvExCurveSocket', 'Curve1')
-            self.inputs.new('SvExCurveSocket', 'Curve2')
-            self.inputs.new('SvExCurveSocket', 'Curves')
+            self.inputs.new('SvCurveSocket', 'Curve1')
+            self.inputs.new('SvCurveSocket', 'Curve2')
+            self.inputs.new('SvCurveSocket', 'Curves')
             self.inputs.new('SvStringsSocket', "Factor1").prop_name = 'factor1'
             self.inputs.new('SvStringsSocket', "Factor2").prop_name = 'factor2'
-            self.outputs.new('SvExCurveSocket', 'Curve')
+            self.outputs.new('SvCurveSocket', 'Curve')
             self.update_sockets(context)
 
         def get_inputs(self):
@@ -85,16 +85,16 @@ if geomdl is not None:
             if self.mode == 'TWO':
                 curve1_s = self.inputs['Curve1'].sv_get()
                 curve2_s = self.inputs['Curve2'].sv_get()
-                if isinstance(curve1_s[0], SvExCurve):
+                if isinstance(curve1_s[0], SvCurve):
                     curve1_s = [curve1_s]
-                if isinstance(curve2_s[0], SvExCurve):
+                if isinstance(curve2_s[0], SvCurve):
                     curve2_s = [curve2_s]
                 for curve1s, curve2s, factor1s, factor2s in zip_long_repeat(curve1_s, curve2_s, factor1_s, factor2_s):
                     for curve1, curve2, factor1, factor2 in zip_long_repeat(curve1s, curve2s, factor1s, factor2s):
                         yield curve1, curve2, factor1, factor2
             else:
                 curves_s = self.inputs['Curves'].sv_get()
-                if isinstance(curves_s[0], SvExCurve):
+                if isinstance(curves_s[0], SvCurve):
                     curves_s = [curves_s]
                 for curves, factor1s, factor2s in zip_long_repeat(curves_s, factor1_s, factor2_s):
                     factor1s = repeat_last_for_length(factor1s, len(curves))

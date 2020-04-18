@@ -6,7 +6,7 @@ from mathutils import Vector, Matrix
 
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
-from sverchok.utils.curve import SvExCircle
+from sverchok.utils.curve import SvCircle
 
 from sverchok_extra.dependencies import circlify
 
@@ -54,7 +54,7 @@ if circlify is not None:
             d.prop = (0.0, 0.0, 0.0)
 
             self.inputs.new('SvStringsSocket', "MajorRadius").prop_name = 'major_radius'
-            self.outputs.new('SvExCurveSocket', "Circles")
+            self.outputs.new('SvCurveSocket', "Circles")
             self.outputs.new('SvVerticesSocket', "Centers")
             self.outputs.new('SvStringsSocket', "Radiuses")
 
@@ -81,7 +81,7 @@ if circlify is not None:
                 center = Vector((x0, general_center[1], y0))
                 matrix = Matrix.Rotation(pi/2, 4, 'X')
                 matrix.translation = center
-            curve = SvExCircle(matrix, circle.r)
+            curve = SvCircle(matrix, circle.r)
             return curve
 
         def process(self):

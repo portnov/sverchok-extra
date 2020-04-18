@@ -10,7 +10,7 @@ import sverchok
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, get_data_nesting_level
 from sverchok.utils.logging import info, exception
-from sverchok.utils.curve import SvExCurve, SvExCurveOnSurface, SvExCircle
+from sverchok.utils.curve import SvCurve, SvCurveOnSurface, SvCircle
 
 from sverchok_extra.data.surface import SvExRbfSurface
 from sverchok_extra.utils import rbf_functions
@@ -54,13 +54,13 @@ if scipy is not None:
                 update = updateNode)
 
         def sv_init(self, context):
-            self.inputs.new('SvExCurveSocket', "Curve")
+            self.inputs.new('SvCurveSocket', "Curve")
             self.inputs.new('SvStringsSocket', "Samples").prop_name = 'samples_t'
             self.inputs.new('SvStringsSocket', "Epsilon").prop_name = 'epsilon'
             self.inputs.new('SvStringsSocket', "Smooth").prop_name = 'smooth'
-            self.outputs.new('SvExSurfaceSocket', "Surface")
-            self.outputs.new('SvExCurveSocket', "TrimCurve")
-            self.outputs.new('SvExCurveSocket', "Curve")
+            self.outputs.new('SvSurfaceSocket', "Surface")
+            self.outputs.new('SvCurveSocket', "TrimCurve")
+            self.outputs.new('SvCurveSocket', "Curve")
 
         def draw_buttons(self, context, layout):
             layout.prop(self, "function")
@@ -104,7 +104,7 @@ if scipy is not None:
             smooth_s = self.inputs['Smooth'].sv_get()
             samples_s = self.inputs['Samples'].sv_get()
 
-            if isinstance(curve_s[0], SvExCurve):
+            if isinstance(curve_s[0], SvCurve):
                 curve_s = [curve_s]
             epsilon_s = ensure_nesting_level(epsilon_s, 2)
             smooth_s = ensure_nesting_level(smooth_s, 2)
@@ -118,8 +118,8 @@ if scipy is not None:
             for curves, epsilons, smooths, samples_i in inputs:
                 for curve, epsilon, smooth, samples in zip_long_repeat(curves, epsilons, smooths, samples_i):
                     new_surface = self.make_surface(curve, epsilon, smooth, samples)
-                    circle = SvExCircle(Matrix(), 1.0)
-                    new_curve = SvExCurveOnSurface(circle, new_surface, axis=2)
+                    circle = SvCircle(Matrix(), 1.0)
+                    new_curve = SvCurveOnSurface(circle, new_surface, axis=2)
                     surface_out.append(new_surface)
                     curve_out.append(new_curve)
                     circle_out.append(circle)

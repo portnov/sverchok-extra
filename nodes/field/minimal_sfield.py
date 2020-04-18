@@ -57,7 +57,7 @@ if scipy is not None:
             self.inputs.new('SvStringsSocket', "Values")
             self.inputs.new('SvStringsSocket', "Epsilon").prop_name = 'epsilon'
             self.inputs.new('SvStringsSocket', "Smooth").prop_name = 'smooth'
-            self.outputs.new('SvExScalarFieldSocket', "Field")
+            self.outputs.new('SvScalarFieldSocket', "Field")
 
         def draw_buttons(self, context, layout):
             layout.prop(self, "function")

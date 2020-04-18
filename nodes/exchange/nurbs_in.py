@@ -6,8 +6,8 @@ from mathutils import Vector
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, split_by_count
 from sverchok.utils.logging import info, exception
-from sverchok.utils.curve import SvExCurve
-from sverchok.utils.surface import SvExSurface
+from sverchok.utils.curve import SvCurve
+from sverchok.utils.surface import SvSurface
 
 from sverchok_extra.data.curve import SvExGeomdlCurve
 from sverchok_extra.data.surface import SvExGeomdlSurface
@@ -64,8 +64,8 @@ if geomdl is not None:
             update = updateNode)
 
         def sv_init(self, context):
-            self.outputs.new('SvExCurveSocket', 'Curves')
-            self.outputs.new('SvExSurfaceSocket', 'Surfaces')
+            self.outputs.new('SvCurveSocket', 'Curves')
+            self.outputs.new('SvSurfaceSocket', 'Surfaces')
             self.outputs.new('SvMatrixSocket', 'Matrices')
 
         def get_objects_from_scene(self, ops):

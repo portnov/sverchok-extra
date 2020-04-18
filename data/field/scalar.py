@@ -1,5 +1,5 @@
 
-from sverchok.utils.field.scalar import SvExScalarField
+from sverchok.utils.field.scalar import SvScalarField
 
 ##################
 #                #
@@ -7,7 +7,7 @@ from sverchok.utils.field.scalar import SvExScalarField
 #                #
 ##################
 
-class SvExRbfScalarField(SvExScalarField):
+class SvExRbfScalarField(SvScalarField):
     def __init__(self, rbf):
         self.rbf = rbf
 

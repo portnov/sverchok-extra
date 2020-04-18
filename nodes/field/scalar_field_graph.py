@@ -68,7 +68,7 @@ if skimage is not None:
             layout.prop(self, 'join', toggle=True)
 
         def sv_init(self, context):
-            self.inputs.new('SvExScalarFieldSocket', "Field")
+            self.inputs.new('SvScalarFieldSocket', "Field")
             self.inputs.new('SvVerticesSocket', "Bounds")
             self.inputs.new('SvStringsSocket', "SamplesXY").prop_name = 'samples_xy'
             self.inputs.new('SvStringsSocket', "SamplesZ").prop_name = 'samples_z'

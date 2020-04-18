@@ -128,7 +128,7 @@ if geomdl is not None:
             self.inputs.new('SvStringsSocket', "USize").prop_name = 'u_size'
             self.outputs.new('SvVerticesSocket', "Vertices")
             self.outputs.new('SvStringsSocket', "Faces")
-            self.outputs.new('SvExSurfaceSocket', "Surface")
+            self.outputs.new('SvSurfaceSocket', "Surface")
             self.update_sockets(context)
 
         def draw_buttons(self, context, layout):

@@ -10,7 +10,7 @@ from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match
 from sverchok.utils.logging import info, exception
 from sverchok.utils.sv_bmesh_utils import bmesh_from_pydata
 from sverchok.utils.logging import info, exception
-from sverchok.utils.field.vector import SvExBvhAttractorVectorField
+from sverchok.utils.field.vector import SvBvhAttractorVectorField
 
 from sverchok_extra.data.field.vector import SvExBvhRbfNormalVectorField
 from sverchok_extra.utils import rbf_functions
@@ -55,7 +55,7 @@ class SvExMeshNormalFieldNode(bpy.types.Node, SverchCustomTreeNode):
     def sv_init(self, context):
         self.inputs.new('SvVerticesSocket', 'Vertices')
         self.inputs.new('SvStringsSocket', 'Faces')
-        self.outputs.new('SvExVectorFieldSocket', "Field")
+        self.outputs.new('SvVectorFieldSocket', "Field")
 
     def process(self):
         if not any(socket.is_linked for socket in self.outputs):
@@ -86,7 +86,7 @@ class SvExMeshNormalFieldNode(bpy.types.Node, SverchCustomTreeNode):
 
                 field = SvExBvhRbfNormalVectorField(bvh, rbf)
             else:
-                field = SvExBvhAttractorVectorField(verts=vertices, faces=faces, use_normal=True, signed_normal=self.signed)
+                field = SvBvhAttractorVectorField(verts=vertices, faces=faces, use_normal=True, signed_normal=self.signed)
             fields_out.append(field)
         self.outputs['Field'].sv_set(fields_out)
 

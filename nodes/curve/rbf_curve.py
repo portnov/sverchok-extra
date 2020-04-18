@@ -50,7 +50,7 @@ if scipy is not None:
             self.inputs.new('SvVerticesSocket', "Vertices")
             self.inputs.new('SvStringsSocket', "Epsilon").prop_name = 'epsilon'
             self.inputs.new('SvStringsSocket', "Smooth").prop_name = 'smooth'
-            self.outputs.new('SvExCurveSocket', "Curve")
+            self.outputs.new('SvCurveSocket', "Curve")
 
         def process(self):
             if not any(socket.is_linked for socket in self.outputs):

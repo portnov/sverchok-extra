@@ -7,9 +7,11 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, StringProperty
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList
 from sverchok.utils.logging import info, exception
+from sverchok.utils.curve import SvCurve
+from sverchok.utils.surface import SvSurface
 
-from sverchok_extra.data.curve import SvExGeomdlCurve, SvExCurve
-from sverchok_extra.data.surface import SvExGeomdlSurface, SvExSurface
+from sverchok_extra.data.curve import SvExGeomdlCurve
+from sverchok_extra.data.surface import SvExGeomdlSurface
 from sverchok_extra.dependencies import geomdl
 
 if geomdl is not None:
@@ -96,8 +98,8 @@ if geomdl is not None:
             export.treename = self.id_data.name
 
         def sv_init(self, context):
-            self.inputs.new('SvExCurveSocket', "Curves")
-            self.inputs.new('SvExSurfaceSocket', "Surfaces")
+            self.inputs.new('SvCurveSocket', "Curves")
+            self.inputs.new('SvSurfaceSocket', "Surfaces")
             self.update_sockets(context)
 
         def process(self):

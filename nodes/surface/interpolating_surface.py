@@ -10,8 +10,8 @@ from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, get_data_nesting_level
 from sverchok.utils.logging import info, exception
 from sverchok.utils.geom import LinearSpline, CubicSpline
-from sverchok.utils.surface import SvExInterpolatingSurface
-from sverchok.utils.curve import SvExSplineCurve, make_euclidian_ts
+from sverchok.utils.surface import SvInterpolatingSurface
+from sverchok.utils.curve import SvSplineCurve, make_euclidian_ts
 
 from sverchok_extra.utils import rbf_functions
 from sverchok_extra.data.curve import SvExGeomdlCurve, SvExRbfCurve
@@ -86,12 +86,12 @@ class SvExInterpolatingSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
         if self.interp_mode == 'LIN':
             def make(vertices):
                 spline = LinearSpline(vertices, metric='DISTANCE', is_cyclic=self.is_cyclic)
-                return SvExSplineCurve(spline)
+                return SvSplineCurve(spline)
             return make
         elif self.interp_mode == 'CUBIC':
             def make(vertices):
                 spline = CubicSpline(vertices, metric='DISTANCE', is_cyclic=self.is_cyclic)
-                return SvExSplineCurve(spline)
+                return SvSplineCurve(spline)
             return make
         elif geomdl is not None and self.interp_mode == 'BSPLINE':
             from geomdl import fitting
@@ -124,11 +124,11 @@ class SvExInterpolatingSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
             layout.prop(self, 'function')
 
     def sv_init(self, context):
-        self.inputs.new('SvExCurveSocket', "Curves")
+        self.inputs.new('SvCurveSocket', "Curves")
         self.inputs.new('SvStringsSocket', "Degree").prop_name = 'degree'
         self.inputs.new('SvStringsSocket', "Epsilon").prop_name = 'epsilon'
         self.inputs.new('SvStringsSocket', "Smooth").prop_name = 'smooth'
-        self.outputs.new('SvExSurfaceSocket', "Surface")
+        self.outputs.new('SvSurfaceSocket', "Surface")
         self.update_sockets(context)
 
     def process(self):
@@ -155,7 +155,7 @@ class SvExInterpolatingSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
             u_spline_constructor = self.get_u_spline_constructor(degree, smooth, epsilon)
             v_bounds = (0.0, 1.0)
             u_bounds = (0.0, 1.0)
-            surface = SvExInterpolatingSurface(u_bounds, v_bounds, u_spline_constructor, curves)
+            surface = SvInterpolatingSurface(u_bounds, v_bounds, u_spline_constructor, curves)
             surfaces_out.append(surface)
 
         self.outputs['Surface'].sv_set(surfaces_out)

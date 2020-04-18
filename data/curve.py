@@ -1,7 +1,7 @@
 
 import numpy as np
 
-from sverchok.utils.curve import SvExCurve
+from sverchok.utils.curve import SvCurve
 
 ##################
 #                #
@@ -9,7 +9,7 @@ from sverchok.utils.curve import SvExCurve
 #                #
 ##################
 
-class SvExGeomdlCurve(SvExCurve):
+class SvExGeomdlCurve(SvCurve):
     def __init__(self, curve):
         self.curve = curve
         self.u_bounds = (0.0, 1.0)
@@ -61,7 +61,7 @@ class SvExGeomdlCurve(SvExCurve):
     def get_u_bounds(self):
         return self.u_bounds
 
-class SvExRbfCurve(SvExCurve):
+class SvExRbfCurve(SvCurve):
     def __init__(self, rbf, u_bounds):
         self.rbf = rbf
         self.u_bounds = u_bounds

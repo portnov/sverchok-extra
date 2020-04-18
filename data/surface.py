@@ -3,7 +3,7 @@ import numpy as np
 
 from mathutils import Matrix, Vector
 
-from sverchok.utils.surface import SvExSurface
+from sverchok.utils.surface import SvSurface
 
 from sverchok_extra.dependencies import geomdl
 
@@ -16,7 +16,7 @@ if geomdl is not None:
 #                #
 ##################
 
-class SvExRbfSurface(SvExSurface):
+class SvExRbfSurface(SvSurface):
     def __init__(self, rbf, coord_mode, input_orientation, input_matrix):
         self.rbf = rbf
         self.coord_mode = coord_mode
@@ -89,7 +89,7 @@ class SvExRbfSurface(SvExSurface):
         #self.info("Normals: %s", normal)
         return normal
 
-class SvExGeomdlSurface(SvExSurface):
+class SvExGeomdlSurface(SvSurface):
     def __init__(self, surface):
         self.surface = surface
         self.u_bounds = (0, 1)

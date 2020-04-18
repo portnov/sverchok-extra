@@ -2,7 +2,7 @@
 import numpy as np
 from mathutils import Matrix, Vector
 
-from sverchok.utils.field.vector import SvExVectorField
+from sverchok.utils.field.vector import SvVectorField
 
 ##################
 #                #
@@ -10,7 +10,7 @@ from sverchok.utils.field.vector import SvExVectorField
 #                #
 ##################
 
-class SvExRbfVectorField(SvExVectorField):
+class SvExRbfVectorField(SvVectorField):
     def __init__(self, rbf):
         self.rbf = rbf
 
@@ -27,7 +27,7 @@ class SvExRbfVectorField(SvExVectorField):
         vz = vz - zs
         return vx, vy, vz
 
-class SvExBvhRbfNormalVectorField(SvExVectorField):
+class SvExBvhRbfNormalVectorField(SvVectorField):
     def __init__(self, bvh, rbf):
         self.bvh = bvh
         self.rbf = rbf
