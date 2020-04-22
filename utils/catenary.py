@@ -4,7 +4,9 @@ from math import sqrt, atanh, sinh, cosh
 
 from sverchok_extra.dependencies import scipy
 from sverchok_extra.data.curve import SvCurve
-from scipy.optimize import root_scalar
+
+if scipy is not None:
+    from scipy.optimize import root_scalar
 
 class SvExCatenaryCurve(SvCurve):
     def __init__(self, A, x0, point1, force, x_direction, x_range):
