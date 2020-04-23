@@ -57,6 +57,7 @@ def nodes_index():
                 ("curve.interpolate_nurbs_curve", "SvExInterpolateNurbsCurveNode"),
                 ("curve.approximate_nurbs_curve", "SvExApproxNurbsCurveNode"),
                 ("curve.circlify", "SvExCirclifyNode"),
+                ("curve.nearest_point", "SvExNearestPointOnCurveNode"),
                 ("curve.marching_squares", "SvExMarchingSquaresNode")
             ]),
             ("Extra Fields", [

@@ -53,8 +53,8 @@ if scipy is not None:
 
     class SvExNearestPointOnSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
         """
-        Triggers: Evaluate Surface
-        Tooltip: Evaluate Surface
+        Triggers: Nearest Point on Surface
+        Tooltip: Find the point on the surface which is the nearest to the given point
         """
         bl_idname = 'SvExNearestPointOnSurfaceNode'
         bl_label = 'Nearest Point on Surface'
