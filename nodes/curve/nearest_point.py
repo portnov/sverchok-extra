@@ -96,9 +96,15 @@ if scipy is not None:
                     init_ts, init_points = init_guess(curve, src_points,samples=self.samples)
                     for src_point, init_t, init_point in zip(src_points, init_ts, init_points):
                         if self.precise:
+                            if init_t <= t_min:
+                                bracket = (init_t - 0.1, init_t, t_max)
+                            elif init_t >= t_max:
+                                bracket = (t_min, init_t, init_t + 0.1)
+                            else:
+                                bracket = (t_min, init_t, t_max)
                             result = minimize_scalar(goal(curve, src_point),
                                         bounds = (t_min, t_max),
-                                        bracket = (t_min, init_t, t_max),
+                                        bracket = bracket,
                                         method = 'Brent'
                                     )
                             if not result.success:
