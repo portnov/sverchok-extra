@@ -72,9 +72,26 @@ if scipy is not None:
             default = True,
             update = updateNode)
 
+        methods = [
+            ('L-BFGS-B', "L-BFGS-B", "L-BFGS-B algorithm", 0),
+            ('CG', "Conjugate Gradient", "Conjugate gradient algorithm", 1),
+            ('TNC', "Truncated Newton", "Truncated Newton algorithm", 2),
+            ('SLSQP', "SLSQP", "Sequential Least SQuares Programming algorithm", 3)
+        ]
+
+        method : EnumProperty(
+            name = "Method",
+            items = methods,
+            default = 'L-BFGS-B',
+            update = updateNode)
+
         def draw_buttons(self, context, layout):
             layout.prop(self, 'samples')
             layout.prop(self, 'precise', toggle=True)
+
+        def draw_buttons_ext(self, context, layout):
+            self.draw_buttons(context, layout)
+            layout.prop(self, 'method')
 
         def sv_init(self, context):
             self.inputs.new('SvSurfaceSocket', "Surface")
@@ -112,7 +129,8 @@ if scipy is not None:
                         if self.precise:
                             result = minimize(goal(surface, src_point),
                                         x0 = np.array([init_u, init_v]),
-                                        bounds = [(u_min, u_max), (v_min, v_max)]
+                                        bounds = [(u_min, u_max), (v_min, v_max)],
+                                        method = self.method
                                     )
                             if not result.success:
                                 raise Exception("Can't find the nearest point for {}: {}".format(src_point, result.message))
