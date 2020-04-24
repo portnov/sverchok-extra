@@ -104,7 +104,8 @@ if scipy is not None:
             ('lm', "Levenberg-Marquardt", "Levenberg-Marquardt algorithm", 1),
             ('krylov', "Krylov", "Krylov algorithm", 2),
             ('broyden1', "Broyden 1", "Broyden1 algorithm", 3),
-            ('broyden2', "Broyden 2", "Broyden2 algorithm", 4)
+            ('broyden2', "Broyden 2", "Broyden2 algorithm", 4),
+            ('anderson', 'Anderson', "Anderson algorithm", 5)
         ]
 
         method : EnumProperty(
