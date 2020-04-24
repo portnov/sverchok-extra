@@ -83,12 +83,33 @@ if scipy is not None:
             default = True,
             update = updateNode)
 
+        @throttled
+        def update_sockets(self, context):
+            self.inputs['Source'].hide_safe = self.project_mode != 'CONIC'
+            self.inputs['Direction'].hide_safe = self.project_mode != 'PARALLEL'
+
+        modes = [
+            ('PARALLEL', "Along Direction", "Project points along specified direction", 0),
+            ('CONIC', "From Source", "Project points along the direction from the source point", 1)
+        ]
+
+        project_mode : EnumProperty(
+            name = "Project",
+            items = modes,
+            default = 'PARALLEL',
+            update = update_sockets)
+
         def draw_buttons(self, context, layout):
+            layout.label(text="Project:")
+            layout.prop(self, 'project_mode', text='')
             layout.prop(self, 'samples')
             layout.prop(self, 'precise', toggle=True)
 
         def sv_init(self, context):
             self.inputs.new('SvSurfaceSocket', "Surface")
+            p = self.inputs.new('SvVerticesSocket', "Source")
+            p.use_prop = True
+            p.prop = (0.0, 0.0, 1.0)
             p = self.inputs.new('SvVerticesSocket', "Point")
             p.use_prop = True
             p.prop = (0.0, 0.0, 1.0)
@@ -97,6 +118,7 @@ if scipy is not None:
             p.prop = (0.0, 0.0, -1.0)
             self.outputs.new('SvVerticesSocket', "Point")
             self.outputs.new('SvVerticesSocket', "UVPoint")
+            self.update_sockets(context)
 
         def process(self):
             if not any(socket.is_linked for socket in self.outputs):
@@ -104,15 +126,17 @@ if scipy is not None:
 
             surfaces_s = self.inputs['Surface'].sv_get()
             surfaces_s = ensure_nesting_level(surfaces_s, 2, data_types=(SvSurface,))
-            src_point_s = self.inputs['Point'].sv_get()
+            src_point_s = self.inputs['Source'].sv_get()
             src_point_s = ensure_nesting_level(src_point_s, 4)
+            points_s = self.inputs['Point'].sv_get()
+            points_s = ensure_nesting_level(points_s, 4)
             direction_s = self.inputs['Direction'].sv_get()
             direction_s = ensure_nesting_level(direction_s, 4)
 
             points_out = []
             points_uv_out = []
-            for surfaces, src_points_i, directions_i in zip_long_repeat(surfaces_s, src_point_s, direction_s):
-                for surface, src_points, directions in zip_long_repeat(surfaces, src_points_i, directions_i):
+            for surfaces, src_points_i, points_i, directions_i in zip_long_repeat(surfaces_s, src_point_s, points_s, direction_s):
+                for surface, src_points, points, directions in zip_long_repeat(surfaces, src_points_i, points_i, directions_i):
                     u_min = surface.get_u_min()
                     u_max = surface.get_u_max()
                     v_min = surface.get_v_min()
@@ -123,17 +147,22 @@ if scipy is not None:
                     new_v = []
                     new_points = []
 
-                    directions = repeat_last_for_length(directions, len(src_points))
-                    init_us, init_vs, init_ts, init_points = init_guess(surface, src_points, directions, samples=self.samples)
-                    for src_point, direction, init_u, init_v, init_t, init_point in zip(src_points, directions, init_us, init_vs, init_ts, init_points):
+                    if self.project_mode == 'PARALLEL':
+                        directions = repeat_last_for_length(directions, len(points))
+                    else: # CONIC
+                        src_points = repeat_last_for_length(src_points, len(points))
+                        directions = (np.array(points) - np.array(src_points)).tolist()
+
+                    init_us, init_vs, init_ts, init_points = init_guess(surface, points, directions, samples=self.samples)
+                    for point, direction, init_u, init_v, init_t, init_point in zip(points, directions, init_us, init_vs, init_ts, init_points):
                         if self.precise:
                             direction = np.array(direction)
                             direction = direction / np.linalg.norm(direction)
-                            result = root(goal(surface, np.array(src_point), direction),
+                            result = root(goal(surface, np.array(point), direction),
                                         x0 = np.array([init_u, init_v, init_t]),
                                         method = 'hybr')
                             if not result.success:
-                                raise Exception("Can't find the projection for {}: {}".format(src_point, result.message))
+                                raise Exception("Can't find the projection for {}: {}".format(point, result.message))
                             u0, v0, t0 = result.x
                         else:
                             u0, v0 = init_u, init_v
