@@ -36,6 +36,7 @@ At the moment, this addon includes the following nodes for Sverchok:
   * Circlify (pack a set of circles into another circle) (uses [Circlify][15] library)
   * Blend Curves (by BSpline curve, uses [Geomdl][3] library)
   * Marching Squares (uses [Scikit-Image][5] library)
+  * Nearest Point on Curve (usess [SciPy][4])
 * *Surface* category:
   * Smooth Bivariate Spline (uses [SciPy][4])
   * NURBS Surface (uses Geomdl)
@@ -45,6 +46,8 @@ At the moment, this addon includes the following nodes for Sverchok:
   * Minimal Surface (uses SciPy)
   * Curves to Surface (optionally uses SciPy and/or Geomdl)
   * Marching Cubes (uses either [PyMCubes][8] or [Scikit-Image][5])
+  * Nearest Point on Surface (uses SciPy)
+  * Raycast onto Surface (uses SciPy)
 * *Spatial* category:
   * Voronoi 3D (uses SciPy)
   * Spherical Voronoi (uses SciPy)
