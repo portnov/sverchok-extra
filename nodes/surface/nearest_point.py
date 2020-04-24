@@ -91,7 +91,8 @@ if scipy is not None:
 
         def draw_buttons_ext(self, context, layout):
             self.draw_buttons(context, layout)
-            layout.prop(self, 'method')
+            if self.precise:
+                layout.prop(self, 'method')
 
         def sv_init(self, context):
             self.inputs.new('SvSurfaceSocket', "Surface")

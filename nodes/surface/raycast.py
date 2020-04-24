@@ -99,11 +99,30 @@ if scipy is not None:
             default = 'PARALLEL',
             update = update_sockets)
 
+        methods = [
+            ('hybr', "Hybrd & Hybrj", "Use MINPACK’s hybrd and hybrj routines (modified Powell method)", 0),
+            ('lm', "Levenberg-Marquardt", "Levenberg-Marquardt algorithm", 1),
+            ('krylov', "Krylov", "Krylov algorithm", 2),
+            ('broyden1', "Broyden 1", "Broyden1 algorithm", 3),
+            ('broyden2', "Broyden 2", "Broyden2 algorithm", 4)
+        ]
+
+        method : EnumProperty(
+            name = "Method",
+            items = methods,
+            default = 'hybr',
+            update = updateNode)
+
         def draw_buttons(self, context, layout):
             layout.label(text="Project:")
             layout.prop(self, 'project_mode', text='')
             layout.prop(self, 'samples')
             layout.prop(self, 'precise', toggle=True)
+
+        def draw_buttons_ext(self, context, layout):
+            self.draw_buttons(context, layout)
+            if self.precise:
+                layout.prop(self, 'method')
 
         def sv_init(self, context):
             self.inputs.new('SvSurfaceSocket', "Surface")
@@ -160,7 +179,7 @@ if scipy is not None:
                             direction = direction / np.linalg.norm(direction)
                             result = root(goal(surface, np.array(point), direction),
                                         x0 = np.array([init_u, init_v, init_t]),
-                                        method = 'hybr')
+                                        method = self.method)
                             if not result.success:
                                 raise Exception("Can't find the projection for {}: {}".format(point, result.message))
                             u0, v0, t0 = result.x
