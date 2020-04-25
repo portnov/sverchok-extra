@@ -60,7 +60,8 @@ if scipy is not None:
             ('krylov', "Krylov", "Krylov algorithm", 2),
             ('broyden1', "Broyden 1", "Broyden1 algorithm", 3),
             ('broyden2', "Broyden 2", "Broyden2 algorithm", 4),
-            ('anderson', 'Anderson', "Anderson algorithm", 5)
+            ('anderson', 'Anderson', "Anderson algorithm", 5),
+            ('df-sane', 'DF-SANE', "DF-SANE method", 6)
         ]
 
         method : EnumProperty(
