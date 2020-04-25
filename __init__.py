@@ -47,6 +47,7 @@ def nodes_index():
                 ("surface.approximate_nurbs_surface", "SvExApproxNurbsSurfaceNode"),
                 ("surface.interpolating_surface", "SvExInterpolatingSurfaceNode"),
                 ("surface.nearest_point", "SvExNearestPointOnSurfaceNode"),
+                ("surface.ortho_project", "SvExOrthoProjectSurfaceNode"),
                 ("surface.raycast", "SvExRaycastSurfaceNode"),
                 ("surface.quads_to_nurbs", "SvExQuadsToNurbsNode"),
                 ("surface.marching_cubes", "SvExMarchingCubesNode")

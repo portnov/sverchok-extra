@@ -4,8 +4,8 @@ from math import sqrt, atanh, sinh, cosh
 
 from mathutils import kdtree
 
+from sverchok.utils.curve import SvCurve, SvIsoUvCurve
 from sverchok_extra.dependencies import scipy
-from sverchok_extra.data.curve import SvCurve
 
 if scipy is not None:
     from scipy.optimize import root_scalar
@@ -59,6 +59,46 @@ def ortho_project_curve(src_point, curve, init_samples=10):
         point = curve.evaluate(u)
         points.append(point)
 
+    if not us:
+        raise Exception("Can't calculate the projection of {} onto {}".format(src_point, curve))
     result = ProjectionResult(us, points, src_point)
     return result
+
+def ortho_project_surface(src_point, surface, init_samples=10, maxiter=30, tolerance=1e-4):
+    u_min, u_max = surface.get_u_min(), surface.get_u_max()
+    v_min, v_max = surface.get_v_min(), surface.get_v_max()
+
+    u0 = (u_min + u_max) / 2.0
+    v0 = (v_min + v_max) / 2.0
+
+    fixed_axis = 'U'
+    fixed_axis_value = u0
+    prev_fixed_axis_value = v0
+    prev_point = surface.evaluate(u0, v0)
+
+    i = 0
+    while True:
+        if i > maxiter:
+            raise Exception("No convergence")
+        curve = SvIsoUvCurve(surface, fixed_axis, fixed_axis_value)
+        projection = ortho_project_curve(src_point, curve, init_samples)
+        point = projection.nearest
+        dv = point - prev_point
+        if np.linalg.norm(dv) < tolerance:
+            break
+        fixed_axis_value = projection.nearest_u
+        if fixed_axis == 'U':
+            fixed_axis = 'V'
+        else:
+            fixed_axis = 'U'
+        prev_fixed_axis_value = fixed_axis_value
+        prev_point = point
+        i += 1
+
+    if fixed_axis == 'U':
+        u, v = prev_fixed_axis_value, fixed_axis_value
+    else:
+        u, v = fixed_axis_value, prev_fixed_axis_value
+
+    return u, v, point
 
