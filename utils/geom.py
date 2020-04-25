@@ -114,7 +114,19 @@ class RaycastResult(object):
         self.us = []
         self.vs = []
 
-def raycast_surface(surface, src_points, directions, samples=50, precise=True, calc_points=True, method='hybr'):
+class RaycastInitGuess(object):
+    def __init__(self):
+        self.us = []
+        self.vs = []
+        self.ts = []
+        self.nearest = []
+        self.all_good = True
+
+SKIP = 'skip'
+FAIL = 'fail'
+RETURN_NONE = 'none'
+
+def raycast_surface(surface, src_points, directions, samples=50, precise=True, calc_points=True, method='hybr', on_init_fail = SKIP):
     def make_faces():
         faces = []
         for row in range(samples - 1):
@@ -135,24 +147,29 @@ def raycast_surface(surface, src_points, directions, samples=50, precise=True, c
         us = us.flatten()
         vs = vs.flatten()
 
+        h2 = (u_max - u_min) / (2 * samples)
+
         points = surface.evaluate_array(us, vs).tolist()
         faces = make_faces()
 
         bvh = BVHTree.FromPolygons(points, faces)
 
-        us_out = []
-        vs_out = []
-        t_out = []
-        nearest_out = []
-        h2 = (u_max - u_min) / (2 * samples)
+        guess = RaycastInitGuess()
         for src_point, direction in zip(src_points, directions):
             nearest, normal, index, distance = bvh.ray_cast(src_point, direction)
-            us_out.append(us[index] + h2)
-            vs_out.append(vs[index] + h2)
-            t_out.append(distance)
-            nearest_out.append(tuple(nearest))
+            if nearest is None:
+                guess.us.append(None)
+                guess.vs.append(None)
+                guess.ts.append(None)
+                guess.nearest.append(None)
+                guess.all_good = False
+            else:
+                guess.us.append(us[index] + h2)
+                guess.vs.append(vs[index] + h2)
+                guess.ts.append(distance)
+                guess.nearest.append(tuple(nearest))
 
-        return us_out, vs_out, t_out, nearest_out
+        return guess
 
     def goal(surface, src_point, direction):
         def function(p):
@@ -162,8 +179,21 @@ def raycast_surface(surface, src_points, directions, samples=50, precise=True, c
         return function
 
     result = RaycastResult()
-    result.init_us, result.init_vs, result.init_ts, result.init_points = init_guess()
+    guess = init_guess()
+    result.init_us, result.init_vs = guess.us, guess.vs
+    result.init_ts = guess.ts
+    result.init_points = guess.nearest
     for point, direction, init_u, init_v, init_t, init_point in zip(src_points, directions, result.init_us, result.init_vs, result.init_ts, result.init_points):
+        if init_u is None:
+            if on_init_fail == SKIP:
+                continue
+            elif on_init_fail == FAIL:
+                raise Exception("Can't find initial guess of the projection for {}".format(point))
+            elif on_init_fail == RETURN_NONE:
+                return None
+            else:
+                raise Exception("Invalid on_init_fail value")
+
         if precise:
             direction = np.array(direction)
             direction = direction / np.linalg.norm(direction)
