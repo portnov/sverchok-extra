@@ -12,55 +12,10 @@ from sverchok.utils.logging import info, exception
 from sverchok.utils.surface import SvSurface
 
 from sverchok_extra.dependencies import scipy
+from sverchok_extra.utils.geom import raycast_surface
 
 if scipy is not None:
     from scipy.optimize import root
-
-    def make_faces(samples):
-        faces = []
-        for row in range(samples - 1):
-            for col in range(samples - 1):
-                i = row * samples + col
-                face = (i, i+samples, i+samples+1, i+1)
-                faces.append(face)
-        return faces
-
-    def init_guess(surface, src_points, directions, samples=50):
-        u_min = surface.get_u_min()
-        u_max = surface.get_u_max()
-        v_min = surface.get_v_min()
-        v_max = surface.get_v_max()
-        us = np.linspace(u_min, u_max, num=samples)
-        vs = np.linspace(v_min, v_max, num=samples)
-        us, vs = np.meshgrid(us, vs)
-        us = us.flatten()
-        vs = vs.flatten()
-
-        points = surface.evaluate_array(us, vs).tolist()
-        faces = make_faces(samples)
-
-        bvh = BVHTree.FromPolygons(points, faces)
-
-        us_out = []
-        vs_out = []
-        t_out = []
-        nearest_out = []
-        h2 = (u_max - u_min) / (2 * samples)
-        for src_point, direction in zip(src_points, directions):
-            nearest, normal, index, distance = bvh.ray_cast(src_point, direction)
-            us_out.append(us[index] + h2)
-            vs_out.append(vs[index] + h2)
-            t_out.append(distance)
-            nearest_out.append(tuple(nearest))
-
-        return us_out, vs_out, t_out, nearest_out
-
-    def goal(surface, src_point, direction):
-        def function(p):
-            on_surface = surface.evaluate(p[0], p[1])
-            on_line = src_point + direction * p[2]
-            return (on_surface - on_line).flatten()
-        return function
 
     class SvExRaycastSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
         """
@@ -173,27 +128,14 @@ if scipy is not None:
                         src_points = repeat_last_for_length(src_points, len(points))
                         directions = (np.array(points) - np.array(src_points)).tolist()
 
-                    init_us, init_vs, init_ts, init_points = init_guess(surface, points, directions, samples=self.samples)
-                    for point, direction, init_u, init_v, init_t, init_point in zip(points, directions, init_us, init_vs, init_ts, init_points):
-                        if self.precise:
-                            direction = np.array(direction)
-                            direction = direction / np.linalg.norm(direction)
-                            result = root(goal(surface, np.array(point), direction),
-                                        x0 = np.array([init_u, init_v, init_t]),
-                                        method = self.method)
-                            if not result.success:
-                                raise Exception("Can't find the projection for {}: {}".format(point, result.message))
-                            u0, v0, t0 = result.x
-                        else:
-                            u0, v0 = init_u, init_v
-                            new_points.append(init_point)
+                    result = raycast_surface(surface, points, directions,
+                                samples = self.samples,
+                                precise = self.precise,
+                                calc_points = self.outputs['Point'].is_linked,
+                                method = self.method)
 
-                        new_uv.append((u0, v0, 0))
-                        new_u.append(u0)
-                        new_v.append(v0)
-
-                    if self.precise and self.outputs['Point'].is_linked:
-                        new_points = surface.evaluate_array(np.array(new_u), np.array(new_v)).tolist()
+                    new_uv = result.uvs
+                    new_points = result.points
 
                     points_out.append(new_points)
                     points_uv_out.append(new_uv)
