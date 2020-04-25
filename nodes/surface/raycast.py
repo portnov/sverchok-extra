@@ -15,7 +15,6 @@ from sverchok_extra.dependencies import scipy
 from sverchok_extra.utils.geom import raycast_surface
 
 if scipy is not None:
-    from scipy.optimize import root
 
     class SvExRaycastSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
         """
