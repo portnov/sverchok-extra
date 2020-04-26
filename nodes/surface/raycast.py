@@ -72,12 +72,14 @@ if scipy is not None:
         def draw_buttons(self, context, layout):
             layout.label(text="Project:")
             layout.prop(self, 'project_mode', text='')
-            layout.prop(self, 'samples')
             layout.prop(self, 'precise', toggle=True)
+            if not self.precise:
+                layout.prop(self, 'samples')
 
         def draw_buttons_ext(self, context, layout):
             self.draw_buttons(context, layout)
             if self.precise:
+                layout.prop(self, 'samples')
                 layout.prop(self, 'method')
 
         def sv_init(self, context):

@@ -139,6 +139,8 @@ class SurfaceRaycaster(object):
         self.surface = surface
         self.bvh = None
         self.samples = None
+        self.center_us = None
+        self.center_vs = None
 
     def init_bvh(self, samples):
         self.samples = samples
@@ -155,26 +157,31 @@ class SurfaceRaycaster(object):
         self.vs = vs.flatten()
 
         points = self.surface.evaluate_array(self.us, self.vs).tolist()
-        faces = self._make_faces()
+        self.center_us, self.center_vs, faces = self._make_faces()
 
         self.bvh = BVHTree.FromPolygons(points, faces)
 
     def _make_faces(self):
         samples = self.samples
+        uh2 = (self.u_max - self.u_min) / (2 * samples)
+        vh2 = (self.v_max - self.v_min) / (2 * samples)
         faces = []
+        center_us = []
+        center_vs = []
         for row in range(samples - 1):
             for col in range(samples - 1):
                 i = row * samples + col
                 face = (i, i+samples, i+samples+1, i+1)
+                u = self.us[i] + uh2
+                v = self.vs[i] + vh2
+                center_us.append(u)
+                center_vs.append(v)
                 faces.append(face)
-        return faces
+        return center_us, center_vs, faces
 
     def _init_guess(self, src_points, directions):
         if self.bvh is None:
             raise Exception("You have to call init_bvh() method first!")
-
-        uh2 = (self.u_max - self.u_min) / (2 * self.samples)
-        vh2 = (self.v_max - self.v_min) / (2 * self.samples)
 
         guess = RaycastInitGuess()
         for src_point, direction in zip(src_points, directions):
@@ -186,8 +193,8 @@ class SurfaceRaycaster(object):
                 guess.nearest.append(None)
                 guess.all_good = False
             else:
-                guess.us.append(self.us[index] + uh2)
-                guess.vs.append(self.vs[index] + vh2)
+                guess.us.append(self.center_us[index])
+                guess.vs.append(self.center_vs[index])
                 guess.ts.append(distance)
                 guess.nearest.append(tuple(nearest))
 
