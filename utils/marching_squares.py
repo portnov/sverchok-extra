@@ -1,5 +1,5 @@
 
-def make_contour(samples, min_x, x_size, min_y, y_size, z, contour, make_faces=False, connect_bounds=False):
+def make_contour(samples_x, samples_y, min_x, x_size, min_y, y_size, z, contour, make_faces=False, connect_bounds=False):
     n = len(contour)
     verts = []
     vert_0_bound = None
@@ -17,19 +17,19 @@ def make_contour(samples, min_x, x_size, min_y, y_size, z, contour, make_faces=F
                     vert_0_bound = 'D'
                 elif i == n-1:
                     vert_n_bound = 'D'
-            elif x0 >= samples-1:
+            elif x0 >= samples_x-1:
                 if i == 0:
                     vert_0_bound = 'C'
                 elif i == n-1:
                     vert_n_bound = 'C'
-            elif y0 >= samples-1:
+            elif y0 >= samples_y-1:
                 if i == 0:
                     vert_0_bound = 'B'
                 elif i == n-1:
                     vert_n_bound = 'B'
 
-        x = min_x + x_size * x0
-        y = min_y + y_size * y0
+        x = min_x + x_size * x0 + x_size/2.0
+        y = min_y + y_size * y0 + y_size/2.0
         vertex = (x, y, z)
         verts.append(vertex)
 
@@ -47,12 +47,12 @@ def make_contour(samples, min_x, x_size, min_y, y_size, z, contour, make_faces=F
         faces = []
     return verts, edges, faces
 
-def make_contours(samples, min_x, x_size, min_y, y_size, z, contours, make_faces=False, connect_bounds=False):
+def make_contours(samples_x, samples_y, min_x, x_size, min_y, y_size, z, contours, make_faces=False, connect_bounds=False):
     verts = []
     edges = []
     faces = []
     for contour in contours:
-        new_verts, new_edges, new_faces = make_contour(samples, min_x, x_size, min_y, y_size, z, contour, make_faces=make_faces, connect_bounds=connect_bounds)
+        new_verts, new_edges, new_faces = make_contour(samples_x, samples_y, min_x, x_size, min_y, y_size, z, contour, make_faces=make_faces, connect_bounds=connect_bounds)
         verts.append(new_verts)
         edges.append(new_edges)
         faces.append(new_faces)

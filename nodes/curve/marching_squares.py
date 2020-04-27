@@ -168,7 +168,7 @@ if skimage is not None:
                 x_size = (max_x - min_x)/samples
                 y_size = (max_y - min_y)/samples
 
-                new_verts, new_edges, new_faces = make_contours(samples, min_x, x_size, min_y, y_size, z_value, contours, make_faces=self.make_faces, connect_bounds = self.connect_bounds)
+                new_verts, new_edges, new_faces = make_contours(samples, samples, min_x, x_size, min_y, y_size, z_value, contours, make_faces=self.make_faces, connect_bounds = self.connect_bounds)
                 if has_matrix:
                     new_verts = self.unapply_matrix(matrix, new_verts)
                 verts_out.extend(new_verts)

@@ -62,7 +62,8 @@ def nodes_index():
                 ("curve.circlify", "SvExCirclifyNode"),
                 ("curve.nearest_point", "SvExNearestPointOnCurveNode"),
                 ("curve.ortho_project", "SvExOrthoProjectCurveNode"),
-                ("curve.marching_squares", "SvExMarchingSquaresNode")
+                ("curve.marching_squares", "SvExMarchingSquaresNode"),
+                ("curve.intersect_surface_plane", "SvExCrossSurfacePlaneNode")
             ]),
             ("Extra Fields", [
                 ("field.mesh_normal_field", "SvExMeshNormalFieldNode"),
