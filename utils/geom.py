@@ -7,6 +7,7 @@ from mathutils.bvhtree import BVHTree
 
 from sverchok.utils.curve import SvCurve, SvIsoUvCurve
 from sverchok.utils.logging import debug, info
+from sverchok.utils.geom import PlaneEquation, LineEquation
 from sverchok_extra.dependencies import scipy
 
 if scipy is not None:
@@ -320,4 +321,68 @@ def intersect_curve_surface(curve, surface, raycast_samples=10, ortho_samples=10
         prev_point = point
 
     return point
+
+def intersect_curve_plane(curve, plane, init_samples=10, ortho_samples=10, tolerance=1e-3, maxiter=50):
+    u_min, u_max = curve.get_u_bounds()
+    u_range = np.linspace(u_min, u_max, num=init_samples)
+    init_points = curve.evaluate_array(u_range)
+    init_signs = plane.side_of_points(init_points)
+    good_ranges = []
+    for u1, u2, sign1, sign2 in zip(u_range, u_range[1:], init_signs, init_signs[1:]):
+        if sign1 * sign2 < 0:
+            good_ranges.append((u1, u2))
+    if not good_ranges:
+        raise Exception("No candidate curve subranges for intersection")
+
+    solutions = []
+    for u1, u2 in good_ranges:
+        u0 = u1
+        tangent = curve.tangent(u0)
+        point = curve.evaluate(u0)
+        line = LineEquation.from_direction_and_point(tangent, point)
+
+        p = plane.intersect_with_line(line)
+        if p is None:
+            u0 = u2
+            tangent = curve.tangent(u0)
+            point = curve.evaluate(u0)
+            line = LineEquation.from_direction_and_point(tangent, point)
+            p = plane.intersect_with_line(line)
+            if p is None:
+                raise Exception("Can't find initial point for intersection")
+
+        i = 0
+        prev_prev_point = None
+        prev_point = np.array(p)
+        while True:
+            i += 1
+            if i > maxiter:
+                raise Exception("Maximum number of iterations is exceeded; last step {} - {} = {}".format(prev_prev_point, point, step))
+
+            ortho = ortho_project_curve(prev_point, curve, init_samples = ortho_samples)
+            point = ortho.nearest
+            step = np.linalg.norm(point - prev_point)
+            if step < tolerance:
+                debug("After ortho: Point {}, prev {}, iter {}".format(point, prev_point, i))
+                break
+
+            prev_point = point
+            tangent = curve.tangent(ortho.nearest_u)
+            point = curve.evaluate(ortho.nearest_u)
+            line = LineEquation.from_direction_and_point(tangent, point)
+            point = plane.intersect_with_line(line)
+            if point is None:
+                raise Exception("Can't intersect a line {} with a plane {}".format(line, point))
+            point = np.array(point)
+            step = np.linalg.norm(point - prev_point)
+            if step < tolerance:
+                debug("After raycast: Point {}, prev {}, iter {}".format(point, prev_point, i))
+                break
+
+            prev_prev_point = prev_point
+            prev_point = point
+
+        solutions.append(point)
+
+    return solutions
 
