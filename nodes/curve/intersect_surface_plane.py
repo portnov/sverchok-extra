@@ -11,11 +11,10 @@ from sverchok.utils.logging import info, exception
 from sverchok.utils.surface import SvSurface
 from sverchok.utils.geom import PlaneEquation
 
-from sverchok_extra.dependencies import skimage
-from sverchok_extra.utils.marching_squares import make_contours
+from sverchok_extra.dependencies import scipy, skimage
+from sverchok_extra.utils.geom import intersect_surface_plane_msquares, intersect_surface_plane_uv
 
-if skimage is not None:
-    from skimage import measure
+if skimage is not None or scipy is not None:
 
     class SvExCrossSurfacePlaneNode(bpy.types.Node, SverchCustomTreeNode):
         """
@@ -39,6 +38,29 @@ if skimage is not None:
                 min = 4,
                 update = updateNode)
 
+        init_samples : IntProperty(
+            name = "Init Resolution",
+            default = 10,
+            min = 3,
+            update = updateNode)
+
+        def get_modes(self, context):
+            modes = []
+            if skimage is not None:
+                modes.append(('skimage', "Marching Squares", "Use marching squares algorithm", 0))
+            if scipy is not None:
+                modes.append(('scipy', "OP + Tangent (Unsorted!)", "Use orthogonal projections + tangent method", 1))
+            return modes
+
+        @throttled
+        def update_sockets(self, context):
+            self.outputs['UVPoints'].hide_safe = self.algorithm != 'skimage'
+        
+        algorithm : EnumProperty(
+                name = "Algorithm",
+                items = get_modes,
+                update = update_sockets)
+
         def sv_init(self, context):
             self.inputs.new('SvSurfaceSocket', "Surface")
             d = self.inputs.new('SvVerticesSocket', "Point")
@@ -51,14 +73,15 @@ if skimage is not None:
             self.inputs.new('SvStringsSocket', "SamplesV").prop_name = 'samples_v'
             self.outputs.new('SvVerticesSocket', "Points")
             self.outputs.new('SvVerticesSocket', "UVPoints")
+            self.update_socket(context)
 
-        def fill_data(self, surface, point, normal, us, vs):
-            plane = PlaneEquation.from_normal_and_point(normal, point)
-            d = plane.d
-            surface_points = surface.evaluate_array(us, vs)
-            normal = np.array(normal)
-            p2 = np.apply_along_axis(lambda p : normal.dot(p), 1, surface_points)
-            return p2 + d
+        def draw_buttons(self, context, layout):
+            layout.prop(self, 'algorithm', text='')
+
+        def draw_buttons_ext(self, context, layout):
+            self.draw_buttons(context)
+            if self.algorithm == 'scipy':
+                layout.prop(self, 'init_samples')
 
         def process(self):
             if not any(socket.is_linked for socket in self.outputs):
@@ -80,34 +103,16 @@ if skimage is not None:
                 uv_new = []
                 points_new = []
                 for surface, point, normal, samples_u, samples_v in zip_long_repeat(surfaces, points, normals, samples_u_i, samples_v_i):
-
-                    u_min, u_max = surface.get_u_min(), surface.get_u_max()
-                    v_min, v_max = surface.get_v_min(), surface.get_v_max()
-                    u_range = np.linspace(u_min, u_max, num=samples_u)
-                    v_range = np.linspace(v_min, v_max, num=samples_v)
-                    us, vs = np.meshgrid(u_range, v_range, indexing='ij')
-                    us, vs = us.flatten(), vs.flatten()
-
-                    data = self.fill_data(surface, point, normal, us, vs)
-                    data = data.reshape((samples_u, samples_v))
-
-                    contours = measure.find_contours(data, level=0.0)
-
-                    u_size = (u_max - u_min) / samples_u
-                    v_size = (v_max - v_min) / samples_v
-
-                    uv_new, _, _ = make_contours(samples_u, samples_v,
-                                    u_min, u_size, v_min, v_size,
-                                    0,
-                                    contours,
-                                    make_faces = False,
-                                    connect_bounds = False)
-                    if need_points:
-                        for uv_i in uv_new:
-                            us_i = [p[0] for p in uv_i]
-                            vs_i = [p[1] for p in uv_i]
-                            ps = surface.evaluate_array(np.array(us_i), np.array(vs_i)).tolist()
-                            points_new.append(ps)
+                    plane = PlaneEquation.from_normal_and_point(normal, point)
+                    if self.algorithm == 'skimage':
+                        uv_new, points_new = intersect_surface_plane_msquares(surface, plane,
+                                                need_points = need_points,
+                                                samples_u = samples_u, samples_v = samples_v)
+                    else:
+                        points_new = intersect_surface_plane_uv(surface, plane,
+                                        samples_u = samples_u, samples_v = samples_v,
+                                        init_samples = self.init_samples, ortho_samples = self.init_samples)
+                        points_new = [points_new]
 
                 uv_out.extend(uv_new)
                 points_out.extend(points_new)
