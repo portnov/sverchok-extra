@@ -166,7 +166,7 @@ more tricky, I did not try.
 You have to somehow tell Blender's built-in python where to look for headers.
 I've found the simplest way is to do
 
-    $ ln -s /usr/include/python3.7m/* /path/to/blender/2.xx/python/include
+    $ ln -s /usr/include/python3.7m/* /path/to/blender/2.xx/python/include/python3.7m/
 
 There may be more correct way, but I do not know it.
 
