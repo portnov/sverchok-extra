@@ -75,6 +75,7 @@ def nodes_index():
             ("Spatial", [
                 ("spatial.voronoi3d", "SvExVoronoi3DNode"),
                 ("spatial.voronoi_sphere", "SvExVoronoiSphereNode"),
+                ("spatial.delaunay3d", "SvExDelaunay3DNode"),
                 ("spatial.field_random_probe", "SvExFieldRandomProbeNode")
             ]),
             ("Exchange", [
