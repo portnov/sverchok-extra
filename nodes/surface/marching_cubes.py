@@ -9,6 +9,7 @@ from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match
 from sverchok.utils.logging import info, exception
 
 from sverchok_extra.dependencies import mcubes, skimage
+from sverchok_extra.utils.marching_cubes import isosurface_np
 
 if skimage is not None:
     import skimage.measure
@@ -52,6 +53,7 @@ if mcubes is not None or skimage is not None:
                 modes.append(("skimage", "SciKit-Image", "SciKit-Image", 0))
             if mcubes is not None:
                 modes.append(("mcubes", "PyMCubes", "PyMCubes", 1))
+            modes.append(('python', "Pure Python", "Pure Python implementation", 2))
             return modes
 
         @throttled
@@ -132,7 +134,7 @@ if mcubes is not None or skimage is not None:
                     new_verts = (new_verts / samples) * (b2n - b1n) + b1n
                     new_verts, new_faces = new_verts.tolist(), new_faces.tolist()
                     new_normals = []
-                else: # skimage
+                elif self.implementation == 'skimage':
                     spacing = tuple(1 / (b2n - b1n))
                     new_verts, new_faces, normals, values = skimage.measure.marching_cubes_lewiner(
                             func_values, level = value,
@@ -141,6 +143,12 @@ if mcubes is not None or skimage is not None:
                     new_verts = (new_verts / samples) * (b2n - b1n) + b1n
                     new_verts, new_faces = new_verts.tolist(), new_faces.tolist()
                     new_normals = normals.tolist()
+                else: # python
+                    new_verts, new_faces = isosurface_np(func_values, value)
+                    new_verts = (new_verts / samples) * (b2n - b1n) + b1n
+                    new_verts = new_verts.tolist()
+                    new_normals = []
+
                 verts_out.append(new_verts)
                 faces_out.append(new_faces)
                 normals_out.append(new_normals)
