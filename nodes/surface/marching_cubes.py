@@ -131,7 +131,7 @@ if mcubes is not None or skimage is not None:
                             func_values,
                             value)                         # Isosurface value
 
-                    new_verts = (new_verts / samples) * (b2n - b1n) + b1n
+                    new_verts = (new_verts / (samples-1)) * (b2n - b1n) + b1n
                     new_verts, new_faces = new_verts.tolist(), new_faces.tolist()
                     new_normals = []
                 elif self.implementation == 'skimage':
@@ -140,12 +140,12 @@ if mcubes is not None or skimage is not None:
                             func_values, level = value,
                             #spacing = spacing,
                             step_size = 1)
-                    new_verts = (new_verts / samples) * (b2n - b1n) + b1n
+                    new_verts = (new_verts / (samples-1)) * (b2n - b1n) + b1n
                     new_verts, new_faces = new_verts.tolist(), new_faces.tolist()
                     new_normals = normals.tolist()
                 else: # python
                     new_verts, new_faces = isosurface_np(func_values, value)
-                    new_verts = (new_verts / samples) * (b2n - b1n) + b1n
+                    new_verts = (new_verts / (samples-1)) * (b2n - b1n) + b1n
                     new_verts = new_verts.tolist()
                     new_normals = []
 
