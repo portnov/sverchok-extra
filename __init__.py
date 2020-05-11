@@ -50,6 +50,7 @@ def nodes_index():
                 ("surface.ortho_project", "SvExOrthoProjectSurfaceNode"),
                 ("surface.raycast", "SvExRaycastSurfaceNode"),
                 ("surface.implicit_surface_raycast", "SvExImplSurfaceRaycastNode"),
+                ("surface.implicit_surface_solver", "SvExImplSurfaceSolverNode"),
                 ("surface.intersect_curve_surface", "SvExCrossCurveSurfaceNode"),
                 ("surface.quads_to_nurbs", "SvExQuadsToNurbsNode"),
                 ("surface.marching_cubes", "SvExMarchingCubesNode")
