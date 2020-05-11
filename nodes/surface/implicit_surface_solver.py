@@ -21,9 +21,7 @@ if scipy is not None:
             return (v - iso_value)**2
         return function
 
-    def solve(field, init, iso_value):
-        maxiter = 30
-        threshold = 1e-4
+    def solve(field, init, iso_value, maxiter=30, threshold=1e-4):
 
         i = 0
         p = init
@@ -33,7 +31,7 @@ if scipy is not None:
                 raise Exception("Maximum number of iterations is exceeded")
             v = field.evaluate_grid(p[:,0], p[:,1], p[:,2]) - iso_value
             dv = abs(v)
-            print(f"I#{i}, DV {dv.max()}")
+            #print(f"I#{i}, DV {dv.max()}")
             if (dv < threshold).all():
                 return p
             gradX, gradY, gradZ = field.gradient_grid(p[:,0], p[:,1], p[:,2])
@@ -55,6 +53,22 @@ if scipy is not None:
                 name = "Iso Value",
                 default = 0.0,
                 update = updateNode)
+
+        maxiter : IntProperty(
+                name = "Max Iterations",
+                default = 30,
+                min = 2,
+                update = updateNode)
+
+        accuracy : IntProperty(
+                name = "Accuracy",
+                default = 4,
+                min = 1,
+                update = updateNode)
+
+        def draw_buttons(self, context, layout):
+            layout.prop(self, 'maxiter')
+            layout.prop(self, 'accuracy')
 
         def sv_init(self, context):
             self.inputs.new('SvScalarFieldSocket', "Field")
@@ -78,10 +92,12 @@ if scipy is not None:
 
             verts_out = []
 
+            threshold = 10**(-self.accuracy)
+
             for fields, verts_i, iso_value_i in zip_long_repeat(field_s, verts_s, iso_value_s):
                 for field, verts, iso_value in zip_long_repeat(fields, verts_i, iso_value_i):
                     verts = np.array(verts)
-                    new_verts = solve(field, verts, iso_value).tolist()
+                    new_verts = solve(field, verts, iso_value, maxiter = self.maxiter, threshold=threshold).tolist()
                     verts_out.append(new_verts)
 
             self.outputs['Vertices'].sv_set(verts_out)
