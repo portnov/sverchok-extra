@@ -36,6 +36,8 @@ At the moment, this addon includes the following nodes for Sverchok:
   * Circlify (pack a set of circles into another circle) (uses [Circlify][15] library)
   * Blend Curves (by BSpline curve, uses [Geomdl][3] library)
   * Marching Squares (uses [Scikit-Image][5] library)
+  * Intersect Surface with Plane (uses [SciPy][4])
+  * Orthogonal Projection onto Curve (uses [SciPy][4])
   * Nearest Point on Curve (usess [SciPy][4])
 * *Surface* category:
   * Smooth Bivariate Spline (uses [SciPy][4])
@@ -44,19 +46,23 @@ At the moment, this addon includes the following nodes for Sverchok:
   * NURBS Approximation Surface (uses Geomdl)
   * Quads to NURBS (uses Geomdl)
   * Minimal Surface (uses SciPy)
+  * Minimal Surface from (closed) Curve (uses SciPy)
   * Curves to Surface (optionally uses SciPy and/or Geomdl)
-  * Marching Cubes (uses either [PyMCubes][8] or [Scikit-Image][5])
+  * Marching Cubes (optionally uses either [PyMCubes][8] or [Scikit-Image][5]; has slower implementation in pure Python)
   * Nearest Point on Surface (uses SciPy)
   * Raycast onto Surface (uses SciPy)
+  * Raycast onto Implicit Surface (scalar field iso-surface) (uses SciPy)
+  * Orthogonal Projection onto Surface (uses SciPy)
+  * Implicit Surface Solver / Wrap (no dependencies, experimental node)
 * *Spatial* category:
   * Voronoi 3D (uses SciPy)
   * Spherical Voronoi (uses SciPy)
-  * Scalar Field Random Probe
+  * Delaunay 3D (uses SciPy)
 * *Field* category (please refer to the [wiki page][11] about used concept of the field; most of these nodes do not use external libraries, except for numpy):
   * Mesh Nearest Normals Field (optionally uses SciPy)
   * Minimal Scalar Field (uses SciPy)
   * Minimal Vector Field (uses SciPy)
-  * Scalar Field Graph
+  * Scalar Field Graph (uses [Scikit-Image][5])
 * *Exchange* category:
   * NURBS In (input Blender's NURBS curve or surface objects into Sverchok tree)
   * NURBS to JSON (uses Geomdl to represent NURBS surfaces or curves in JSON format which can be converted to Rhino's `3dm` by [rw3dm][12]
