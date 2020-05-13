@@ -22,10 +22,30 @@ if scipy is not None:
             return v - iso_value
         return function
 
+    def find_distance(field, init, direction, max_distance, iso_value):
+        init_value = field.evaluate(init[0], init[1], init[2])
+        sign = (init_value - iso_value)
+        distance = max_distance
+        max_sections = 10
+        i = 0
+        while True:
+            i += 1
+            if i > max_sections:
+                raise Exception(f"Can not find range where the field jumps over iso_value: init value at {init} = {init_value}, last value at {distance} = {value}")
+            p = init + direction * distance
+            value = field.evaluate(p[0], p[1], p[2])
+            #print(value)
+            if (value - iso_value) * sign < 0:
+                break
+            distance /= 2.0
+
+        return distance
+
     def solve(field, init, direction, max_distance, iso_value):
+        distance = find_distance(field, init, direction, max_distance, iso_value)
         sol = root_scalar(goal(field, init, direction, iso_value), method = 'ridder',
                 x0 = 0,
-                bracket = (0, max_distance)
+                bracket = (0, distance)
             )
         t = sol.root
         p = init + t*direction
