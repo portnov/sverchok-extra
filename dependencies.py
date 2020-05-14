@@ -93,9 +93,19 @@ except ImportError:
     info(circlify_d.message)
     circlify = None
 
+ladydug_d = dependencies["lbt-ladybug"] = Dependency("lbt-ladybug", "https://github.com/ladybug-tools/ladybug")
+try:
+    import ladybug
+    ladydug_d.message = "Ladybug package is available"
+    ladydug_d.module = ladybug
+except ImportError:
+    ladydug_d.message = "Ladybug package is not available. Ladybug module will not be available"
+    ladydug_d.pip_installable = True
+    info(ladydug_d.message)
+    ladybug = None
+
 good_names = [d.package for d in dependencies.values() if d.module is not None and d.package is not None]
 if good_names:
     info("Dependencies available: %s.", ", ".join(good_names))
 else:
     info("No dependencies are available.")
-
