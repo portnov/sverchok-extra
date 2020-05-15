@@ -17,10 +17,14 @@ class SvExPipInstall(bpy.types.Operator):
     package : bpy.props.StringProperty(name = "Package names")
 
     def execute(self, context):
+        first_install = self.package in dependencies and [self.package] is None
         cmd = [PYPATH, '-m', 'pip', 'install', '--upgrade'] + self.package.split(" ")
         ok = subprocess.call(cmd) == 0
         if ok:
-            self.report({'INFO'}, "%s installed successfully. Please restart Blender to see effect." % self.package)
+            if first_install:
+                self.report({'INFO'}, "%s installed successfully. Please restart Blender to see effect." % self.package)
+            else:
+                self.report({'INFO'}, "%s upgraded successfully. Please restart Blender to see effect." % self.package)
             return {'FINISHED'}
         else:
             self.report({'ERROR'}, "Cannot install %s, see console output for details" % self.package)
@@ -64,6 +68,8 @@ class SvExPreferences(AddonPreferences):
             row.operator('wm.url_open', text="Visit package website").url = dependency.url
             if dependency.module is None and dependency.pip_installable and pip is not None:
                 row.operator('node.sv_ex_pip_install', text="Install with PIP").package = dependency.package
+            elif dependency.pip_installable and pip is not None:
+                op = row.operator('node.sv_ex_pip_install', text="Upgrade with PIP").package = dependency.package
             return row
 
         box.label(text="Dependencies:")
@@ -98,4 +104,3 @@ def unregister():
 
 if __name__ == '__main__':
     register()
-

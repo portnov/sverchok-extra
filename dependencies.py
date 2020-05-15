@@ -41,13 +41,13 @@ else:
     debug("PIP is already installed, no need to call ensurepip")
 
 scipy_d = dependencies["scipy"] = Dependency("scipy", "https://www.scipy.org/")
+scipy_d.pip_installable = True
 try:
     import scipy
     scipy_d.message = "SciPy is available"
     scipy_d.module = scipy
 except ImportError:
     scipy_d.message = "SciPy package is not available. Voronoi nodes and RBF-based nodes will not be available."
-    scipy_d.pip_installable = True
     info(scipy_d.message)
     scipy = None
 
@@ -62,13 +62,13 @@ except ImportError:
     geomdl = None
 
 skimage_d = dependencies["skimage"] = Dependency("scikit-image", "https://scikit-image.org/")
+skimage_d.pip_installable = True
 try:
     import skimage
     skimage_d.message = "SciKit-Image package is available"
     skimage_d.module = skimage
 except ImportError:
     skimage_d.message = "SciKit-Image package is not available; SciKit-based implementation of Marching Cubes and Marching Squares will not be available"
-    skimage_d.pip_installable = True
     info(skimage_d.message)
     skimage = None
 
@@ -83,13 +83,13 @@ except ImportError:
     mcubes = None
 
 circlify_d = dependencies["circlify"] = Dependency("circlify", "https://github.com/elmotec/circlify")
+circlify_d.pip_installable = True
 try:
     import circlify
     circlify_d.message = "Circlify package is available"
     circlify_d.module = circlify
 except ImportError:
     circlify_d.message = "Circlify package is not available. Circlify node will not be available"
-    circlify_d.pip_installable = True
     info(circlify_d.message)
     circlify = None
 
@@ -98,4 +98,3 @@ if good_names:
     info("Dependencies available: %s.", ", ".join(good_names))
 else:
     info("No dependencies are available.")
-
