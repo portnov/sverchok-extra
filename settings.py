@@ -17,7 +17,7 @@ class SvExPipInstall(bpy.types.Operator):
     package : bpy.props.StringProperty(name = "Package names")
 
     def execute(self, context):
-        first_install = self.package in dependencies and [self.package] is None
+        first_install = self.package in dependencies and dependencies[self.package] is None
         cmd = [PYPATH, '-m', 'pip', 'install', '--upgrade'] + self.package.split(" ")
         ok = subprocess.call(cmd) == 0
         if ok:
