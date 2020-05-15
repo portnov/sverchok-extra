@@ -28,7 +28,7 @@ from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat
 from sverchok.utils.logging import info, debug
 
-# make sverchok the root module name, (if sverchok dir not named exactly "sverchok") 
+# make sverchok the root module name, (if sverchok dir not named exactly "sverchok")
 if __name__ != "sverchok_extra":
     sys.modules["sverchok_extra"] = sys.modules[__name__]
 
@@ -130,15 +130,15 @@ def make_menu():
             if not rna:
                 info("Node `%s' is not available (probably due to missing dependencies).", nodetype)
             else:
-                node_item = SverchNodeItem.new(nodetype) 
+                node_item = SverchNodeItem.new(nodetype)
                 node_items.append(node_item)
-
-        cat = SverchNodeCategory(
-                    identifier,
-                    category,
-                    items = node_items
-                )
-        menu.append(cat)
+        if node_items:
+            cat = SverchNodeCategory(
+                        identifier,
+                        category,
+                        items=node_items
+                    )
+            menu.append(cat)
     return menu
 
 class SvExCategoryProvider(object):
@@ -168,7 +168,7 @@ def register():
 
     register_nodes()
     extra_nodes = importlib.import_module(".nodes", "sverchok_extra")
-    auto_gather_node_classes(extra_nodes)    
+    auto_gather_node_classes(extra_nodes)
     menu = make_menu()
     menu_category_provider = SvExCategoryProvider("SVERCHOK_EXTRA", menu)
     register_extra_category_provider(menu_category_provider) #if 'SVERCHOK_EXTRA' in nodeitems_utils._node_categories:
@@ -197,4 +197,3 @@ def unregister():
     icons.unregister()
     data.unregister()
     settings.unregister()
-
