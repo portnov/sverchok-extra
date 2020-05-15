@@ -112,8 +112,8 @@ if pygalmesh is not None:
                 return
 
             if not self.active:
-                verts_out = self['verts_out']
-                faces_out = self['faces_out']
+                verts_out = self.get('verts_out', [])
+                faces_out = self.get('faces_out', [])
                 self.outputs['Vertices'].sv_set(verts_out)
                 self.outputs['Faces'].sv_set(faces_out)
                 return
