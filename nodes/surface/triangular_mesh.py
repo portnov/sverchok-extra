@@ -132,7 +132,7 @@ if pygalmesh is not None:
             for fields, radiuses, values, cell_sizes in parameters:
                 for field, radius, value, cell_size in zip_long_repeat(fields, radiuses, values, cell_sizes):
                     domain = SvDomain(field, radius, value)
-                    mesh = pygalmesh.generate_mesh(domain, cell_size = cell_size)
+                    mesh = pygalmesh.generate_surface_mesh(domain, angle_bound=0.01, distance_bound=0.01, radius_bound=0.1)
                     new_verts = mesh.points.tolist()
                     new_faces = mesh.cells[0].data.tolist()
                     verts_out.append(new_verts)
