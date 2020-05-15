@@ -43,6 +43,15 @@ if scipy is not None:
 
             self.outputs.new('SvCurveSocket', "Curve")
 
+        join : BoolProperty(
+                name = "Join",
+                description = "Output single list of curves for all input points",
+                default = True,
+                update = updateNode)
+
+        def draw_buttons(self, context, layout):
+            layout.prop(self, 'join', toggle=True)
+
         def process(self):
             if not any(socket.is_linked for socket in self.outputs):
                 return
@@ -54,10 +63,15 @@ if scipy is not None:
 
             curves_out = []
             for point1s, point2s, forces, lengths in zip_long_repeat(point1_s, point2_s, force_s, length_s):
+                new_curves = []
                 for point1, point2, force, length in zip_long_repeat(point1s, point2s, forces, lengths):
                     solver = CatenarySolver(np.array(point1), np.array(point2), length, np.array(force))
                     curve = solver.solve()
-                    curves_out.append(curve)
+                    new_curves.append(curve)
+                if self.join:
+                    curves_out.extend(new_curves)
+                else:
+                    curves_out.append(new_curves)
 
             self.outputs['Curve'].sv_set(curves_out)
 
