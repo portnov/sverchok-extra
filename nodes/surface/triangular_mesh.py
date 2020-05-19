@@ -27,6 +27,20 @@ if pygalmesh is not None:
         def get_bounding_sphere_squared_radius(self):
             return self.radius**2
 
+    def build_volume(b1, b2, samples, field, iso_value):
+        x_range = np.linspace(b1[0], b2[0], num=samples)
+        y_range = np.linspace(b1[1], b2[1], num=samples)
+        z_range = np.linspace(b1[2], b2[2], num=samples)
+        xs, ys, zs = np.meshgrid(x_range, y_range, z_range, indexing='ij')
+        func_values = field.evaluate_grid(xs.flatten(), ys.flatten(), zs.flatten())
+        m = func_values.min()
+        M = func_values.max()
+        print(f"Values: {m} - {M}")
+        #func_values = iso_value - func_values
+        func_values[func_values > iso_value] = 0
+        func_values = func_values.reshape((samples, samples, samples))
+        return func_values
+
     class SvExUpdateGalMeshNodeOp(bpy.types.Operator):
         bl_idname = "node.sv_gal_gen_mesh_update"
         bl_label = "Update node"
@@ -79,8 +93,21 @@ if pygalmesh is not None:
                 default = True,
                 update = updateNode)
 
+        sample_size : IntProperty(
+                name = "Samples",
+                default = 50,
+                min = 4,
+                update = updateNode)
+
+        sample_size_draft : IntProperty(
+                name = "[D] Samples",
+                default = 25,
+                min = 4,
+                update = updateNode)
+
         draft_properties_mapping = dict(
-                cell_size = 'cell_size_draft'
+                cell_size = 'cell_size_draft',
+                sample_size = 'sample_size_draft'
             )
 
         def does_support_draft_mode(self):
@@ -101,11 +128,18 @@ if pygalmesh is not None:
 
         def sv_init(self, context):
             self.inputs.new('SvScalarFieldSocket', "Field")
-            self.inputs.new('SvStringsSocket', "Radius").prop_name = 'radius'
+            self.inputs.new('SvVerticesSocket', "Bounds")
             self.inputs.new('SvStringsSocket', "Value").prop_name = 'iso_value'
+            self.inputs.new('SvStringsSocket', "SampleSize").prop_name = 'sample_size'
             self.inputs.new('SvStringsSocket', "CellSize").prop_name = 'cell_size'
             self.outputs.new('SvVerticesSocket', "Vertices")
             self.outputs.new('SvStringsSocket', "Faces")
+
+        def get_bounds(self, vertices):
+            vs = np.array(vertices)
+            min = vs.min(axis=0)
+            max = vs.max(axis=0)
+            return min.tolist(), max.tolist()
 
         def process(self):
             if not any(socket.is_linked for socket in self.outputs):
@@ -119,20 +153,27 @@ if pygalmesh is not None:
                 return
 
             fields_s = self.inputs['Field'].sv_get()
-            radius_s = self.inputs['Radius'].sv_get()
+            bounds_s = self.inputs['Bounds'].sv_get()
             value_s = self.inputs['Value'].sv_get()
             cell_size_s = self.inputs['CellSize'].sv_get()
+            sample_size_s = self.inputs['SampleSize'].sv_get()
 
             fields_s = ensure_nesting_level(fields_s, 2, data_types=(SvScalarField,))
+            bounds_s = ensure_nesting_level(bounds_s, 4)
 
             verts_out = []
             faces_out = []
 
-            parameters = zip_long_repeat(fields_s, radius_s, value_s, cell_size_s)
-            for fields, radiuses, values, cell_sizes in parameters:
-                for field, radius, value, cell_size in zip_long_repeat(fields, radiuses, values, cell_sizes):
-                    domain = SvDomain(field, radius, value)
-                    mesh = pygalmesh.generate_surface_mesh(domain, angle_bound=0.01, distance_bound=0.01, radius_bound=0.1)
+            parameters = zip_long_repeat(fields_s, bounds_s, value_s, sample_size_s, cell_size_s)
+            for fields, bounds_i, values, sample_sizes, cell_sizes in parameters:
+                for field, bounds, value, sample_size, cell_size in zip_long_repeat(fields, bounds_i, values, sample_sizes, cell_sizes):
+                    b1, b2 = self.get_bounds(bounds)
+                    b1n, b2n = np.array(b1), np.array(b2)
+                    volume = build_volume(b1n, b2n, sample_size, field, value)
+                    h = [(b2[0] - b1[0])/sample_size,
+                            (b2[1] - b1[1])/sample_size,
+                            (b2[2] - b1[2])/sample_size]
+                    mesh = pygalmesh.generate_from_array(volume, h, cell_size=100*min(h), facet_distance=min(h))
                     new_verts = mesh.points.tolist()
                     new_faces = mesh.cells[0].data.tolist()
                     verts_out.append(new_verts)
