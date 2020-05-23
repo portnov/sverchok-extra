@@ -10,22 +10,32 @@ from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_
 from sverchok.utils.logging import info, exception
 from sverchok.utils.field.scalar import SvScalarField
 
-from sverchok_extra.dependencies import pygalmesh
+from sverchok_extra.dependencies import pygalmesh, scipy
 
-if pygalmesh is not None:
+if pygalmesh is not None and scipy is not None:
+
+    from scipy.interpolate import RegularGridInterpolator
 
     class SvDomain(pygalmesh.DomainBase):
-        def __init__(self, field, radius, iso_value):
+        def __init__(self, field, b1, b2, samples, iso_value):
             super().__init__()
             self.field = field
-            self.radius = radius
             self.iso_value = iso_value
+            self.b1 = b1
+            self.b2 = b2
+            x_range, y_range, z_range, self.volume = build_volume(b1, b2, samples, field, iso_value)
+            self.interpolator = RegularGridInterpolator((x_range, y_range, z_range), self.volume)
 
         def eval(self, x):
-            return self.field.evaluate(x[0], x[1], x[2]) - self.iso_value
+            if (x < self.b1).any() or (x > self.b2).any():
+                return 0
+            return self.interpolator(x)
 
         def get_bounding_sphere_squared_radius(self):
-            return self.radius**2
+            dx = self.b2[0] - self.b1[0]
+            dy = self.b2[1] - self.b1[1]
+            dz = self.b2[2] - self.b1[2]
+            return (dx**2 + dy**2 + dz**2)/4.0
 
     def build_volume(b1, b2, samples, field, iso_value):
         x_range = np.linspace(b1[0], b2[0], num=samples)
@@ -36,10 +46,10 @@ if pygalmesh is not None:
         m = func_values.min()
         M = func_values.max()
         print(f"Values: {m} - {M}")
-        #func_values = iso_value - func_values
-        func_values[func_values > iso_value] = 0
+        func_values = func_values - iso_value
+        #func_values[func_values > iso_value] = 0
         func_values = func_values.reshape((samples, samples, samples))
-        return func_values
+        return x_range, y_range, z_range, func_values
 
     class SvExUpdateGalMeshNodeOp(bpy.types.Operator):
         bl_idname = "node.sv_gal_gen_mesh_update"
@@ -169,11 +179,8 @@ if pygalmesh is not None:
                 for field, bounds, value, sample_size, cell_size in zip_long_repeat(fields, bounds_i, values, sample_sizes, cell_sizes):
                     b1, b2 = self.get_bounds(bounds)
                     b1n, b2n = np.array(b1), np.array(b2)
-                    volume = build_volume(b1n, b2n, sample_size, field, value)
-                    h = [(b2[0] - b1[0])/sample_size,
-                            (b2[1] - b1[1])/sample_size,
-                            (b2[2] - b1[2])/sample_size]
-                    mesh = pygalmesh.generate_from_array(volume, h, cell_size=100*min(h), facet_distance=min(h))
+                    domain = SvDomain(field, b1n, b2n, sample_size, value)
+                    mesh = pygalmesh.generate_surface_mesh(domain, angle_bound=30, distance_bound=0.5, radius_bound=0.5)
                     new_verts = mesh.points.tolist()
                     new_faces = mesh.cells[0].data.tolist()
                     verts_out.append(new_verts)
