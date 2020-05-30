@@ -171,10 +171,16 @@ class SvExMarchingCubesNode(bpy.types.Node, SverchCustomTreeNode):
             value_s = value_s[0]
 
         parameters = match_long_repeat([fields_s, vertices_s, value_s, samples_s, samples_x_s, samples_y_s, samples_z_s])
+        single_bounds = len(vertices_s) == 1
 
         verts_out = []
         faces_out = []
         normals_out = []
+
+        func_values = None
+        prev_field = None
+        prev_samples = (None, None, None)
+
         for field, vertices, value, samples, samples_x, samples_y, samples_z in zip(*parameters):
             if isinstance(value, (list, tuple)):
                 value = value[0]
@@ -197,12 +203,18 @@ class SvExMarchingCubesNode(bpy.types.Node, SverchCustomTreeNode):
 
             self.debug("Eval for value = %s", value)
 
-            x_range = np.linspace(b1[0], b2[0], num=samples_x)
-            y_range = np.linspace(b1[1], b2[1], num=samples_y)
-            z_range = np.linspace(b1[2], b2[2], num=samples_z)
-            xs, ys, zs = np.meshgrid(x_range, y_range, z_range, indexing='ij')
-            func_values = field.evaluate_grid(xs.flatten(), ys.flatten(), zs.flatten())
-            func_values = func_values.reshape((samples_x, samples_y, samples_z))
+            same_field = (prev_field is field)
+            same_samples = prev_samples == (samples_x, samples_y, samples_z)
+
+            need_eval = func_values is None or not same_field or not same_samples or not single_bounds
+
+            if not same_field or func_values is None:
+                x_range = np.linspace(b1[0], b2[0], num=samples_x)
+                y_range = np.linspace(b1[1], b2[1], num=samples_y)
+                z_range = np.linspace(b1[2], b2[2], num=samples_z)
+                xs, ys, zs = np.meshgrid(x_range, y_range, z_range, indexing='ij')
+                func_values = field.evaluate_grid(xs.flatten(), ys.flatten(), zs.flatten())
+                func_values = func_values.reshape((samples_x, samples_y, samples_z))
 
             if self.implementation == 'mcubes':
                 new_verts, new_faces = mcubes.marching_cubes(
@@ -224,6 +236,9 @@ class SvExMarchingCubesNode(bpy.types.Node, SverchCustomTreeNode):
                 new_verts = self.scale_back(b1n, b2n, samples_x, samples_y, samples_z, new_verts)
                 new_verts = new_verts.tolist()
                 new_normals = []
+
+            prev_field = field
+            prev_samples = (samples_x, samples_y, samples_z)
 
             verts_out.append(new_verts)
             faces_out.append(new_faces)
