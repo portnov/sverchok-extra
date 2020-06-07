@@ -93,9 +93,9 @@ def ortho_project_surface(src_point, surface, init_samples=10, maxiter=30, toler
         projection = ortho_project_curve(src_point, curve, init_samples)
         point = projection.nearest
         dv = point - prev_point
+        fixed_axis_value = projection.nearest_u
         if np.linalg.norm(dv) < tolerance:
             break
-        fixed_axis_value = projection.nearest_u
         if fixed_axis == 'U':
             fixed_axis = 'V'
         else:
