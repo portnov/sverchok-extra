@@ -58,6 +58,7 @@ def nodes_index():
             ("Extra Curves", [
                 ("curve.rbf_curve", "SvExRbfCurveNode"),
                 ("curve.catenary_curve", "SvExCatenaryCurveNode"),
+                ("curve.bezier_fit", "SvExBezierCurveFitNode"),
                 ("curve.nurbs_curve", "SvExNurbsCurveNode"),
                 ("curve.interpolate_nurbs_curve", "SvExInterpolateNurbsCurveNode"),
                 ("curve.approximate_nurbs_curve", "SvExApproxNurbsCurveNode"),
