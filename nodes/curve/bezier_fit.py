@@ -7,7 +7,7 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
 from sverchok.utils.curve import SvBezierCurve
-from sverchok.utils.geom import linear_approximation
+from sverchok.utils.geom import linear_approximation, Spline
 
 from sverchok_extra.dependencies import scipy
 
@@ -45,11 +45,25 @@ if scipy is not None:
                 default = 3,
                 update = updateNode)
 
+        metrics = [
+            ('MANHATTAN', 'Manhattan', "Manhattan distance metric", 0),
+            ('DISTANCE', 'Euclidan', "Eudlcian distance metric", 1),
+            ('POINTS', 'Points', "Points based", 2),
+            ('CHEBYSHEV', 'Chebyshev', "Chebyshev distance", 3)]
+
+        metric: EnumProperty(name='Metric',
+            description = "Knot mode",
+            default="DISTANCE", items=metrics,
+            update=updateNode)
+
         def sv_init(self, context):
             self.inputs.new('SvVerticesSocket', "Vertices")
             self.inputs.new('SvStringsSocket', "Degree").prop_name = 'degree'
             self.outputs.new('SvCurveSocket', "Curve")
             self.outputs.new('SvVerticesSocket', "ControlPoints")
+
+        def draw_buttons_ext(self, context, layout):
+            layout.prop(self, 'metric')
 
         def process(self):
             if not any(socket.is_linked for socket in self.outputs):
@@ -71,7 +85,8 @@ if scipy is not None:
                 npoints = degree + 1
                 vertices = np.array(vertices)
 
-                xdata = np.linspace(0, 1, num=n)
+                #xdata = np.linspace(0, 1, num=n)
+                xdata = Spline.create_knots(vertices, metric=self.metric)
                 ydata = np.ravel(vertices)
 
                 p0 = init_guess(vertices, npoints)
