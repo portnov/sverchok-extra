@@ -28,8 +28,16 @@ if scipy is not None:
 
         samples : IntProperty(
             name = "Init Resolution",
+            description = "A number of segments to subdivide the curve in; defines the maximum number of intersection points that is possible to find.",
             default = 10,
             min = 3,
+            update = updateNode)
+
+        accuracy : IntProperty(
+            name = "Accuracy",
+            description = "Accuracy level - number of exact digits after decimal points.",
+            default = 4,
+            min = 1,
             update = updateNode)
 
 #         join : BoolProperty(
@@ -39,6 +47,9 @@ if scipy is not None:
 
         def draw_buttons(self, context, layout):
             layout.prop(self, 'samples')
+            
+        def draw_buttons_ext(self, context, layout):
+            layout.prop(self, 'accuracy')
             
         def sv_init(self, context):
             self.inputs.new('SvCurveSocket', "Curve")
@@ -63,6 +74,8 @@ if scipy is not None:
             points_out = []
             t_out = []
 
+            tolerance = 10**(-self.accuracy)
+
             for curves, points, normals in zip_long_repeat(curves_s, point_s, normal_s):
                 new_points = []
                 new_ts = []
@@ -70,7 +83,8 @@ if scipy is not None:
                     plane = PlaneEquation.from_normal_and_point(normal, point)
                     ps = intersect_curve_plane(curve, plane,
                             method = EQUATION,
-                            init_samples = self.samples)
+                            init_samples = self.samples,
+                            tolerance = tolerance)
                     ts = [p[0] for p in ps]
                     points = [p[1].tolist() for p in ps]
                     new_points.extend(points)
