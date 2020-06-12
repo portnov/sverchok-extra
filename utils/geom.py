@@ -328,7 +328,23 @@ def intersect_curve_surface(curve, surface, raycast_samples=10, ortho_samples=10
 
     return point
 
-def intersect_curve_plane(curve, plane, init_samples=10, ortho_samples=10, tolerance=1e-3, maxiter=50):
+ORTHO = 'ortho'
+EQUATION = 'equation'
+
+def intersect_curve_plane_ortho(curve, plane, init_samples=10, ortho_samples=10, tolerance=1e-3, maxiter=50):
+    """
+    Find intersections of curve and a plane, by combination of orthogonal projections with tangent projections.
+    inputs:
+        * curve : SvCurve
+        * plane : sverchok.utils.geom.PlaneEquation
+        * init_samples: number of samples to subdivide the curve to; this defines the maximum possible number
+            of solutions the method will return (the solution is searched at each segment).
+        * ortho_samples: number of samples for ortho_project_curve method
+        * tolerance: target tolerance
+        * maxiter: maximum number of iterations
+    outputs:
+        list of intersection points
+    """
     u_min, u_max = curve.get_u_bounds()
     u_range = np.linspace(u_min, u_max, num=init_samples)
     init_points = curve.evaluate_array(u_range)
@@ -394,6 +410,65 @@ def intersect_curve_plane(curve, plane, init_samples=10, ortho_samples=10, toler
         solutions.append(point)
 
     return solutions
+
+def intersect_curve_plane_equation(curve, plane, init_samples=10, tolerance=1e-3, maxiter=50):
+    """
+    Find intersections of curve and a plane, by directly solving an equation.
+    inputs:
+        * curve : SvCurve
+        * plane : sverchok.utils.geom.PlaneEquation
+        * init_samples: number of samples to subdivide the curve to; this defines the maximum possible number
+            of solutions the method will return (the solution is searched at each segment).
+        * tolerance: target tolerance
+        * maxiter: maximum number of iterations
+    outputs:
+        list of 2-tuples:
+            * curve T value
+            * point at the curve
+    """
+    u_min, u_max = curve.get_u_bounds()
+    u_range = np.linspace(u_min, u_max, num=init_samples)
+    init_points = curve.evaluate_array(u_range)
+    init_signs = plane.side_of_points(init_points)
+    good_ranges = []
+    for u1, u2, sign1, sign2 in zip(u_range, u_range[1:], init_signs, init_signs[1:]):
+        if sign1 * sign2 < 0:
+            good_ranges.append((u1, u2))
+    if not good_ranges:
+        return []
+
+    plane_normal = np.array(plane.normal)
+    plane_d = plane.d
+
+    def goal(t):
+        point = curve.evaluate(t)
+        value = (plane_normal * point).sum() + plane_d
+        return value
+
+    solutions = []
+    for u1, u2 in good_ranges:
+        sol = root_scalar(goal, method='ridder',
+                bracket = (u1, u2),
+                xtol = tolerance,
+                maxiter = maxiter)
+        u = sol.root
+        point = curve.evaluate(u)
+        solutions.append((u, point))
+
+    return solutions
+
+def intersect_curve_plane(curve, plane, method = EQUATION, **kwargs):
+    """
+    Call for intersect_curve_plane_equation or intersect_curve_plane_ortho,
+    depending on `method` parameter.
+    Inputs and outputs: see corresponding method docs.
+    """
+    if method == EQUATION:
+        return intersect_curve_plane_equation(curve, plane, **kwargs)
+    elif method == ORTHO:
+        return intersect_curve_plane_ortho(curve, plane, **kwargs)
+    else:
+        raise Exception("Unsupported method")
 
 def intersect_surface_plane_msquares(surface, plane, need_points = True, samples_u=50, samples_v=50):
     u_min, u_max = surface.get_u_min(), surface.get_u_max()

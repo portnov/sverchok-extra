@@ -11,7 +11,7 @@ from sverchok.utils.logging import info, exception
 from sverchok.utils.curve import SvCurve
 from sverchok.utils.geom import PlaneEquation
 
-from sverchok_extra.utils.geom import intersect_curve_plane
+from sverchok_extra.utils.geom import intersect_curve_plane, EQUATION, ORTHO
 from sverchok_extra.dependencies import scipy
 
 if scipy is not None:
@@ -50,6 +50,7 @@ if scipy is not None:
             d.use_prop = True
             d.prop = (0.0, 0.0, 1.0)
             self.outputs.new('SvVerticesSocket', "Point")
+            self.outputs.new('SvStringsSocket', "T")
 
         def process(self):
             if not any(socket.is_linked for socket in self.outputs):
@@ -61,17 +62,26 @@ if scipy is not None:
             curves_s = ensure_nesting_level(curves_s, 2, data_types=(SvCurve,))
 
             points_out = []
+            t_out = []
 
             for curves, points, normals in zip_long_repeat(curves_s, point_s, normal_s):
                 new_points = []
+                new_ts = []
                 for curve, point, normal in zip_long_repeat(curves, points, normals):
                     plane = PlaneEquation.from_normal_and_point(normal, point)
-                    ps = intersect_curve_plane(curve, plane, init_samples = self.samples, ortho_samples = self.samples)
-                    new_points.extend(ps)
+                    ps = intersect_curve_plane(curve, plane,
+                            method = EQUATION,
+                            init_samples = self.samples)
+                    ts = [p[0] for p in ps]
+                    points = [p[1].tolist() for p in ps]
+                    new_points.extend(points)
+                    new_ts.extend(ts)
 
                 points_out.append(new_points)
+                t_out.append(new_ts)
 
             self.outputs['Point'].sv_set(points_out)
+            self.outputs['T'].sv_set(t_out)
 
 def register():
     if scipy is not None:
