@@ -37,8 +37,7 @@ if scipy is not None:
 #             default = True,
 #             update = updateNode)
 
-        def draw_buttons_ext(self, context, layout):
-            self.draw_buttons(context)
+        def draw_buttons(self, context, layout):
             layout.prop(self, 'samples')
             
         def sv_init(self, context):
