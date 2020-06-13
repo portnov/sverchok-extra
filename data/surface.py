@@ -3,7 +3,7 @@ import numpy as np
 
 from mathutils import Matrix, Vector
 
-from sverchok.utils.surface import SvSurface
+from sverchok.utils.surface import SvSurface, SurfaceCurvatureCalculator
 
 from sverchok_extra.dependencies import geomdl
 
@@ -126,8 +126,9 @@ class SvExGeomdlSurface(SvSurface):
         return False
 
     def evaluate(self, u, v):
-        v = self.surface.evaluate_single((u, v))
-        return np.array(v)
+        vert = self.surface.evaluate_single((u, v))
+        print(f"({u}, {v}) => {vert}")
+        return np.array(vert)
 
     def evaluate_array(self, us, vs):
         uv_coords = list(zip(list(us), list(vs)))
@@ -143,6 +144,41 @@ class SvExGeomdlSurface(SvSurface):
             uv_coords = list(zip(list(us), list(vs)))
             spline_normals = np.array( operations.normal(self.surface, uv_coords) )[:,1,:]
             return spline_normals
+
+    def derivatives_list(self, us, vs):
+        result = []
+        for u, v in zip(us, vs):
+            ds = self.surface.derivatives(u, v, order=2)
+            result.append(ds)
+        return np.array(result)
+
+    def curvature_calculator(self, us, vs, order=True):
+        surf_vertices = self.evaluate_array(us, vs)
+
+        derivatives = self.derivatives_list(us, vs)
+        # derivatives[i][j][k] = derivative w.r.t U j times, w.r.t. V k times, at i'th pair of (u, v)
+        fu = derivatives[:,1,0]
+        fv = derivatives[:,0,1]
+
+        normal = np.cross(fu, fv)
+        norm = np.linalg.norm(normal, axis=1, keepdims=True)
+        normal = normal / norm
+
+        fuu = derivatives[:,2,0]
+        fvv = derivatives[:,0,2]
+        fuv = derivatives[:,1,1]
+
+        nuu = (fuu * normal).sum(axis=1)
+        nvv = (fvv * normal).sum(axis=1)
+        nuv = (fuv * normal).sum(axis=1)
+
+        duu = np.linalg.norm(fu, axis=1) **2
+        dvv = np.linalg.norm(fv, axis=1) **2
+        duv = (fu * fv).sum(axis=1)
+
+        calc = SurfaceCurvatureCalculator(us, vs, order=order)
+        calc.set(surf_vertices, normal, fu, fv, duu, dvv, duv, nuu, nvv, nuv)
+        return calc
 
 def register():
     pass
