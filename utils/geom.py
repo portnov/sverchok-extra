@@ -19,6 +19,10 @@ if scipy is not None:
 if skimage is not None:
     from skimage import measure
 
+SKIP = 'skip'
+FAIL = 'fail'
+RETURN_NONE = 'none'
+
 class CurveProjectionResult(object):
     def __init__(self, us, points, source):
         self.us = us
@@ -36,14 +40,17 @@ class CurveProjectionResult(object):
         self.nearest_distance = distance
         self.nearest_u = us[i]
 
-def ortho_project_curve(src_point, curve, init_samples=10):
+def ortho_project_curve(src_point, curve, subdomain = None, init_samples=10, on_fail=FAIL):
     def goal(t):
         point_on_curve = curve.evaluate(t)
         dv = src_point - point_on_curve
         tangent = curve.tangent(t)
         return dv.dot(tangent)
 
-    u_min, u_max = curve.get_u_bounds()
+    if subdomain is None:
+        u_min, u_max = curve.get_u_bounds()
+    else:
+        u_min, u_max = subdomain
     u_samples = np.linspace(u_min, u_max, num=init_samples)
 
     u_ranges = []
@@ -69,7 +76,12 @@ def ortho_project_curve(src_point, curve, init_samples=10):
         points.append(point)
 
     if not us:
-        raise Exception("Can't calculate the projection of {} onto {}".format(src_point, curve))
+        if on_fail == FAIL:
+            raise Exception("Can't calculate the projection of {} onto {}".format(src_point, curve))
+        elif on_fail == RETURN_NONE:
+            return None
+        else:
+            raise Exception("Unsupported on_fail value")
     result = CurveProjectionResult(us, points, src_point)
     return result
 
@@ -129,10 +141,6 @@ class RaycastInitGuess(object):
         self.ts = []
         self.nearest = []
         self.all_good = True
-
-SKIP = 'skip'
-FAIL = 'fail'
-RETURN_NONE = 'none'
 
 class SurfaceRaycaster(object):
     """
@@ -259,7 +267,7 @@ def raycast_surface(surface, src_points, directions, samples=50, precise=True, c
     raycaster.init_bvh(samples)
     return raycaster.raycast(src_points, directions, precise=precise, calc_points=calc_points, method=method, on_init_fail=on_init_fail)
 
-def intersect_curve_surface(curve, surface, raycast_samples=10, ortho_samples=10, tolerance=1e-3, maxiter=50, raycast_method='hybr'):
+def intersect_curve_surface(curve, surface, init_samples=10, raycast_samples=10, tolerance=1e-3, maxiter=50, raycast_method='hybr'):
     u_min, u_max = curve.get_u_bounds()
 
     raycaster = SurfaceRaycaster(surface)
@@ -277,56 +285,65 @@ def intersect_curve_surface(curve, surface, raycast_samples=10, ortho_samples=10
                         on_init_fail = RETURN_NONE)
         return good_sign, raycast
 
-    tangent = curve.tangent(u_min)
-    point = curve.evaluate(u_min)
-
-    sign = 1
-    u0 = u_min
-    raycast = raycaster.raycast([point], [sign*tangent],
-                method = raycast_method,
-                on_init_fail = RETURN_NONE)
-    if raycast is None:
-        sign = -1
-        u0 = u_max
-        tangent = curve.tangent(u_max)
-        point = curve.evaluate(u_max)
-        raycast = raycaster.raycast([point], [sign*tangent],
-                    method = raycast_method,
+    good_ranges = []
+    u_range = np.linspace(u_min, u_max, num=init_samples)
+    points = curve.evaluate_array(u_range)
+    tangents = curve.tangent_array(u_range)
+    for u1, u2, p1, p2, tangent1, tangent2 in zip(u_range, u_range[1:], points, points[1:], tangents,tangents[1:]):
+        raycast = raycaster.raycast([p1, p2], [tangent1, -tangent2],
+                    precise = False, calc_points=False,
                     on_init_fail = RETURN_NONE)
-
-    debug("Init sign = %s, u = %s", sign, u0)
-    if raycast is None:
-        raise Exception("Can't find initial raycast point for intersection")
-
-    i = 0
-    prev_prev_point = None
-    prev_point = raycast.points[0]
-    while True:
-        i += 1
-        if i > maxiter:
-            raise Exception("Maximum number of iterations is exceeded; last step {} - {} = {}".format(prev_prev_point, point, step))
-
-        ortho = ortho_project_curve(prev_point, curve, init_samples = ortho_samples)
-        point = ortho.nearest
-        step = np.linalg.norm(point - prev_point)
-        if step < tolerance:
-            debug("After ortho: Point {}, prev {}, iter {}".format(point, prev_point, i))
-            break
-
-        prev_point = point
-        tangent = curve.tangent(ortho.nearest_u)
-        sign, raycast = do_raycast(point, tangent, sign)
         if raycast is None:
-            raise Exception("Can't do a raycast with point {}, direction {} onto surface {}".format(point, tangent, surface))
-        point = raycast.points[0]
-        step = np.linalg.norm(point - prev_point)
-        if step < tolerance:
-            debug("After raycast: Point {}, prev {}, iter {}".format(point, prev_point, i))
-            break
-        prev_prev_point = prev_point
-        prev_point = point
+            continue
+        good_ranges.append((u1, u2, raycast.points[0], raycast.points[1]))
 
-    return point
+    result = []
+    for u1, u2, init_p1, init_p2 in good_ranges:
+
+        tangent = curve.tangent(u1)
+        point = curve.evaluate(u1)
+
+        i = 0
+        sign = 1
+        prev_prev_point = None
+        prev_point = init_p1
+        u_root = None
+        point_found = False
+        while True:
+            i += 1
+            if i > maxiter:
+                raise Exception("Maximum number of iterations is exceeded; last step {} - {} = {}".format(prev_prev_point, point, step))
+
+            ortho = ortho_project_curve(prev_point, curve,
+                        subdomain = (u1, u2),
+                        init_samples = 2,
+                        on_fail = RETURN_NONE)
+            if ortho is None:
+                break
+            point = ortho.nearest
+            u_root = ortho.nearest_u
+            if u_root < u1 or u_root > u2:
+                break
+            step = np.linalg.norm(point - prev_point)
+            if step < tolerance and i > 1:
+                debug("After ortho: Point {}, prev {}, iter {}".format(point, prev_point, i))
+                point_found = True
+                break
+
+            prev_point = point
+            tangent = curve.tangent(ortho.nearest_u)
+            sign, raycast = do_raycast(point, tangent, sign)
+            if raycast is None:
+                raise Exception("Can't do a raycast with point {}, direction {} onto surface {}".format(point, tangent, surface))
+            point = raycast.points[0]
+            step = np.linalg.norm(point - prev_point)
+            prev_prev_point = prev_point
+            prev_point = point
+
+        if point_found:
+            result.append((u_root, point))
+
+    return result
 
 ORTHO = 'ortho'
 EQUATION = 'equation'

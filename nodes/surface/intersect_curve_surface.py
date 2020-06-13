@@ -28,8 +28,14 @@ if scipy is not None:
         bl_icon = 'OUTLINER_OB_EMPTY'
         sv_icon = 'SV_EVAL_SURFACE'
 
-        samples : IntProperty(
-            name = "Init Resolution",
+        raycast_samples : IntProperty(
+            name = "Init Surface Samples",
+            default = 10,
+            min = 3,
+            update = updateNode)
+
+        curve_samples : IntProperty(
+            name = "Init Curve Samples",
             default = 10,
             min = 3,
             update = updateNode)
@@ -50,17 +56,27 @@ if scipy is not None:
             default = 'hybr',
             update = updateNode)
 
+        accuracy : IntProperty(
+            name = "Accuracy",
+            description = "Accuracy level - number of exact digits after decimal points.",
+            default = 4,
+            min = 1,
+            update = updateNode)
+
         def draw_buttons(self, context, layout):
-            layout.prop(self, 'samples')
+            layout.prop(self, 'raycast_samples')
+            layout.prop(self, 'curve_samples')
 
         def draw_buttons_ext(self, context, layout):
             self.draw_buttons(context, layout)
             layout.prop(self, 'raycast_method')
+            layout.prop(self, 'accuracy')
 
         def sv_init(self, context):
             self.inputs.new('SvCurveSocket', "Curve")
             self.inputs.new('SvSurfaceSocket', "Surface")
             self.outputs.new('SvVerticesSocket', "Point")
+            self.outputs.new('SvStringsSocket', "T")
 
         def process(self):
             if not any(socket.is_linked for socket in self.outputs):
@@ -71,18 +87,25 @@ if scipy is not None:
             curves_s = self.inputs['Curve'].sv_get()
             curves_s = ensure_nesting_level(curves_s, 2, data_types=(SvCurve,))
 
+            tolerance = 10**(-self.accuracy)
+
             points_out = []
+            u_out = []
             for surfaces, curves in zip_long_repeat(surfaces_s, curves_s):
                 for surface, curve in zip_long_repeat(surfaces, curves):
                     result = intersect_curve_surface(curve, surface,
-                                raycast_samples = self.samples,
-                                ortho_samples = self.samples,
+                                init_samples = self.curve_samples,
+                                raycast_samples = self.raycast_samples,
+                                tolerance = tolerance,
                                 raycast_method = self.raycast_method
                             )
-                    new_points = [result]
+                    new_points = [p[1] for p in result]
+                    new_u = [p[0] for p in result]
                     points_out.append(new_points)
+                    u_out.append(new_u)
 
             self.outputs['Point'].sv_set(points_out)
+            self.outputs['T'].sv_set(u_out)
 
 def register():
     if scipy is not None:
