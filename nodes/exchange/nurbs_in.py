@@ -134,7 +134,7 @@ if geomdl is not None:
 
             points = split_by_count(spline.points, spline.point_count_u)
             if self.apply_matrix:
-                points = [[list(matrix @ Vector(p.co[:3])) + [p.co[3]] for p in row] for row in points]
+                points = [[list(matrix @ Vector(p.co[:3])*p.co[3]) + [p.co[3]] for p in row] for row in points]
             else:
                 points = [[tuple(p.co) for p in row] for row in points]
             if spline.use_cyclic_v:
