@@ -74,7 +74,8 @@ def nodes_index():
                 ("field.mesh_normal_field", "SvExMeshNormalFieldNode"),
                 ("field.minimal_vfield", "SvExMinimalVectorFieldNode"),
                 ("field.minimal_sfield", "SvExMinimalScalarFieldNode"),
-                ("field.scalar_field_graph", "SvExScalarFieldGraphNode")
+                ("field.scalar_field_graph", "SvExScalarFieldGraphNode"),
+                ("field.vfield_lines_on_surface", "SvExVFieldLinesOnSurfNode")
             ]),
             ("Spatial", [
                 ("spatial.voronoi3d", "SvExVoronoi3DNode"),
