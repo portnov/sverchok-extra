@@ -70,7 +70,8 @@ def nodes_index():
                 ("curve.marching_squares", "SvExMarchingSquaresNode"),
                 ("curve.marching_squares_on_surface", "SvExMSquaresOnSurfaceNode"),
                 ("curve.intersect_curve_plane", "SvExCrossCurvePlaneNode"),
-                ("curve.intersect_surface_plane", "SvExCrossSurfacePlaneNode")
+                ("curve.intersect_surface_plane", "SvExCrossSurfacePlaneNode"),
+                ("curve.interpolate_frame", "SvExSlerpCurveFrameNode")
             ]),
             ("Extra Fields", [
                 ("field.mesh_normal_field", "SvExMeshNormalFieldNode"),
