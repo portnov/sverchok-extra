@@ -49,6 +49,7 @@ def nodes_index():
                 ("surface.nearest_point", "SvExNearestPointOnSurfaceNode"),
                 ("surface.ortho_project", "SvExOrthoProjectSurfaceNode"),
                 ("surface.raycast", "SvExRaycastSurfaceNode"),
+                ("surface.curvature_lines", "SvExSurfaceCurvatureLinesNode"),
                 ("surface.implicit_surface_raycast", "SvExImplSurfaceRaycastNode"),
                 ("surface.implicit_surface_solver", "SvExImplSurfaceSolverNode"),
                 ("surface.intersect_curve_surface", "SvExCrossCurveSurfaceNode"),
