@@ -146,6 +146,7 @@ def make_menu():
                         category,
                         items=node_items
                     )
+            cat.nodes = node_items
             menu.append(cat)
     return menu
 
