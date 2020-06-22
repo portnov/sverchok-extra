@@ -3,7 +3,7 @@ import numpy as np
 
 from mathutils import Matrix, Vector
 
-from sverchok.utils.surface import SvSurface, SurfaceCurvatureCalculator
+from sverchok.utils.surface import SvSurface, SurfaceCurvatureCalculator, SurfaceDerivativesData
 
 from sverchok_extra.dependencies import geomdl
 
@@ -179,6 +179,14 @@ class SvExGeomdlSurface(SvSurface):
         calc = SurfaceCurvatureCalculator(us, vs, order=order)
         calc.set(surf_vertices, normal, fu, fv, duu, dvv, duv, nuu, nvv, nuv)
         return calc
+
+    def derivatives_data_array(self, us, vs):
+        surf_vertices = self.evaluate_array(us, vs)
+        derivatives = self.derivatives_list(us, vs)
+        # derivatives[i][j][k] = derivative w.r.t U j times, w.r.t. V k times, at i'th pair of (u, v)
+        du = derivatives[:,1,0]
+        dv = derivatives[:,0,1]
+        return SurfaceDerivativesData(surf_vertices, du, dv)
 
 def register():
     pass
