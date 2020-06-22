@@ -91,6 +91,18 @@ def nodes_index():
                 ("ladybug.location", "SvExLadyBugLocationNode"),
                 ("ladybug.sun_position", "SvExLadyBugSunPositionNode"),
 
+            ]),
+            ("Solids", [
+                ("solid.box", "SvExBoxSolidNode"),
+                ("solid.cylinder", "SvExCylinderSolidNode"),
+                ("solid.sphere", "SvExSphereSolidNode"),
+                ("solid.solid_to_mesh", "SvExSolidToMeshNode"),
+                ("solid.mesh_to_solid", "SvExMeshToSolidNode"),
+                ("solid.solid_boolean", "SvExSolidBooleanNode"),
+                ("solid.transform_solid", "SvExTransformSolidNode"),
+
+
+
             ])
     ]
 

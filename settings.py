@@ -45,10 +45,32 @@ class SvExEnsurePip(bpy.types.Operator):
         else:
             self.report({'ERROR'}, "Cannot install PIP, see console output for details")
             return {'CANCELLED'}
+class SvExSetFreeCadPath(bpy.types.Operator):
+    """Save FreeCAD path in system"""
+    bl_idname = "node.sv_ex_set_freecad_path"
+    bl_label = "Set FreeCAD path"
+    bl_options = {'REGISTER', 'INTERNAL'}
+    FreeCAD_folder: bpy.props.StringProperty(name="FreeCAD python 3.7 folder")
+    def execute(self, context):
+        import sys
+        import os
+        site_packages = ''
+        for p in sys.path:
+            if 'site-packages' in p:
+                site_packages = p
+                break
+
+        file_path= open(os.path.join(site_packages, "freecad_path.pth"), "w+")
+        file_path.write(self.FreeCAD_folder)
+        file_path.close()
+        self.report({'INFO'}, "FreeCad path saved successfully. Please restart Blender to see effect.")
+        return {'FINISHED'}
+
 
 class SvExPreferences(AddonPreferences):
     bl_idname = __package__
 
+    FreeCAD_folder: bpy.props.StringProperty(name="FreeCAD python 3.7 folder")
     def draw(self, context):
         layout = self.layout
 
@@ -71,6 +93,16 @@ class SvExPreferences(AddonPreferences):
             elif dependency.pip_installable and pip is not None:
                 op = row.operator('node.sv_ex_pip_install', text="Upgrade with PIP").package = dependency.package
             return row
+        def draw_freeCad_ops(package):
+            dependency = dependencies[package]
+            col = box.column(align=True)
+            col.label(text=dependency.message, icon=get_icon(dependency.module))
+            row = col.row(align=True)
+            row.operator('wm.url_open', text="Visit package website").url = dependency.url
+            if dependency.module is None:
+                row.prop(self, 'FreeCAD_folder')
+                row.operator('node.sv_ex_set_freecad_path', text="Set path").FreeCAD_folder= self.FreeCAD_folder
+            return row
 
         box.label(text="Dependencies:")
         draw_message("sverchok")
@@ -88,6 +120,8 @@ class SvExPreferences(AddonPreferences):
         draw_message("mcubes")
         draw_message("circlify")
         draw_message("lbt-ladybug")
+        draw_freeCad_ops("freecad")
+
 
         if any(package.module is None for package in dependencies.values()):
             box.operator('wm.url_open', text="Read installation instructions for missing dependencies").url = "https://github.com/portnov/sverchok-extra"
@@ -95,12 +129,14 @@ class SvExPreferences(AddonPreferences):
 def register():
     bpy.utils.register_class(SvExPipInstall)
     bpy.utils.register_class(SvExEnsurePip)
+    bpy.utils.register_class(SvExSetFreeCadPath)
     bpy.utils.register_class(SvExPreferences)
 
 
 def unregister():
     bpy.utils.unregister_class(SvExPreferences)
     bpy.utils.unregister_class(SvExEnsurePip)
+    bpy.utils.unregister_class(SvExSetFreeCadPath)
     bpy.utils.unregister_class(SvExPipInstall)
 
 if __name__ == '__main__':

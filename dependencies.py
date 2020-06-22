@@ -98,11 +98,22 @@ try:
     import ladybug
     ladydug_d.message = "Ladybug package is available"
     ladydug_d.module = ladybug
+    ladydug_d.pip_installable = True
 except ImportError:
     ladydug_d.message = "Ladybug package is not available. Ladybug module will not be available"
     ladydug_d.pip_installable = True
     info(ladydug_d.message)
     ladybug = None
+
+freecad_d = dependencies["freecad"] = Dependency("FreeCAD", "https://www.freecadweb.org/")
+try:
+    import FreeCAD
+    freecad_d.message = "FreeCAD package is available"
+    freecad_d.module = FreeCAD
+except ImportError:
+    freecad_d.message = "FreeCAD package is not available, Solids nodes will not be available"
+    info(freecad_d.message)
+    FreeCAD = None
 
 good_names = [d.package for d in dependencies.values() if d.module is not None and d.package is not None]
 if good_names:
