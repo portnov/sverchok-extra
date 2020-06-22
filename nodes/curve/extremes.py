@@ -114,10 +114,7 @@ if scipy is not None:
                 else:
                     return []
             else:
-                if self.direction == 'MAX':
-                    target_v = max(res_vs)
-                else:
-                    target_v = min(res_vs)
+                target_v = min(res_vs)
                 res_ts = [t for t,v in zip(res_ts, res_vs) if v == target_v]
                 return res_ts
 

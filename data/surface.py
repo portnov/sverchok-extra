@@ -127,7 +127,7 @@ class SvExGeomdlSurface(SvSurface):
 
     def evaluate(self, u, v):
         vert = self.surface.evaluate_single((u, v))
-        print(f"({u}, {v}) => {vert}")
+        #print(f"({u}, {v}) => {vert}")
         return np.array(vert)
 
     def evaluate_array(self, us, vs):
