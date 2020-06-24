@@ -58,7 +58,7 @@ def ortho_project_curve(src_point, curve, subdomain = None, init_samples=10, on_
     prev_u = u_min
     for u in u_samples[1:]:
         value = goal(u)
-        if value * prev_value < 0:
+        if value * prev_value <= 0:
             u_ranges.append((prev_u, u))
         prev_u = u
         prev_value = value
