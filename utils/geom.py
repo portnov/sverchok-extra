@@ -102,7 +102,7 @@ def ortho_project_surface(src_point, surface, init_samples=10, maxiter=30, toler
         if i > maxiter:
             raise Exception("No convergence")
         curve = SvIsoUvCurve(surface, fixed_axis, fixed_axis_value)
-        projection = ortho_project_curve(src_point, curve, init_samples)
+        projection = ortho_project_curve(src_point, curve, init_samples=init_samples)
         point = projection.nearest
         dv = point - prev_point
         fixed_axis_value = projection.nearest_u
