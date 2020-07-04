@@ -15,7 +15,7 @@ if geomdl is not None:
     class SvExApproxNurbsCurveNode(bpy.types.Node, SverchCustomTreeNode):
         """
         Triggers: NURBS Curve
-        Tooltip: Interpolate NURBS Curve
+        Tooltip: Approximate NURBS Curve
         """
         bl_idname = 'SvExApproxNurbsCurveNode'
         bl_label = 'Approximate NURBS Curve'
