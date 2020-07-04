@@ -38,17 +38,30 @@ class SvExCatenaryCurve(SvCurve):
         return self.point1 + (dxs + dys).T
 
     def tangent(self, t):
-        t = t * self.x_range
-        point = self.evaluate(t)
-        point_h = self.evaluate(t+self.tangent_delta)
-        return (point_h - point) / self.tangent_delta
+        return self.tangent_array(np.array([t]))[0]
 
     def tangent_array(self, ts):
         ts = ts * self.x_range
-        points = self.evaluate_array(ts)
-        points_h = self.evaluate_array(ts + self.tangent_delta)
-        return (points_h - points) / self.tangent_delta
-    
+        dxs = self.x_direction[np.newaxis].T
+        ys = np.sinh((ts - self.x0) / self.A)
+        dys = - ys * self.force[np.newaxis].T
+        return (dxs + dys).T
+
+    def second_derivative(self, t):
+        return self.second_derivative_array(np.array([t]))[0]
+
+    def second_derivative_array(self, ts):
+        ts = ts * self.x_range
+        ys = np.cosh((ts - self.x0) / self.A) / self.A
+        dys = - ys * self.force[np.newaxis].T
+        return dys.T
+
+    def third_derivative_array(self, ts):
+        ts = ts * self.x_range
+        ys = np.sinh((ts - self.x0) / self.A) / (self.A ** 2)
+        dys = - ys * self.force[np.newaxis].T
+        return dys.T
+
     def get_u_bounds(self):
         return (0.0, 1.0)
 
