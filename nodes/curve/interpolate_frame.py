@@ -18,6 +18,8 @@ from sverchok_extra.dependencies import scipy
 if scipy is not None:
 
     def nearest_solution(point, solutions):
+        if len(solutions) == 0:
+            return None, None
         if len(solutions) <= 1:
             return solutions[0]
         kdt = kdtree.KDTree(len(solutions))
@@ -36,6 +38,8 @@ if scipy is not None:
                     tolerance=tolerance,
                     maxiter=maxiter)
         t, point = nearest_solution(matrix.translation, solutions)
+        if t is None:
+            raise Exception(f"Can't project the matrix {matrix} to the {curve}!")
         #matrix.translation = Vector(point)
         return t, matrix.to_quaternion()
 
