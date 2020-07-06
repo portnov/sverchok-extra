@@ -9,10 +9,10 @@ import sverchok
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, get_data_nesting_level
 from sverchok.utils.logging import info, exception
+from sverchok.utils.field.rbf import SvExRbfVectorField
+from sverchok.dependencies import scipy
 
-from sverchok_extra.data.field.vector import SvExRbfVectorField
 from sverchok_extra.utils import rbf_functions
-from sverchok_extra.dependencies import scipy
 
 if scipy is not None:
     from scipy.interpolate import Rbf

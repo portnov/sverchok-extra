@@ -11,10 +11,10 @@ from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, get_data_nesting_level
 from sverchok.utils.logging import info, exception
 from sverchok.utils.curve import SvCurve, SvCurveOnSurface, SvCircle
+from sverchok.utils.surface.rbf import SvExRbfSurface
+from sverchok.dependencies import scipy
 
-from sverchok_extra.data.surface import SvExRbfSurface
 from sverchok_extra.utils import rbf_functions
-from sverchok_extra.dependencies import scipy
 
 if scipy is not None:
     from scipy.interpolate import Rbf

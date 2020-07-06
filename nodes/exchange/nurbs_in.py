@@ -4,14 +4,13 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, StringProperty
 from mathutils import Vector
 
 from sverchok.node_tree import SverchCustomTreeNode, throttled
-from sverchok.data_structure import updateNode, zip_long_repeat, fullList, split_by_count
+from sverchok.data_structure import updateNode, zip_long_repeat, split_by_count
 from sverchok.utils.logging import info, exception
 from sverchok.utils.curve import SvCurve
 from sverchok.utils.surface import SvSurface
-
-from sverchok_extra.data.curve import SvExGeomdlCurve
-from sverchok_extra.data.surface import SvExGeomdlSurface
-from sverchok_extra.dependencies import geomdl
+from sverchok.utils.curve.nurbs import SvExGeomdlCurve
+from sverchok.utils.surface.nurbs import SvExGeomdlSurface
+from sverchok.dependencies import geomdl
 
 if geomdl is not None:
     from geomdl import NURBS, knotvector

@@ -11,10 +11,10 @@ from sverchok.utils.logging import info, exception
 from sverchok.utils.sv_bmesh_utils import bmesh_from_pydata
 from sverchok.utils.logging import info, exception
 from sverchok.utils.field.vector import SvBvhAttractorVectorField
+from sverchok.utils.field.rbf import SvExBvhRbfNormalVectorField
+from sverchok.dependencies import scipy
 
-from sverchok_extra.data.field.vector import SvExBvhRbfNormalVectorField
 from sverchok_extra.utils import rbf_functions
-from sverchok_extra.dependencies import scipy
 
 if scipy is not None:
     from scipy.interpolate import Rbf

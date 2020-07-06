@@ -9,8 +9,8 @@ from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, get_data_nesting_level
 from sverchok.utils.logging import info, exception
 from sverchok.utils.surface import SvSurface
+from sverchok.dependencies import scipy
 
-from sverchok_extra.dependencies import scipy
 from sverchok_extra.utils.geom import ortho_project_surface
 
 if scipy is not None:

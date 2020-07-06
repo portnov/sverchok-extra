@@ -12,10 +12,11 @@ from sverchok.utils.logging import info, exception
 from sverchok.utils.geom import LinearSpline, CubicSpline
 from sverchok.utils.surface import SvInterpolatingSurface
 from sverchok.utils.curve import SvSplineCurve, make_euclidian_ts
+from sverchok.dependencies import geomdl, scipy
+from sverchok.utils.curve.nurbs import SvExGeomdlCurve
+from sverchok.utils.curve.rbf import SvExRbfCurve
 
 from sverchok_extra.utils import rbf_functions
-from sverchok_extra.data.curve import SvExGeomdlCurve, SvExRbfCurve
-from sverchok_extra.dependencies import geomdl, scipy
 
 class SvExInterpolatingSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
     """

@@ -5,14 +5,13 @@ import bpy
 from bpy.props import FloatProperty, EnumProperty, BoolProperty, StringProperty
 
 from sverchok.node_tree import SverchCustomTreeNode, throttled
-from sverchok.data_structure import updateNode, zip_long_repeat, fullList
+from sverchok.data_structure import updateNode, zip_long_repeat
 from sverchok.utils.logging import info, exception
 from sverchok.utils.curve import SvCurve
 from sverchok.utils.surface import SvSurface
-
-from sverchok_extra.data.curve import SvExGeomdlCurve
-from sverchok_extra.data.surface import SvExGeomdlSurface
-from sverchok_extra.dependencies import geomdl
+from sverchok.utils.curve.nurbs import SvExGeomdlCurve
+from sverchok.utils.surface.nurbs import SvExGeomdlSurface
+from sverchok.dependencies import geomdl
 
 if geomdl is not None:
     # FIXME: Ugly temporary hack... Has to be replaced after

@@ -9,9 +9,8 @@ from sverchok.utils.logging import info, exception
 from sverchok.utils.sv_mesh_utils import polygons_to_edges
 from sverchok.utils.sv_bmesh_utils import bmesh_from_pydata, edge_data_from_bmesh_edges
 from sverchok.utils.geom import PlaneEquation, center
-
-from sverchok_extra.data.surface import SvExGeomdlSurface
-from sverchok_extra.dependencies import geomdl
+from sverchok.utils.surface.nurbs import SvExGeomdlSurface
+from sverchok.dependencies import geomdl
 
 if geomdl is not None:
     from geomdl import NURBS, BSpline, knotvector

@@ -7,9 +7,8 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, ensure_nesting_level
 from sverchok.utils.logging import info, exception
-
-from sverchok_extra.data.surface import SvExGeomdlSurface
-from sverchok_extra.dependencies import geomdl
+from sverchok.utils.surface.nurbs import SvExGeomdlSurface
+from sverchok.dependencies import geomdl
 
 # from python 3.5 docs https://docs.python.org/3.5/library/itertools.html recipes
 def grouper(iterable, n, fillvalue=None):

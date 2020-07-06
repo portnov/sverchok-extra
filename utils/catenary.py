@@ -2,8 +2,8 @@
 import numpy as np
 from math import sqrt, atanh, sinh, cosh
 
-from sverchok_extra.dependencies import scipy
-from sverchok_extra.data.curve import SvCurve
+from sverchok.dependencies import scipy
+from sverchok.utils.curve import SvCurve
 
 if scipy is not None:
     from scipy.optimize import root_scalar
