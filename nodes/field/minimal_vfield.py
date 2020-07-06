@@ -11,8 +11,7 @@ from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_
 from sverchok.utils.logging import info, exception
 from sverchok.utils.field.rbf import SvExRbfVectorField
 from sverchok.dependencies import scipy
-
-from sverchok_extra.utils import rbf_functions
+from sverchok.utils.math import rbf_functions
 
 if scipy is not None:
     from scipy.interpolate import Rbf

@@ -13,8 +13,7 @@ from sverchok.utils.logging import info, exception
 from sverchok.utils.curve import SvCurve, SvCurveOnSurface, SvCircle
 from sverchok.utils.surface.rbf import SvExRbfSurface
 from sverchok.dependencies import scipy
-
-from sverchok_extra.utils import rbf_functions
+from sverchok.utils.math import rbf_functions
 
 if scipy is not None:
     from scipy.interpolate import Rbf

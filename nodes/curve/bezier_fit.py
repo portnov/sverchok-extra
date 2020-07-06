@@ -8,8 +8,7 @@ from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
 from sverchok.utils.curve import SvBezierCurve
 from sverchok.utils.geom import linear_approximation, Spline
-
-from sverchok_extra.dependencies import scipy
+from sverchok.dependencies import scipy
 
 if scipy is not None:
     from scipy.optimize import curve_fit

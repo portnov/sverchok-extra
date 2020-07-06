@@ -14,8 +14,7 @@ from sverchok.utils.math import to_spherical, from_spherical
 from sverchok.utils.sv_mesh_utils import polygons_to_edges
 from sverchok.utils.sv_bmesh_utils import pydata_from_bmesh, bmesh_from_pydata
 from sverchok.utils.logging import info, exception
-
-from sverchok_extra.dependencies import scipy
+from sverchok.dependencies import scipy
 
 def to_radius(r, v, c):
     x,y,z = v

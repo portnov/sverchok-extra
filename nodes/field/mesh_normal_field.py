@@ -13,8 +13,7 @@ from sverchok.utils.logging import info, exception
 from sverchok.utils.field.vector import SvBvhAttractorVectorField
 from sverchok.utils.field.rbf import SvExBvhRbfNormalVectorField
 from sverchok.dependencies import scipy
-
-from sverchok_extra.utils import rbf_functions
+from sverchok.utils.math import rbf_functions
 
 if scipy is not None:
     from scipy.interpolate import Rbf

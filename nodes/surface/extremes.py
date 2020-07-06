@@ -11,8 +11,7 @@ from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_
 from sverchok.utils.logging import info, exception
 from sverchok.utils.surface import SvSurface
 from sverchok.utils.field.scalar import SvScalarField
-
-from sverchok_extra.dependencies import scipy
+from sverchok.dependencies import scipy
 
 if scipy is not None:
     from scipy.optimize import minimize

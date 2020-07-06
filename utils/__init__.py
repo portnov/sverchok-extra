@@ -4,15 +4,6 @@ import os
 
 from sverchok.utils.math import inverse, inverse_square, inverse_cubic
 
-rbf_functions = [
-    ('multiquadric', "Multi Quadric", "Multi Quadric", 0),
-    ('inverse', "Inverse", "Inverse", 1),
-    ('gaussian', "Gaussian", "Gaussian", 2),
-    ('cubic', "Cubic", "Cubic", 3),
-    ('quintic', "Quintic", "Qunitic", 4),
-    ('thin_plate', "Thin Plate", "Thin Plate", 5)
-]
-
 def show_welcome():
     text = """
    _____                     __          __         ______     __            

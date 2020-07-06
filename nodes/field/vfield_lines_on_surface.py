@@ -9,8 +9,7 @@ from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
 from sverchok.utils.field.vector import SvVectorField
 from sverchok.utils.surface import SvSurface
-
-from sverchok_extra.dependencies import scipy
+from sverchok.dependencies import scipy
 
 if scipy is not None:
     from scipy.integrate import solve_ivp

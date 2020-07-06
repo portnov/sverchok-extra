@@ -1,10 +1,11 @@
 
 import numpy as np
+from math import pi
 
 import bpy
 from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, StringProperty
 import bmesh
-from mathutils import Matrix
+from mathutils import Vector, Euler, Matrix
 
 import sverchok
 from sverchok.node_tree import SverchCustomTreeNode, throttled
@@ -12,10 +13,8 @@ from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_
 from sverchok.utils.sv_mesh_utils import polygons_to_edges, mesh_join
 from sverchok.utils.sv_bmesh_utils import pydata_from_bmesh, bmesh_from_pydata
 from sverchok.utils.logging import info, exception
+from sverchok.dependencies import ladybug
 
-from sverchok_extra.dependencies import ladybug
-from mathutils import Vector, Euler, Matrix
-from math import pi
 if ladybug is not None:
     from ladybug.sunpath import Sunpath
 

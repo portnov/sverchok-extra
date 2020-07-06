@@ -12,8 +12,7 @@ from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_
 from sverchok.utils.sv_mesh_utils import polygons_to_edges, mesh_join
 from sverchok.utils.sv_bmesh_utils import pydata_from_bmesh, bmesh_from_pydata
 from sverchok.utils.logging import info, exception
-
-from sverchok_extra.dependencies import ladybug
+from sverchok.dependencies import ladybug
 
 if ladybug is not None:
     from ladybug.location import Location
