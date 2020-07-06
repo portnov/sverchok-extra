@@ -38,62 +38,13 @@ from sverchok_extra.utils import show_welcome
 
 def nodes_index():
     return [("Extra Surfaces", [
-                ("surface.minimal_surface", "SvExMinimalSurfaceNode"),
-                ("surface.min_surface_from_curve", "SvExMinSurfaceFromCurveNode"),
                 ("surface.smooth_spline", "SvExBivariateSplineNode"),
-                ("surface.nurbs_surface", "SvExNurbsSurfaceNode"),
-                ("surface.interpolate_nurbs_surface", "SvExInterpolateNurbsSurfaceNode"),
-                ("surface.approximate_nurbs_surface", "SvExApproxNurbsSurfaceNode"),
                 ("surface.interpolating_surface", "SvExInterpolatingSurfaceNode"),
-                ("surface.nearest_point", "SvExNearestPointOnSurfaceNode"),
-                ("surface.extremes", "SvExSurfaceExtremesNode"),
-                ("surface.ortho_project", "SvExOrthoProjectSurfaceNode"),
-                ("surface.raycast", "SvExRaycastSurfaceNode"),
                 ("surface.curvature_lines", "SvExSurfaceCurvatureLinesNode"),
-                ("surface.implicit_surface_raycast", "SvExImplSurfaceRaycastNode"),
-                ("surface.implicit_surface_solver", "SvExImplSurfaceSolverNode"),
-                ("surface.intersect_curve_surface", "SvExCrossCurveSurfaceNode"),
-                ("surface.quads_to_nurbs", "SvExQuadsToNurbsNode"),
-                ("surface.marching_cubes", "SvExMarchingCubesNode")
+                ("surface.implicit_surface_solver", "SvExImplSurfaceSolverNode")
             ]),
             ("Extra Curves", [
-                ("curve.rbf_curve", "SvExRbfCurveNode"),
-                ("curve.catenary_curve", "SvExCatenaryCurveNode"),
-                ("curve.bezier_fit", "SvExBezierCurveFitNode"),
-                ("curve.nurbs_curve", "SvExNurbsCurveNode"),
-                ("curve.interpolate_nurbs_curve", "SvExInterpolateNurbsCurveNode"),
-                ("curve.approximate_nurbs_curve", "SvExApproxNurbsCurveNode"),
-                ("curve.circlify", "SvExCirclifyNode"),
-                ("curve.nearest_point", "SvExNearestPointOnCurveNode"),
-                ("curve.ortho_project", "SvExOrthoProjectCurveNode"),
-                ("curve.extremes", "SvExCurveExtremesNode"),
-                ("curve.marching_squares", "SvExMarchingSquaresNode"),
-                ("curve.marching_squares_on_surface", "SvExMSquaresOnSurfaceNode"),
-                ("curve.intersect_curve_plane", "SvExCrossCurvePlaneNode"),
-                ("curve.intersect_surface_plane", "SvExCrossSurfacePlaneNode"),
-                ("curve.interpolate_frame", "SvExSlerpCurveFrameNode")
-            ]),
-            ("Extra Fields", [
-                ("field.mesh_normal_field", "SvExMeshNormalFieldNode"),
-                ("field.minimal_vfield", "SvExMinimalVectorFieldNode"),
-                ("field.minimal_sfield", "SvExMinimalScalarFieldNode"),
-                ("field.scalar_field_graph", "SvExScalarFieldGraphNode"),
-                ("field.vfield_lines_on_surface", "SvExVFieldLinesOnSurfNode")
-            ]),
-            ("Spatial", [
-                ("spatial.voronoi3d", "SvExVoronoi3DNode"),
-                ("spatial.voronoi_sphere", "SvExVoronoiSphereNode"),
-                ("spatial.delaunay3d", "SvExDelaunay3DNode")
-            ]),
-            ("Exchange", [
-                ("exchange.nurbs_in", "SvExNurbsInNode"),
-                ("exchange.import_rw3dm_json", "SvExJsonToNurbsNode"),
-                ("exchange.export_rw3dm_json", "SvExNurbsToJsonNode")
-            ]),
-            ("Ladybug", [
-                ("ladybug.location", "SvExLadyBugLocationNode"),
-                ("ladybug.sun_position", "SvExLadyBugSunPositionNode"),
-
+                ("curve.intersect_surface_plane", "SvExCrossSurfacePlaneNode")
             ])
     ]
 
