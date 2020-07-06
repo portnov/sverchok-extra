@@ -9,9 +9,8 @@ from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match_long_repeat
 from sverchok.utils.logging import info, exception
 from sverchok.utils.sv_mesh_utils import mesh_join
-
-from sverchok_extra.dependencies import skimage
-from sverchok_extra.utils.marching_squares import make_contours
+from sverchok.utils.marching_squares import make_contours
+from sverchok.dependencies import skimage
 
 if skimage is not None:
     from skimage import measure

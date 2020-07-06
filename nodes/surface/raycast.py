@@ -10,9 +10,8 @@ from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, get_data_nesting_level, repeat_last_for_length
 from sverchok.utils.logging import info, exception
 from sverchok.utils.surface import SvSurface
-
-from sverchok_extra.dependencies import scipy
-from sverchok_extra.utils.geom import raycast_surface
+from sverchok.utils.manifolds import raycast_surface
+from sverchok.dependencies import scipy
 
 if scipy is not None:
 

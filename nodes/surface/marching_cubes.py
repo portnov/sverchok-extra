@@ -7,9 +7,8 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, St
 from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList, match_long_repeat
 from sverchok.utils.logging import info, exception
-
-from sverchok_extra.dependencies import mcubes, skimage
-from sverchok_extra.utils.marching_cubes import isosurface_np
+from sverchok.utils.marching_cubes import isosurface_np
+from sverchok.dependencies import mcubes, skimage
 
 if skimage is not None:
     import skimage.measure

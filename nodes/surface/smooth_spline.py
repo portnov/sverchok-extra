@@ -10,7 +10,7 @@ from sverchok.node_tree import SverchCustomTreeNode, throttled
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList
 from sverchok.utils.logging import info, exception
 
-from sverchok_extra.dependencies import scipy
+from sverchok.dependencies import scipy
 
 if scipy is not None:
     from scipy.interpolate import SmoothBivariateSpline

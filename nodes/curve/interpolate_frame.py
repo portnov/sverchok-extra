@@ -11,9 +11,8 @@ from sverchok.data_structure import updateNode, zip_long_repeat, match_long_repe
 from sverchok.utils.logging import info, exception
 from sverchok.utils.curve import SvCurve
 from sverchok.utils.geom import PlaneEquation
-
-from sverchok_extra.utils.geom import intersect_curve_plane
-from sverchok_extra.dependencies import scipy
+from sverchok.utils.manifolds import intersect_curve_plane
+from sverchok.dependencies import scipy
 
 if scipy is not None:
 

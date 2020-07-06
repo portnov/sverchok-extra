@@ -12,9 +12,8 @@ from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_
 from sverchok.utils.logging import info, exception
 from sverchok.utils.curve import SvCurve
 from sverchok.utils.surface import SvSurface
-
-from sverchok_extra.dependencies import scipy
-from sverchok_extra.utils.geom import intersect_curve_surface
+from sverchok.utils.manifolds import intersect_curve_surface
+from sverchok.dependencies import scipy
 
 if scipy is not None:
 

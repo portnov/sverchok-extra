@@ -32,7 +32,6 @@ from sverchok.utils.logging import info, debug
 if __name__ != "sverchok_extra":
     sys.modules["sverchok_extra"] = sys.modules[__name__]
 
-from sverchok_extra import data
 from sverchok_extra import icons
 from sverchok_extra import settings
 from sverchok_extra.utils import show_welcome
@@ -108,7 +107,7 @@ def make_node_list():
             modules.append(module)
     return modules
 
-imported_modules = [data, icons] + make_node_list()
+imported_modules = [icons] + make_node_list()
 
 reload_event = False
 
@@ -175,7 +174,6 @@ def register():
     debug("Registering sverchok-extra")
 
     settings.register()
-    data.register()
     icons.register()
 
     register_nodes()
@@ -207,5 +205,4 @@ def unregister():
     unregister_nodes()
 
     icons.unregister()
-    data.unregister()
     settings.unregister()

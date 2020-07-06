@@ -10,7 +10,8 @@ from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_
 from sverchok.utils.logging import info, exception
 from sverchok.utils.surface import SvSurface
 
-from sverchok_extra.dependencies import scipy
+from sverchok.dependencies import scipy
+
 from scipy.integrate import solve_ivp
 
 def solve_lines(surface, p0, tf, method='RK45', negate=False, step=None, direction='MAX'):
