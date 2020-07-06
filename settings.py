@@ -6,7 +6,7 @@ from bpy.types import AddonPreferences
 
 PYPATH = bpy.app.binary_path_python
 
-from sverchok_extra.dependencies import dependencies, pip, ensurepip
+from sverchok_extra.dependencies import ex_dependencies, pip, ensurepip
 
 class SvExPipInstall(bpy.types.Operator):
     """Install the package by calling pip install"""
@@ -17,7 +17,7 @@ class SvExPipInstall(bpy.types.Operator):
     package : bpy.props.StringProperty(name = "Package names")
 
     def execute(self, context):
-        first_install = self.package in dependencies and dependencies[self.package] is None
+        first_install = self.package in ex_dependencies and ex_dependencies[self.package] is None
         cmd = [PYPATH, '-m', 'pip', 'install', '--upgrade'] + self.package.split(" ")
         ok = subprocess.call(cmd) == 0
         if ok:
@@ -61,7 +61,7 @@ class SvExPreferences(AddonPreferences):
         box = layout.box()
 
         def draw_message(package):
-            dependency = dependencies[package]
+            dependency = ex_dependencies[package]
             col = box.column(align=True)
             col.label(text=dependency.message, icon=get_icon(dependency.module))
             row = col.row(align=True)
@@ -89,8 +89,8 @@ class SvExPreferences(AddonPreferences):
         draw_message("circlify")
         draw_message("lbt-ladybug")
 
-        if any(package.module is None for package in dependencies.values()):
-            box.operator('wm.url_open', text="Read installation instructions for missing dependencies").url = "https://github.com/portnov/sverchok-extra"
+        if any(package.module is None for package in ex_dependencies.values()):
+            box.operator('wm.url_open', text="Read installation instructions for missing ex_dependencies").url = "https://github.com/portnov/sverchok-extra"
 
 def register():
     bpy.utils.register_class(SvExPipInstall)
