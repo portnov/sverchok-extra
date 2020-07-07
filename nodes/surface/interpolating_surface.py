@@ -13,7 +13,7 @@ from sverchok.utils.geom import LinearSpline, CubicSpline
 from sverchok.utils.surface import SvInterpolatingSurface
 from sverchok.utils.curve import SvSplineCurve, make_euclidian_ts
 from sverchok.dependencies import geomdl, scipy
-from sverchok.utils.curve.nurbs import SvExGeomdlCurve
+from sverchok.utils.curve.nurbs import SvGeomdlCurve
 from sverchok.utils.curve.rbf import SvExRbfCurve
 from sverchok.utils.math import rbf_functions
 
@@ -97,7 +97,7 @@ class SvExInterpolatingSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
             from geomdl import fitting
             def make(vertices):
                 curve = fitting.interpolate_curve(vertices, degree, centripetal=self.centripetal)
-                return SvExGeomdlCurve(curve)
+                return SvGeomdlCurve(curve)
             return make
         elif scipy is not None and self.interp_mode == 'RBF':
             from scipy.interpolate import Rbf
