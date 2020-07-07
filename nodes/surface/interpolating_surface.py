@@ -14,7 +14,7 @@ from sverchok.utils.surface import SvInterpolatingSurface
 from sverchok.utils.curve import SvSplineCurve, make_euclidian_ts
 from sverchok.dependencies import geomdl, scipy
 from sverchok.utils.curve.nurbs import SvGeomdlCurve
-from sverchok.utils.curve.rbf import SvExRbfCurve
+from sverchok.utils.curve.rbf import SvRbfCurve
 from sverchok.utils.math import rbf_functions
 
 class SvExInterpolatingSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
@@ -108,7 +108,7 @@ class SvExInterpolatingSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
                             function=self.function,
                             smooth=smooth,
                             epsilon=epsilon, mode='N-D')
-                return SvExRbfCurve(rbf, (0.0, 1.0))
+                return SvRbfCurve(rbf, (0.0, 1.0))
             return make
         else:
             raise Exception("Unsupported spline type: " + self.interp_mode)
