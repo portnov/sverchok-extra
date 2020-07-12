@@ -45,6 +45,9 @@ def nodes_index():
             ]),
             ("Extra Curves", [
                 ("curve.intersect_surface_plane", "SvExCrossSurfacePlaneNode")
+            ]),
+            ("Extra Fields", [
+                ("field.vfield_lines_on_surface", "SvExVFieldLinesOnSurfNode")
             ])
     ]
 
