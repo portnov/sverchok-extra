@@ -39,7 +39,6 @@ from sverchok_extra.utils import show_welcome
 def nodes_index():
     return [("Extra Surfaces", [
                 ("surface.smooth_spline", "SvExBivariateSplineNode"),
-                ("surface.interpolating_surface", "SvExInterpolatingSurfaceNode"),
                 ("surface.curvature_lines", "SvExSurfaceCurvatureLinesNode"),
                 ("surface.implicit_surface_solver", "SvExImplSurfaceSolverNode")
             ]),
