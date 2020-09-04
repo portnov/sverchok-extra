@@ -1,4 +1,6 @@
 
+from sverchok.dependencies import SvDependency
+
 ex_dependencies = dict()
 
 try:
@@ -21,7 +23,7 @@ except ImportError:
     print(message)
     sverchok = None
 
-pygalmesh_d = dependencies["pygalmesh"] = Dependency("pygalmesh", "https://github.com/nschloe/pygalmesh")
+pygalmesh_d = ex_dependencies["pygalmesh"] = SvDependency("pygalmesh", "https://github.com/nschloe/pygalmesh")
 try:
     import pygalmesh
     pygalmesh_d.message = "Pygalmesh package is available"
