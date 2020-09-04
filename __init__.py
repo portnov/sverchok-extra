@@ -40,7 +40,8 @@ def nodes_index():
     return [("Extra Surfaces", [
                 ("surface.smooth_spline", "SvExBivariateSplineNode"),
                 ("surface.curvature_lines", "SvExSurfaceCurvatureLinesNode"),
-                ("surface.implicit_surface_solver", "SvExImplSurfaceSolverNode")
+                ("surface.implicit_surface_solver", "SvExImplSurfaceSolverNode"),
+                ("surface.triangular_mesh", "SvExGalGenerateMeshNode")
             ]),
             ("Extra Curves", [
                 ("curve.intersect_surface_plane", "SvExCrossSurfacePlaneNode")

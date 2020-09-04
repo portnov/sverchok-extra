@@ -25,6 +25,7 @@ class SvExPreferences(AddonPreferences):
 
         box.label(text="Dependencies:")
         draw_message(box, "sverchok", dependencies=ex_dependencies)
+        draw_message(box, "pygalmesh", dependencies=ex_dependencies)
 
 def register():
     bpy.utils.register_class(SvExPreferences)
