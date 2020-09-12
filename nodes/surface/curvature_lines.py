@@ -12,7 +12,8 @@ from sverchok.utils.surface import SvSurface
 
 from sverchok.dependencies import scipy
 
-from scipy.integrate import solve_ivp
+if scipy is not None:
+    from scipy.integrate import solve_ivp
 
 def solve_lines(surface, p0, tf, method='RK45', negate=False, step=None, direction='MAX'):
 
