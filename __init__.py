@@ -48,6 +48,10 @@ def nodes_index():
             ]),
             ("Extra Fields", [
                 ("field.vfield_lines_on_surface", "SvExVFieldLinesOnSurfNode")
+            ]),
+            ("Data", [
+                ("data.spreadsheet", "SvSpreadsheetNode"),
+                ("data.data_item", "SvDataItemNode")
             ])
     ]
 
