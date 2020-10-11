@@ -41,6 +41,9 @@ At the moment, this addon includes the following nodes for Sverchok:
   * Surface Curvature Lines (uses [SciPy][3])
 * *Field Extra* category (please refer to the [wiki page][5] about used concept of the field):
   * Vector Field Lines on a Surface (uses SciPy)
+* *Data* category:
+  * Spreadsheet
+  * Data Item
 
 There will be more.
 
