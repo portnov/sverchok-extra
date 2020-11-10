@@ -11,8 +11,8 @@ import bpy
 from bpy.types import Operator, Node, PropertyGroup
 from bpy.props import StringProperty, EnumProperty, IntProperty, BoolProperty, FloatProperty, CollectionProperty, PointerProperty, FloatVectorProperty
 
-from sverchok.node_tree import SverchCustomTreeNode, throttled
-from sverchok.data_structure import updateNode
+from sverchok.node_tree import SverchCustomTreeNode
+from sverchok.data_structure import updateNode, throttle_and_update_node
 from sverchok.utils.dictionary import SvDict
 from sverchok.utils.logging import info, debug
 
@@ -100,7 +100,7 @@ class SvDataItemNode(bpy.types.Node, SverchCustomTreeNode):
     #    self.update_keys(None)
     #    self.update_sockets(None)
     
-    @throttled
+    @throttle_and_update_node
     def update_sockets_throttled(self, context):
         self.update_sockets(context)
 

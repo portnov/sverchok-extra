@@ -21,8 +21,8 @@ from collections import defaultdict
 import bpy
 from bpy.props import CollectionProperty, EnumProperty
 
-from sverchok.node_tree import SverchCustomTreeNode, throttled
-from sverchok.data_structure import updateNode, match_long_repeat, zip_long_repeat
+from sverchok.node_tree import SverchCustomTreeNode
+from sverchok.data_structure import updateNode, match_long_repeat, zip_long_repeat, throttle_and_update_node
 from sverchok.utils.logging import info, debug
 from sverchok_extra.utils.modules.spreadsheet.ui import *
 
@@ -38,7 +38,7 @@ class SvSpreadsheetNode(bpy.types.Node, SverchCustomTreeNode):
 
     spreadsheet : PointerProperty(type=SvSpreadsheetData)
 
-    @throttled
+    @throttle_and_update_node
     def adjust_outputs(self, context):
 
         if self.out_mode == 'ROW':
@@ -127,16 +127,16 @@ class SvSpreadsheetNode(bpy.types.Node, SverchCustomTreeNode):
         formula_cols = self.spreadsheet.get_formula_cols()
         self.inputs['Input'].hide_safe = len(formula_cols) == 0
 
-    @throttled
+    @throttle_and_update_node
     def on_update_value(self, context):
         self.adjust_inputs()
 
-    @throttled
+    @throttle_and_update_node
     def on_update_row_name(self, context):
         self.adjust_inputs()
         self.adjust_outputs(context)
 
-    @throttled
+    @throttle_and_update_node
     def on_update_column(self, context):
         self.adjust_inputs()
         self.adjust_outputs(context)
