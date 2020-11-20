@@ -52,8 +52,7 @@ def nodes_index():
             ("Extra Spatial", [
                 ("spatial.delaunay3d_surface", "SvDelaunayOnSurfaceNode"),
                 ("spatial.voronoi_on_mesh", "SvVoronoiOnMeshNode"),
-                ("spatial.voronoi_on_solid_surface", "SvVoronoiOnSolidNode"),
-                ("spatial.lloyd3d", "SvLloyd3dNode")
+                ("spatial.voronoi_on_solid_surface", "SvVoronoiOnSolidNode")
             ]),
             ("Data", [
                 ("data.spreadsheet", "SvSpreadsheetNode"),
