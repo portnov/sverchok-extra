@@ -17,6 +17,7 @@
 # ##### END GPL LICENSE BLOCK #####
 
 import numpy as np
+from collections import defaultdict
 
 import bpy
 from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
@@ -27,6 +28,8 @@ from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, zip_long_repeat, throttle_and_update_node, ensure_nesting_level, get_data_nesting_level
 from sverchok.utils.sv_bmesh_utils import recalc_normals
 from sverchok.utils.voronoi3d import voronoi_on_solid_surface
+from sverchok.utils.solid import svmesh_to_solid, SvSolidTopology
+from sverchok.utils.surface.freecad import SvSolidFaceSurface
 from sverchok.dependencies import scipy, FreeCAD
 
 if scipy is None or FreeCAD is None:
@@ -34,6 +37,52 @@ if scipy is None or FreeCAD is None:
 
 if FreeCAD is not None:
     import Part
+
+def mesh_from_faces(fragments):
+    verts = [(v.X, v.Y, v.Z) for v in fragments.Vertexes]
+
+    all_fc_verts = {SvSolidTopology.Item(v) : i for i, v in enumerate(fragments.Vertexes)}
+    def find_vertex(v):
+        #for i, fc_vert in enumerate(fragments.Vertexes):
+        #    if v.isSame(fc_vert):
+        #        return i
+        #return None
+        return all_fc_verts[SvSolidTopology.Item(v)]
+
+    edges = []
+    for fc_edge in fragments.Edges:
+        edge = [find_vertex(v) for v in fc_edge.Vertexes]
+        if len(edge) == 2:
+            edges.append(edge)
+
+    faces = []
+    for fc_face in fragments.Faces:
+        incident_verts = defaultdict(set)
+        for fc_edge in fc_face.Edges:
+            edge = [find_vertex(v) for v in fc_edge.Vertexes]
+            if len(edge) == 2:
+                i, j = edge
+                incident_verts[i].add(j)
+                incident_verts[j].add(i)
+
+        face = [find_vertex(v) for v in fc_face.Vertexes]
+
+        vert_idx = face[0]
+        correct_face = [vert_idx]
+
+        for i in range(len(face)):
+            incident = list(incident_verts[vert_idx])
+            other_verts = [i for i in incident if i not in correct_face]
+            if not other_verts:
+                break
+            other_vert_idx = other_verts[0]
+            correct_face.append(other_vert_idx)
+            vert_idx = other_vert_idx
+
+        if len(correct_face) > 2:
+            faces.append(correct_face)
+
+    return verts, edges, faces
 
 class SvVoronoiOnSolidNode(bpy.types.Node, SverchCustomTreeNode):
     """
@@ -47,14 +96,11 @@ class SvVoronoiOnSolidNode(bpy.types.Node, SverchCustomTreeNode):
 
     modes = [
             ('RIDGES', "3D Ridges", "Generate ridges of 3D Voronoi diagram", 0),
-            ('REGIONS', "3D Regions", "Generate regions of 3D Voronoi diagram", 1)
+            ('REGIONS', "3D Regions", "Generate regions of 3D Voronoi diagram", 1),
+            ('FACES', "Solid Faces", "Generate Solid Face objects", 2),
+            ('MESH', "Mesh", "Generate mesh", 3)
         ]
 
-    mode : EnumProperty(
-        name = "Mode",
-        items = modes,
-        update = updateNode)
-    
     thickness : FloatProperty(
         name = "Thickness",
         default = 1.0,
@@ -68,8 +114,17 @@ class SvVoronoiOnSolidNode(bpy.types.Node, SverchCustomTreeNode):
 
     @throttle_and_update_node
     def update_sockets(self, context):
-        self.inputs['Clipping'].hide_safe = self.mode == 'UV' or not self.do_clip
+        self.inputs['Clipping'].hide_safe = not self.do_clip
+        self.outputs['Vertices'].hide_safe = self.mode == 'FACES'
+        self.outputs['Edges'].hide_safe = self.mode == 'FACES'
+        self.outputs['Faces'].hide_safe = self.mode == 'FACES'
+        self.outputs['SolidFaces'].hide_safe = self.mode != 'FACES'
 
+    mode : EnumProperty(
+        name = "Mode",
+        items = modes,
+        update = update_sockets)
+    
     do_clip : BoolProperty(
         name = "Clip Box",
         default = True,
@@ -91,6 +146,13 @@ class SvVoronoiOnSolidNode(bpy.types.Node, SverchCustomTreeNode):
         min = 0.0,
         update = updateNode)
 
+    precision : FloatProperty(
+        name = "Precision",
+        default = 0.0001,
+        min = 0.0,
+        precision = 4,
+        update = updateNode)
+
     def sv_init(self, context):
         self.inputs.new('SvSolidSocket', 'Solid')
         self.inputs.new('SvVerticesSocket', "Sites")
@@ -99,6 +161,8 @@ class SvVoronoiOnSolidNode(bpy.types.Node, SverchCustomTreeNode):
         self.outputs.new('SvVerticesSocket', "Vertices")
         self.outputs.new('SvStringsSocket', "Edges")
         self.outputs.new('SvStringsSocket', "Faces")
+        self.outputs.new('SvSurfaceSocket', "SolidFaces")
+        self.update_sockets(context)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "mode")
@@ -106,7 +170,10 @@ class SvVoronoiOnSolidNode(bpy.types.Node, SverchCustomTreeNode):
         row.prop(self, 'clip_inner', toggle=True)
         row.prop(self, 'clip_outer', toggle=True)
         layout.prop(self, 'do_clip', toggle=True)
-        layout.prop(self, 'normals')
+        if self.mode in {'REGIONS', 'RIDGES'}:
+            layout.prop(self, 'normals')
+        if self.mode in {'FACES', 'MESH'}:
+            layout.prop(self, 'precision')
 
     def process(self):
 
@@ -129,17 +196,32 @@ class SvVoronoiOnSolidNode(bpy.types.Node, SverchCustomTreeNode):
         verts_out = []
         edges_out = []
         faces_out = []
+        fragment_faces_out = []
         for params in zip_long_repeat(solid_in, sites_in, thickness_in, clipping_in):
             new_verts = []
             new_edges = []
             new_faces = []
+            new_fragment_faces = []
             for solid, sites, thickness, clipping in zip_long_repeat(*params):
                 verts, edges, faces = voronoi_on_solid_surface(solid, sites, thickness,
                             clip_inner = self.clip_inner, clip_outer = self.clip_outer,
+                            #skip_added = (self.mode not in {'FACES', 'MESH'}),
                             do_clip=self.do_clip, clipping=clipping,
-                            make_regions = (self.mode == 'REGIONS'))
-                if self.normals:
+                            make_regions = (self.mode in {'REGIONS', 'FACES', 'MESH'}))
+                if self.mode in {'FACES', 'MESH'} or self.normals:
                     verts, edges, faces = recalc_normals(verts, edges, faces, loop=True)
+
+                if self.mode in {'FACES','MESH'}:
+                    fragments = [svmesh_to_solid(vs, fs, self.precision) for vs, fs in zip(verts, faces)]
+                    shell = solid.Shells[0]
+                    fragments = shell.common(fragments)
+                    if self.mode == 'FACES':
+                        sv_faces = [SvSolidFaceSurface(f) for f in fragments.Faces]
+                        new_fragment_faces.append(sv_faces)
+                    else: # MESH
+                        verts, edges, faces = mesh_from_faces(fragments)
+                        if self.normals:
+                            verts, edges, faces = recalc_normals(verts, edges, faces, loop=False)
 
                 new_verts.append(verts)
                 new_edges.append(edges)
@@ -149,14 +231,17 @@ class SvVoronoiOnSolidNode(bpy.types.Node, SverchCustomTreeNode):
                 verts_out.append(new_verts)
                 edges_out.append(new_edges)
                 faces_out.append(new_faces)
+                fragment_faces_out.append(new_fragment_faces)
             else:
                 verts_out.extend(new_verts)
                 edges_out.extend(new_edges)
                 faces_out.extend(new_faces)
+                fragment_faces_out.extend(new_fragment_faces)
 
         self.outputs['Vertices'].sv_set(verts_out)
         self.outputs['Edges'].sv_set(edges_out)
         self.outputs['Faces'].sv_set(faces_out)
+        self.outputs['SolidFaces'].sv_set(fragment_faces_out)
 
 def register():
     if scipy is not None and FreeCAD is not None:
