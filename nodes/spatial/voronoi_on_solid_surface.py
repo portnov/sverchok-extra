@@ -213,7 +213,10 @@ class SvVoronoiOnSolidNode(bpy.types.Node, SverchCustomTreeNode):
 
                 if self.mode in {'FACES','MESH'}:
                     fragments = [svmesh_to_solid(vs, fs, self.precision) for vs, fs in zip(verts, faces)]
-                    shell = solid.Shells[0]
+                    if solid.Shells:
+                        shell = solid.Shells[0]
+                    else:
+                        shell = Part.Shell(solid.Faces)
                     fragments = shell.common(fragments)
                     if self.mode == 'FACES':
                         sv_faces = [SvSolidFaceSurface(f) for f in fragments.Faces]
