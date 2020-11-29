@@ -30,6 +30,7 @@ from sverchok.utils.sv_bmesh_utils import recalc_normals
 from sverchok.utils.voronoi3d import voronoi_on_solid_surface
 from sverchok.utils.solid import svmesh_to_solid, SvSolidTopology
 from sverchok.utils.surface.freecad import SvSolidFaceSurface
+from sverchok.utils.dummy_nodes import add_dummy
 from sverchok.dependencies import scipy, FreeCAD
 
 if scipy is None or FreeCAD is None:
