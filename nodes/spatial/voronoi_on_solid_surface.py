@@ -192,7 +192,7 @@ class SvVoronoiOnSolidNode(bpy.types.Node, SverchCustomTreeNode):
         thickness_in = ensure_nesting_level(thickness_in, 2)
         clipping_in = ensure_nesting_level(clipping_in, 2)
 
-        nested_output = input_level > 1
+        nested_output = input_level > 3
 
         verts_out = []
         edges_out = []
