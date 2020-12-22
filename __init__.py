@@ -49,6 +49,9 @@ def nodes_index():
             ("Extra Fields", [
                 ("field.vfield_lines_on_surface", "SvExVFieldLinesOnSurfNode")
             ]),
+            ("Extra Solids", [
+                ("solid.solid_waffle", "SvSolidWaffleNode")
+            ]),
             ("Extra Spatial", [
                 ("spatial.delaunay3d_surface", "SvDelaunayOnSurfaceNode")
             ]),
