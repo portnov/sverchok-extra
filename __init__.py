@@ -44,7 +44,9 @@ def nodes_index():
                 ("surface.triangular_mesh", "SvExGalGenerateMeshNode")
             ]),
             ("Extra Curves", [
-                ("curve.intersect_surface_plane", "SvExCrossSurfacePlaneNode")
+                ("curve.intersect_surface_plane", "SvExCrossSurfacePlaneNode"),
+                ("curve.approximate_fourier_curve", "SvApproxFourierCurveNode"),
+                ("curve.interpolate_fourier_curve", "SvInterpFourierCurveNode")
             ]),
             ("Extra Fields", [
                 ("field.vfield_lines_on_surface", "SvExVFieldLinesOnSurfNode")
