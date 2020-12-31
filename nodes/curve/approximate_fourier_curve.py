@@ -24,7 +24,7 @@ class SvApproxFourierCurveNode(bpy.types.Node, SverchCustomTreeNode):
     Triggers: Approximate Fourier Curve
     Tooltip: Approximate Fourier Curve
     """
-    bl_idname = 'SvApproxNurbsCurveMk2Node'
+    bl_idname = 'SvApproxFourierCurveNode'
     bl_label = 'Approximate Fourier Curve'
     bl_icon = 'CURVE_NCURVE'
 
