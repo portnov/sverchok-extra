@@ -45,6 +45,7 @@ def nodes_index():
             ]),
             ("Extra Curves", [
                 ("curve.intersect_surface_plane", "SvExCrossSurfacePlaneNode"),
+                ("curve.fourier_curve", "SvFourierCurveNode"),
                 ("curve.approximate_fourier_curve", "SvApproxFourierCurveNode"),
                 ("curve.interpolate_fourier_curve", "SvInterpFourierCurveNode")
             ]),
