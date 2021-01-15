@@ -10,29 +10,23 @@ from sverchok.data_structure import updateNode, zip_long_repeat, match_long_repe
 from sverchok.utils.logging import info, exception
 from sverchok.utils.field.scalar import SvScalarField
 
-def goal(field, iso_value):
-    def function(p):
-        v = field.evaluate(p[0], p[1], p[2])
-        return (v - iso_value)**2
-    return function
-
-def solve(field, init, iso_value, maxiter=30, threshold=1e-4):
+def solve(field, init, iso_value, step_coeff, maxiter=30, threshold=1e-4):
 
     i = 0
     p = init
     while True:
         i += 1
-        if i > maxiter:
-            raise Exception("Maximum number of iterations is exceeded")
         v = field.evaluate_grid(p[:,0], p[:,1], p[:,2]) - iso_value
         dv = abs(v)
         #print(f"I#{i}, DV {dv.max()}")
         if (dv < threshold).all():
             return p
+        if i > maxiter:
+            raise Exception(f"Maximum number of iterations ({maxiter}) is exceeded, last error {dv.max()}")
         gradX, gradY, gradZ = field.gradient_grid(p[:,0], p[:,1], p[:,2])
         grad = np.stack((gradX, gradY, gradZ)).T
         n = np.linalg.norm(grad, axis=1, keepdims=True)**2
-        step = v[np.newaxis].T * grad / n
+        step = step_coeff * v[np.newaxis].T * grad / n
         p -= step
 
 class SvExImplSurfaceSolverNode(bpy.types.Node, SverchCustomTreeNode):
@@ -61,6 +55,13 @@ class SvExImplSurfaceSolverNode(bpy.types.Node, SverchCustomTreeNode):
             min = 1,
             update = updateNode)
 
+    step : FloatProperty(
+            name = "Step",
+            description = "Step coefficient",
+            min = 0.0,
+            default = 1.0,
+            update = updateNode)
+
     def draw_buttons(self, context, layout):
         layout.prop(self, 'maxiter')
         layout.prop(self, 'accuracy')
@@ -71,6 +72,7 @@ class SvExImplSurfaceSolverNode(bpy.types.Node, SverchCustomTreeNode):
         p.use_prop = True
         p.prop = (0.0, 0.0, 0.0)
         self.inputs.new('SvStringsSocket', 'IsoValue').prop_name = 'iso_value'
+        self.inputs.new('SvStringsSocket', 'Step').prop_name = 'step'
         self.outputs.new('SvVerticesSocket', 'Vertices')
 
     def process(self):
@@ -80,19 +82,21 @@ class SvExImplSurfaceSolverNode(bpy.types.Node, SverchCustomTreeNode):
         field_s = self.inputs['Field'].sv_get()
         verts_s = self.inputs['Vertices'].sv_get()
         iso_value_s = self.inputs['IsoValue'].sv_get()
+        step_s = self.inputs['Step'].sv_get()
 
         field_s = ensure_nesting_level(field_s, 2, data_types=(SvScalarField,))
         verts_s = ensure_nesting_level(verts_s, 4)
         iso_value_s = ensure_nesting_level(iso_value_s, 2)
+        step_s = ensure_nesting_level(step_s, 2)
 
         verts_out = []
 
         threshold = 10**(-self.accuracy)
 
-        for fields, verts_i, iso_value_i in zip_long_repeat(field_s, verts_s, iso_value_s):
-            for field, verts, iso_value in zip_long_repeat(fields, verts_i, iso_value_i):
+        for params in zip_long_repeat(field_s, verts_s, iso_value_s, step_s):
+            for field, verts, iso_value, step in zip_long_repeat(*params):
                 verts = np.array(verts)
-                new_verts = solve(field, verts, iso_value, maxiter = self.maxiter, threshold=threshold).tolist()
+                new_verts = solve(field, verts, iso_value, step, maxiter = self.maxiter, threshold=threshold).tolist()
                 verts_out.append(new_verts)
 
         self.outputs['Vertices'].sv_set(verts_out)
