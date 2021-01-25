@@ -37,6 +37,11 @@ class SvDelaunayOnMeshNode(bpy.types.Node, SverchCustomTreeNode):
         default = True,
         update = updateNode)
 
+    preserve_shape : BoolProperty(
+        name = "Preserve shape",
+        default = True,
+        update = updateNode)
+
     @throttle_and_update_node
     def update_sockets(self, context):
         self.inputs['FaceIndex'].hide_safe = self.mode != 'INDEX'
@@ -62,6 +67,7 @@ class SvDelaunayOnMeshNode(bpy.types.Node, SverchCustomTreeNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, 'mode')
         layout.prop(self, 'exclude_boundary')
+        layout.prop(self, 'preserve_shape')
         layout.prop(self, 'recalc_normals')
 
     def draw_buttons_ext(self, context, layout):
@@ -108,6 +114,7 @@ class SvDelaunayOnMeshNode(bpy.types.Node, SverchCustomTreeNode):
             new_verts, new_edges, new_faces = mesh_insert_verts(verts, faces, add_verts_by_face,
                                                 epsilon = tolerance,
                                                 exclude_boundary = self.exclude_boundary,
+                                                preserve_shape = self.preserve_shape,
                                                 recalc_normals = self.recalc_normals)
 
             verts_out.append(new_verts)
