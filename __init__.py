@@ -56,7 +56,8 @@ def nodes_index():
                 ("solid.solid_waffle", "SvSolidWaffleNode")
             ]),
             ("Extra Spatial", [
-                ("spatial.delaunay3d_surface", "SvDelaunayOnSurfaceNode")
+                ("spatial.delaunay3d_surface", "SvDelaunayOnSurfaceNode"),
+                ("spatial.delaunay_mesh", "SvDelaunayOnMeshNode")
             ]),
             ("Data", [
                 ("data.spreadsheet", "SvSpreadsheetNode"),
