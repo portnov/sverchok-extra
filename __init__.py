@@ -152,7 +152,7 @@ def register():
     register_extra_category_provider(menu_category_provider) #if 'SVERCHOK_EXTRA' in nodeitems_utils._node_categories:
         #unregister_node_panels()
         #nodeitems_utils.unregister_node_categories("SVERCHOK_EXTRA")
-    nodeitems_utils.register_node_categories("SVERCHOK_EXTRA", menu)
+
     our_menu_classes = make_extra_category_menus()
     #register_node_panels("SVERCHOK_EXTRA", menu)
     show_welcome()
