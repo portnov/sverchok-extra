@@ -15,6 +15,7 @@ from sverchok.data_structure import updateNode, zip_long_repeat, throttle_and_up
 from sverchok.utils.math import supported_metrics, xyz_metrics
 from sverchok.utils.curve.fourier import SvFourierCurve
 from sverchok.dependencies import scipy
+from sverchok.utils.dummy_nodes import add_dummy
 
 if scipy is None:
     add_dummy('SvApproxFourierCurveNode', "Approximate Fourier Curve", 'scipy')
@@ -98,4 +99,3 @@ def register():
 def unregister():
     if scipy is not None:
         bpy.utils.unregister_class(SvApproxFourierCurveNode)
-
