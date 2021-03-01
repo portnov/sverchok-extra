@@ -11,7 +11,7 @@ try:
             SvDependency,
             ensurepip,
             pip, scipy, geomdl, skimage,
-            mcubes, circlify, ladybug,
+            mcubes, circlify,
             FreeCAD
         )
 
@@ -32,4 +32,3 @@ except ImportError:
     pygalmesh_d.message = "Pygalmesh package is not available. Corresponding nodes will not be available"
     info(pygalmesh_d.message)
     pygalmesh = None
-
