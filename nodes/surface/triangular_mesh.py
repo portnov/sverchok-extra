@@ -5,9 +5,9 @@ import bpy
 from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, StringProperty
 
 
-from sverchok import bl_info:
-    if bl_info["version"] < (1, 0, 0):
-        from sverchok.core.update_system import process_from_node
+from sverchok import bl_info
+if bl_info["version"] < (1, 0, 0):
+    from sverchok.core.update_system import process_from_node
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
@@ -70,7 +70,7 @@ if pygalmesh is not None and scipy is not None:
             if bl_info["version"] < (1, 0, 0):
                 process_from_node(node)
             else:
-                node.process_node()
+                node.process_node(None)
                 
             node.active = False
             return {'FINISHED'}
