@@ -70,7 +70,7 @@ if pygalmesh is not None and scipy is not None:
             if bl_info["version"] < (1, 0, 0):
                 process_from_node(node)
             else:
-                node.process_node()
+                node.process_node(None)
                 
             node.active = False
             return {'FINISHED'}
