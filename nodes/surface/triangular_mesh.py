@@ -4,7 +4,11 @@ import numpy as np
 import bpy
 from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, StringProperty
 
-from sverchok.core.update_system import process_from_node
+
+from sverchok import bl_info:
+    if bl_info["version"] < (1, 0, 0):
+        from sverchok.core.update_system import process_from_node
+
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
 from sverchok.utils.logging import info, exception
@@ -62,7 +66,12 @@ if pygalmesh is not None and scipy is not None:
         def execute(self, context):
             node = bpy.data.node_groups[self.node_tree].nodes[self.node_name]
             node.active = True
-            process_from_node(node)
+
+            if bl_info["version"] < (1, 0, 0):
+                process_from_node(node)
+            else:
+                node.process_node()
+                
             node.active = False
             return {'FINISHED'}
 
