@@ -6,7 +6,7 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
 from mathutils import bvhtree
 
 from sverchok.node_tree import SverchCustomTreeNode
-from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, throttle_and_update_node
+from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
 from sverchok.utils.field.vector import SvVectorField
 from sverchok.utils.surface import SvSurface
 from sverchok.utils.dummy_nodes import add_dummy
@@ -80,11 +80,11 @@ else:
         bl_label = 'Vector Field Lines on Surface'
         bl_icon = 'OUTLINER_OB_EMPTY'
 
-        @throttle_and_update_node
         def update_sockets(self, context):
             self.inputs['MaxT'].hide_safe = self.method == 'EULER'
             self.inputs['Step'].hide_safe = self.method != 'EULER'
             self.inputs['Iterations'].hide_safe = self.method != 'EULER'
+            updateNode(self, context)
 
         methods = [
             ('EULER', "Euler", "Simplest Euler method", 0),

@@ -6,7 +6,7 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, St
 from mathutils import Vector, Matrix
 
 from sverchok.node_tree import SverchCustomTreeNode
-from sverchok.data_structure import updateNode, zip_long_repeat, match_long_repeat, ensure_nesting_level, throttle_and_update_node
+from sverchok.data_structure import updateNode, zip_long_repeat, match_long_repeat, ensure_nesting_level
 from sverchok.utils.logging import info, exception
 from sverchok.utils.surface import SvSurface
 from sverchok.utils.geom import PlaneEquation
@@ -52,9 +52,9 @@ if skimage is not None or scipy is not None:
                 modes.append(('scipy', "OP + Tangent (Unsorted!)", "Use orthogonal projections + tangent method", 1))
             return modes
 
-        @throttle_and_update_node
         def update_sockets(self, context):
             self.outputs['UVPoints'].hide_safe = self.algorithm != 'skimage'
+            updateNode(self, context)
         
         algorithm : EnumProperty(
                 name = "Algorithm",

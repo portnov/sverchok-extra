@@ -12,7 +12,7 @@ import bpy
 from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
-from sverchok.data_structure import zip_long_repeat, throttle_and_update_node, repeat_last_for_length, updateNode
+from sverchok.data_structure import zip_long_repeat, repeat_last_for_length, updateNode
 from sverchok.utils.sv_bmesh_utils import bmesh_from_pydata
 from sverchok.utils.mesh_spatial import mesh_insert_verts, find_nearest_idxs
 
@@ -42,9 +42,9 @@ class SvDelaunayOnMeshNode(bpy.types.Node, SverchCustomTreeNode):
         default = True,
         update = updateNode)
 
-    @throttle_and_update_node
     def update_sockets(self, context):
         self.inputs['FaceIndex'].hide_safe = self.mode != 'INDEX'
+        updateNode(self, context)
 
     modes = [
             ('INDEX', "By face index", "Specify index of the face for each vertex being added", 0),

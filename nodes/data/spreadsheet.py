@@ -22,7 +22,7 @@ import bpy
 from bpy.props import CollectionProperty, EnumProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
-from sverchok.data_structure import updateNode, match_long_repeat, zip_long_repeat, throttle_and_update_node
+from sverchok.data_structure import updateNode, match_long_repeat, zip_long_repeat
 from sverchok.utils.logging import info, debug
 from sverchok_extra.utils.modules.spreadsheet.ui import *
 
@@ -38,7 +38,6 @@ class SvSpreadsheetNode(bpy.types.Node, SverchCustomTreeNode):
 
     spreadsheet : PointerProperty(type=SvSpreadsheetData)
 
-    @throttle_and_update_node
     def adjust_outputs(self, context):
 
         if self.out_mode == 'ROW':
@@ -71,6 +70,7 @@ class SvSpreadsheetNode(bpy.types.Node, SverchCustomTreeNode):
         self.outputs['Data'].hide_safe = self.out_mode != 'NONE'
         self.outputs['Rows'].hide_safe = self.out_mode != 'NONE'
         self.outputs['Columns'].hide_safe = self.out_mode != 'NONE'
+        updateNode(self, context)
 
     out_modes = [
             ('NONE', "Dictionaries", "Do not display separate outputs", 0),
@@ -127,19 +127,19 @@ class SvSpreadsheetNode(bpy.types.Node, SverchCustomTreeNode):
         formula_cols = self.spreadsheet.get_formula_cols()
         self.inputs['Input'].hide_safe = len(formula_cols) == 0
 
-    @throttle_and_update_node
     def on_update_value(self, context):
         self.adjust_inputs()
+        updateNode(self, context)
 
-    @throttle_and_update_node
     def on_update_row_name(self, context):
         self.adjust_inputs()
         self.adjust_outputs(context)
+        updateNode(self, context)
 
-    @throttle_and_update_node
     def on_update_column(self, context):
         self.adjust_inputs()
         self.adjust_outputs(context)
+        updateNode(self, context)
 
     def check_row_uniq(self):
         row_names = [row.name for row in self.spreadsheet.data]
