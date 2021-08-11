@@ -13,7 +13,7 @@ import bpy
 from bpy.props import BoolProperty, FloatProperty, EnumProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
-from sverchok.data_structure import zip_long_repeat, ensure_nesting_level, updateNode, throttle_and_update_node
+from sverchok.data_structure import zip_long_repeat, ensure_nesting_level, updateNode
 from sverchok.utils.curve import SvCurve
 from sverchok.utils.curve.nurbs import SvNurbsCurve
 from sverchok.utils.curve.freecad import SvFreeCadCurve, SvFreeCadNurbsCurve, curve_to_freecad_nurbs
@@ -147,10 +147,10 @@ class SvSolidWaffleNode(bpy.types.Node, SverchCustomTreeNode):
             ('SURFACE', "Surface", "Split along specified surface", 2)
         ]
     
-    @throttle_and_update_node
     def update_sockets(self, context):
         self.inputs['SplitMatrix'].hide_safe = self.split_mode != 'MATRIX'
         self.inputs['SplitSurface'].hide_safe = self.split_mode != 'SURFACE'
+        updateNode(self, context)
 
     split_mode : EnumProperty(
             name = "Split mode",
