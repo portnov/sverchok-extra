@@ -50,7 +50,8 @@ def nodes_index():
                 ("curve.interpolate_fourier_curve", "SvInterpFourierCurveNode")
             ]),
             ("Extra Fields", [
-                ("field.vfield_lines_on_surface", "SvExVFieldLinesOnSurfNode")
+                ("field.vfield_lines_on_surface", "SvExVFieldLinesOnSurfNode"),
+                ('sdf.estimate_bounds', "SvExSdfEstimateBoundsNode")
             ]),
             ("Extra Solids", [
                 ("solid.solid_waffle", "SvSolidWaffleNode")
@@ -58,6 +59,13 @@ def nodes_index():
             ("Extra Spatial", [
                 ("spatial.delaunay3d_surface", "SvDelaunayOnSurfaceNode"),
                 ("spatial.delaunay_mesh", "SvDelaunayOnMeshNode")
+            ]),
+            ('SDF Primitives', [
+                ("sdf_primitives.sdf_sphere", "SvExSdfSphereNode"),
+                ("sdf_primitives.sdf_box", "SvExSdfBoxNode")
+            ]),
+            ('SDF Operations', [
+                ('sdf.sdf_boolean', 'SvExSdfBooleanNode')
             ]),
             ("Data", [
                 ("data.spreadsheet", "SvSpreadsheetNode"),

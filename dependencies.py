@@ -32,3 +32,14 @@ except ImportError:
     pygalmesh_d.message = "Pygalmesh package is not available. Corresponding nodes will not be available"
     info(pygalmesh_d.message)
     pygalmesh = None
+
+sdf_d = ex_dependencies["sdf"] = SvDependency("sdf", "https://github.com/fogleman/sdf")
+try:
+    import sdf
+    sdf_d.message = "SDF package is available"
+    sdf_d.module = sdf
+except ImportError:
+    sdf_d.message = "SDF package is not available. SDF-based nodes will not be available"
+    info(sdf_d.message)
+    sdf = None
+
