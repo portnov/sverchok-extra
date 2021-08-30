@@ -69,7 +69,8 @@ def nodes_index():
                 ("sdf_primitives.sdf_rounded_cylinder", "SvExSdfRoundedCylinderNode"),
             ]),
             ('SDF Operations', [
-                ('sdf.sdf_boolean', 'SvExSdfBooleanNode')
+                ('sdf.sdf_boolean', 'SvExSdfBooleanNode'),
+                ('sdf.sdf_blend', 'SvExSdfBlendNode'),
             ]),
             ("Data", [
                 ("data.spreadsheet", "SvSpreadsheetNode"),

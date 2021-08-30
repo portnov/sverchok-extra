@@ -11,33 +11,24 @@ from sverchok_extra.dependencies import sdf
 from sverchok_extra.utils.sdf import *
 
 if sdf is None:
-    add_dummy('SvExSdfBooleanNode', "SDF Boolean", 'sdf')
+    add_dummy('SvExSdfBlendNode', "SDF Blend", 'sdf')
+else:
+    from sdf import *
 
-class SvExSdfBooleanNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExSdfBlendNode(bpy.types.Node, SverchCustomTreeNode):
     """
-    Triggers: SDF Boolean
-    Tooltip: SDF Boolean
+    Triggers: SDF Blend
+    Tooltip: SDF Blend
     """
-    bl_idname = 'SvExSdfBooleanNode'
-    bl_label = 'SDF Boolean'
+    bl_idname = 'SvExSdfBlendNode'
+    bl_label = 'SDF Blend'
     bl_icon = 'OUTLINER_OB_EMPTY'
-
-    operations = [
-            ('UNION', "Union", "Union", 0),
-            ('INTERSECTION', "Intersection", "Intersection", 1),
-            ('DIFFERENCE', "Difference", "Difference", 2)
-        ]
-
-    operation : EnumProperty(
-            name = "Operation",
-            items = operations,
-            default = 'UNION',
-            update = updateNode)
 
     k_value : FloatProperty(
             name = "K Value",
-            default = 0.0,
+            default = 0.5,
             min = 0.0,
+            max = 1.0,
             update = updateNode)
 
     def sv_init(self, context):
@@ -45,9 +36,6 @@ class SvExSdfBooleanNode(bpy.types.Node, SverchCustomTreeNode):
         self.inputs.new('SvScalarFieldSocket', "SDF2")
         self.inputs.new('SvStringsSocket', "KValue").prop_name = 'k_value'
         self.outputs.new('SvScalarFieldSocket', "SDF")
-
-    def draw_buttons(self, context, layout):
-        layout.prop(self, 'operation')
 
     def process(self):
         if not any(socket.is_linked for socket in self.outputs):
@@ -67,12 +55,7 @@ class SvExSdfBooleanNode(bpy.types.Node, SverchCustomTreeNode):
             for sdf1, sdf2, k in zip_long_repeat(*params):
                 sdf1 = scalar_field_to_sdf(sdf1, 0)
                 sdf2 = scalar_field_to_sdf(sdf2, 0)
-                if self.operation == 'UNION':
-                    sdf = union(sdf1, sdf2, k=k)
-                elif self.operation == 'INTERSECTION':
-                    sdf = intersection(sdf1, sdf2, k=k)
-                else:
-                    sdf = difference(sdf1, sdf2, k=k)
+                sdf = blend(sdf1, sdf2, k=k)
                 field = SvExSdfScalarField(sdf)
                 new_sdf.append(field)
             sdf_out.append(new_sdf)
@@ -81,9 +64,9 @@ class SvExSdfBooleanNode(bpy.types.Node, SverchCustomTreeNode):
 
 def register():
     if sdf is not None:
-        bpy.utils.register_class(SvExSdfBooleanNode)
+        bpy.utils.register_class(SvExSdfBlendNode)
 
 def unregister():
     if sdf is not None:
-        bpy.utils.unregister_class(SvExSdfBooleanNode)
+        bpy.utils.unregister_class(SvExSdfBlendNode)
 

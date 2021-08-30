@@ -11,8 +11,6 @@ from sverchok_extra.utils.sdf import *
 
 if sdf is None:
     add_dummy('SvExSdfRoundedCylinderNode', "SDF Rounded Cylinder", 'sdf')
-else:
-    from sdf import sphere
 
 class SvExSdfRoundedCylinderNode(bpy.types.Node, SverchCustomTreeNode):
     """
