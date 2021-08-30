@@ -66,6 +66,7 @@ def nodes_index():
                 ("sdf_primitives.sdf_rounded_box", "SvExSdfRoundedBoxNode"),
                 ("sdf_primitives.sdf_torus", "SvExSdfTorusNode"),
                 ("sdf_primitives.sdf_cylinder", "SvExSdfCylinderNode"),
+                ("sdf_primitives.sdf_rounded_cylinder", "SvExSdfRoundedCylinderNode"),
             ]),
             ('SDF Operations', [
                 ('sdf.sdf_boolean', 'SvExSdfBooleanNode')
