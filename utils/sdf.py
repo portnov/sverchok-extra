@@ -66,3 +66,18 @@ def estimate_bounds(field):
         x0, y0, z0 = (x0, y0, z0) + where.min(axis=0) * d - d / 2
     return ((x0, y0, z0), (x1, y1, z1))
 
+easing_dict = dict(enumerate([
+        ease.linear,
+        ease.in_quad, ease.out_quad, ease.in_out_quad,
+        ease.in_cubic, ease.out_cubic, ease.in_out_cubic,
+        ease.in_quart, ease.out_quart, ease.in_out_quart,
+        ease.in_quint, ease.out_quint, ease.in_out_quint,
+        ease.in_sine, ease.out_sine, ease.in_out_sine,
+        ease.in_expo, ease.out_expo, ease.in_out_expo,
+        ease.in_circ, ease.out_circ, ease.in_out_circ,
+        ease.in_elastic, ease.out_elastic, ease.in_out_elastic,
+        ease.in_back, ease.out_back, ease.in_out_back,
+        ease.in_bounce, ease.out_bounce, ease.in_out_bounce,
+        ease.in_square, ease.out_square, ease.in_out_square
+    ]))
+
