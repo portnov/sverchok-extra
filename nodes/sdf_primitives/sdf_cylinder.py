@@ -12,7 +12,7 @@ from sverchok_extra.utils.sdf import *
 if sdf is None:
     add_dummy('SvExSdfCylinderNode', "SDF Cylinder", 'sdf')
 else:
-    from sdf import sphere
+    from sdf import *
 
 class SvExSdfCylinderNode(bpy.types.Node, SverchCustomTreeNode):
     """
