@@ -72,6 +72,7 @@ def nodes_index():
             ]),
             ('SDF Operations', [
                 ('sdf.sdf_translate', 'SvExSdfTranslateNode'),
+                ('sdf.sdf_scale', 'SvExSdfScaleNode'),
                 ('sdf.sdf_transform', 'SvExSdfTransformNode'),
                 ('sdf.sdf_boolean', 'SvExSdfBooleanNode'),
                 ('sdf.sdf_blend', 'SvExSdfBlendNode'),
