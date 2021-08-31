@@ -9,6 +9,8 @@ from sverchok.utils.field.scalar import SvScalarField
 from sverchok.utils.modules.sdf_utils import geometry_from_points
 
 class SvExSdfScalarField(SvScalarField):
+    __description__ = "SDF"
+
     def __init__(self, sdf):
         self.sdf = sdf
 
@@ -21,6 +23,24 @@ class SvExSdfScalarField(SvScalarField):
 
     def evaluate(self, x, y, z):
         points = np.array([[x,y,z]])
+        r = self.sdf.f(points)
+        return r
+
+class SvExSdf2DScalarField(SvScalarField):
+    __description__ = "2D SDF"
+
+    def __init__(self, sdf):
+        self.sdf = sdf
+
+    def evaluate_grid(self, xs, ys, zs):
+        points = np.stack((xs, ys)).T
+        r = self.sdf.f(points)
+        if r.ndim == 2 and r.shape[1] == 1:
+            r = r.flatten()
+        return r
+
+    def evaluate(self, x, y, z):
+        points = np.array([[x,y]])
         r = self.sdf.f(points)
         return r
 
@@ -37,6 +57,20 @@ def scalar_field_to_sdf(field, iso_value):
         return evaluate_array
 
     return sdf3(function)()
+
+def scalar_field_to_sdf_2d(field, iso_value):
+    if isinstance(field, SvExSdf2DScalarField):
+        return field.sdf
+
+    def function():
+        def evaluate_array(points):
+            xs = points[:,0]
+            ys = points[:,1]
+            zs = np.zeros_like(xs)
+            return field.evaluate_grid(xs, ys, zs) - iso_value
+        return evaluate_array
+
+    return sdf2(function)()
 
 def cartesian_product(*arrays):
     la = len(arrays)
