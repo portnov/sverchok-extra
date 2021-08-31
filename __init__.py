@@ -64,6 +64,7 @@ def nodes_index():
                 ("sdf_primitives.sdf_sphere", "SvExSdfSphereNode"),
                 ("sdf_primitives.sdf_box", "SvExSdfBoxNode"),
                 ("sdf_primitives.sdf_plane", "SvExSdfPlaneNode"),
+                ("sdf_primitives.sdf_slab", "SvExSdfSlabNode"),
                 ("sdf_primitives.sdf_rounded_box", "SvExSdfRoundedBoxNode"),
                 ("sdf_primitives.sdf_torus", "SvExSdfTorusNode"),
                 ("sdf_primitives.sdf_cylinder", "SvExSdfCylinderNode"),
