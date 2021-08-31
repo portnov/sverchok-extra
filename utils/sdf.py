@@ -14,6 +14,8 @@ class SvExSdfScalarField(SvScalarField):
     def evaluate_grid(self, xs, ys, zs):
         points = np.stack((xs, ys, zs)).T
         r = self.sdf.f(points)
+        if r.ndim == 2 and r.shape[1] == 1:
+            r = r.flatten()
         return r
 
     def evaluate(self, x, y, z):
