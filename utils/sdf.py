@@ -6,6 +6,7 @@ if sdf is not None:
     from sdf import *
 
 from sverchok.utils.field.scalar import SvScalarField
+from sverchok.utils.modules.sdf_utils import geometry_from_points
 
 class SvExSdfScalarField(SvScalarField):
     def __init__(self, sdf):
@@ -24,6 +25,9 @@ class SvExSdfScalarField(SvScalarField):
         return r
 
 def scalar_field_to_sdf(field, iso_value):
+    if isinstance(field, SvExSdfScalarField):
+        return field.sdf
+
     def function():
         def evaluate_array(points):
             xs = points[:,0]

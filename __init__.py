@@ -83,6 +83,7 @@ def nodes_index():
                 ('sdf.sdf_dilate_erode', 'SvExSdfDilateErodeNode'),
                 ('sdf.sdf_shell', 'SvExSdfShellNode'),
                 ('sdf.sdf_twist', 'SvExSdfTwistNode'),
+                ('sdf.sdf_generate', 'SvExSdfGenerateNode'),
             ]),
             ("Data", [
                 ("data.spreadsheet", "SvSpreadsheetNode"),
