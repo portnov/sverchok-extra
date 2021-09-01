@@ -73,6 +73,7 @@ def nodes_index():
                 None,
                 ("sdf_primitives.sdf2d_circle", "SvExSdf2dCircleNode"),
                 ("sdf_primitives.sdf2d_hexagon", "SvExSdf2dHexagonNode"),
+                ("sdf_primitives.sdf2d_polygon", "SvExSdf2dPolygonNode"),
             ]),
             ('SDF Operations', [
                 ('sdf.sdf_translate', 'SvExSdfTranslateNode'),
