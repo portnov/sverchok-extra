@@ -10,39 +10,40 @@ from sverchok_extra.dependencies import sdf
 from sverchok_extra.utils.sdf import *
 
 if sdf is None:
-    add_dummy('SvExSdfCylinderNode', "SDF Cylinder", 'sdf')
+    add_dummy('SvExSdfCapsuleNode', "SDF Capsule", 'sdf')
 else:
     from sdf import *
 
-class SvExSdfCylinderNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExSdfCapsuleNode(bpy.types.Node, SverchCustomTreeNode):
     """
-    Triggers: SDF Cylinder
-    Tooltip: SDF Cylinder
+    Triggers: SDF Capsule
+    Tooltip: SDF Capsule
     """
-    bl_idname = 'SvExSdfCylinderNode'
-    bl_label = 'SDF Cylinder'
+    bl_idname = 'SvExSdfCapsuleNode'
+    bl_label = 'SDF Capsule'
     bl_icon = 'OUTLINER_OB_EMPTY'
 
-    cyl_radius: FloatProperty(
+    caps_radius : FloatProperty(
         name="Radius",
-        default=1,
+        default=0.5,
         update=updateNode)
 
-    cyl_height: FloatProperty(
-        name="Height",
-        default=2,
+    point1 : FloatVectorProperty(
+        name="Point1",
+        default=(0, 0, -1),
+        size=3,
         update=updateNode)
 
-    origin: FloatVectorProperty(
-        name="Origin",
-        default=(0, 0, 0),
+    point2 : FloatVectorProperty(
+        name="Point2",
+        default=(0, 0, 1),
         size=3,
         update=updateNode)
 
     def sv_init(self, context):
-        self.inputs.new('SvStringsSocket', "Radius").prop_name = 'cyl_radius'
-        self.inputs.new('SvStringsSocket', "Height").prop_name = 'cyl_height'
-        self.inputs.new('SvVerticesSocket', "Origin").prop_name = 'origin'
+        self.inputs.new('SvStringsSocket', "Radius").prop_name = 'caps_radius'
+        self.inputs.new('SvVerticesSocket', "Point1").prop_name = 'point1'
+        self.inputs.new('SvVerticesSocket', "Point2").prop_name = 'point2'
         self.outputs.new('SvScalarFieldSocket', "SDF")
 
     def process(self):
@@ -50,18 +51,18 @@ class SvExSdfCylinderNode(bpy.types.Node, SverchCustomTreeNode):
             return
 
         radiuses_s = self.inputs['Radius'].sv_get()
-        height_s = self.inputs['Height'].sv_get()
-        origins_s = self.inputs['Origin'].sv_get()
+        point1_s = self.inputs['Point1'].sv_get()
+        point2_s = self.inputs['Point2'].sv_get()
 
         radiuses_s = ensure_nesting_level(radiuses_s, 2)
-        height_s = ensure_nesting_level(height_s, 2)
-        origins_s = ensure_nesting_level(origins_s, 3)
+        point1_s = ensure_nesting_level(point1_s, 3)
+        point2_s = ensure_nesting_level(point2_s, 3)
 
         fields_out = []
-        for params in zip_long_repeat(radiuses_s, height_s, origins_s):
+        for params in zip_long_repeat(radiuses_s, point1_s, point2_s):
             new_fields = []
-            for radius, height, origin in zip_long_repeat(*params):
-                sdf = capped_cylinder((0, 0, 0), (0, 0, height), radius).translate(origin)
+            for radius, point1, point2 in zip_long_repeat(*params):
+                sdf = capsule(point1, point2, radius)
                 field = SvExSdfScalarField(sdf)
                 new_fields.append(field)
             fields_out.append(new_fields)
@@ -70,9 +71,9 @@ class SvExSdfCylinderNode(bpy.types.Node, SverchCustomTreeNode):
 
 def register():
     if sdf is not None:
-        bpy.utils.register_class(SvExSdfCylinderNode)
+        bpy.utils.register_class(SvExSdfCapsuleNode)
 
 def unregister():
     if sdf is not None:
-        bpy.utils.unregister_class(SvExSdfCylinderNode)
+        bpy.utils.unregister_class(SvExSdfCapsuleNode)
 
