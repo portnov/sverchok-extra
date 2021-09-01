@@ -62,6 +62,9 @@ def scalar_field_to_sdf_2d(field, iso_value):
     if isinstance(field, SvExSdf2DScalarField):
         return field.sdf
 
+    if isinstance(field, SvExSdfScalarField):
+        return field.sdf.slice()
+
     def function():
         def evaluate_array(points):
             xs = points[:,0]
