@@ -21,7 +21,7 @@ import bl_operators
 import sverchok
 from sverchok.core import sv_registration_utils, make_node_list
 from sverchok.utils import auto_gather_node_classes, get_node_class_reference
-from sverchok.menu import SverchNodeItem, node_add_operators, SverchNodeCategory, register_node_panels, unregister_node_panels, unregister_node_add_operators
+from sverchok.menu import SverchNodeItem, SverchSeparator, node_add_operators, SverchNodeCategory, register_node_panels, unregister_node_panels, unregister_node_add_operators
 from sverchok.utils.extra_categories import register_extra_category_provider, unregister_extra_category_provider
 from sverchok.ui.nodeview_space_menu import make_extra_category_menus
 from sverchok.node_tree import SverchCustomTreeNode
@@ -77,6 +77,7 @@ def nodes_index():
                 ('sdf.sdf_rotate', 'SvExSdfRotateNode'),
                 ('sdf.sdf_orient', 'SvExSdfOrientNode'),
                 ('sdf.sdf_transform', 'SvExSdfTransformNode'),
+                None,
                 ('sdf.sdf_boolean', 'SvExSdfBooleanNode'),
                 ('sdf.sdf_blend', 'SvExSdfBlendNode'),
                 ('sdf.sdf_transition_linear', 'SvExSdfLinearTransitionNode'),
@@ -84,9 +85,11 @@ def nodes_index():
                 ('sdf.sdf_dilate_erode', 'SvExSdfDilateErodeNode'),
                 ('sdf.sdf_shell', 'SvExSdfShellNode'),
                 ('sdf.sdf_twist', 'SvExSdfTwistNode'),
+                None,
                 ('sdf.sdf_slice', 'SvExSdfSliceNode'),
                 ('sdf.sdf_extrude', 'SvExSdfExtrudeNode'),
                 ('sdf.sdf_extrude_to', 'SvExSdfExtrudeToNode'),
+                None,
                 ('sdf.sdf_generate', 'SvExSdfGenerateNode'),
             ]),
             ("Data", [
@@ -100,7 +103,10 @@ def make_node_list():
     base_name = "sverchok_extra.nodes"
     index = nodes_index()
     for category, items in index:
-        for module_name, node_name in items:
+        for item in items:
+            if not item:
+                continue
+            module_name, node_name = item
             module = importlib.import_module(f".{module_name}", base_name)
             modules.append(module)
     return modules
@@ -134,6 +140,11 @@ def make_menu():
         identifier = "SVERCHOK_EXTRA_" + category.replace(' ', '_')
         node_items = []
         for item in items:
+            if not item:
+                node_item = SverchSeparator()
+                node_items.append(node_item)
+                continue
+
             nodetype = item[1]
             rna = get_node_class_reference(nodetype)
             if not rna:
