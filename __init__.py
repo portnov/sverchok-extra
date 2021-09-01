@@ -93,6 +93,7 @@ def nodes_index():
                 ('sdf.sdf_slice', 'SvExSdfSliceNode'),
                 ('sdf.sdf_extrude', 'SvExSdfExtrudeNode'),
                 ('sdf.sdf_extrude_to', 'SvExSdfExtrudeToNode'),
+                ('sdf.sdf_revolve', 'SvExSdfRevolveNode'),
                 None,
                 ('sdf.sdf_generate', 'SvExSdfGenerateNode'),
             ]),
