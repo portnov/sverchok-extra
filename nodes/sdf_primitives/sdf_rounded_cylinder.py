@@ -44,6 +44,14 @@ class SvExSdfRoundedCylinderNode(bpy.types.Node, SverchCustomTreeNode):
         size=3,
         update=updateNode)
 
+    origin_at_center: BoolProperty(
+        name = "Center",
+        default = True,
+        update=updateNode)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'origin_at_center')
+
     def sv_init(self, context):
         self.inputs.new('SvStringsSocket', "MajorRadius").prop_name = 'major_radius'
         self.inputs.new('SvStringsSocket', "MinorRadius").prop_name = 'minor_radius'
@@ -69,6 +77,9 @@ class SvExSdfRoundedCylinderNode(bpy.types.Node, SverchCustomTreeNode):
         for params in zip_long_repeat(major_radius_s, minor_radius_s, height_s, origins_s):
             new_fields = []
             for major_radius, minor_radius, height, origin in zip_long_repeat(*params):
+                if not self.origin_at_center:
+                    x0, y0, z0 = origin
+                    origin = x0, y0, z0 + (height / 2.0)
                 sdf = rounded_cylinder(major_radius, minor_radius, height).translate(origin)
                 field = SvExSdfScalarField(sdf)
                 new_fields.append(field)
