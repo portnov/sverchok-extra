@@ -21,7 +21,7 @@ class SvExSdfRoundedBoxNode(bpy.types.Node, SverchCustomTreeNode):
     """
     bl_idname = 'SvExSdfRoundedBoxNode'
     bl_label = 'SDF Rounded Box'
-    bl_icon = 'OUTLINER_OB_EMPTY'
+    bl_icon = 'MESH_CAPSULE'
 
     size_x : FloatProperty(
         name = "X Size",

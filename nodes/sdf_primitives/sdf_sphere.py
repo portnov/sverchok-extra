@@ -21,7 +21,7 @@ class SvExSdfSphereNode(bpy.types.Node, SverchCustomTreeNode):
     """
     bl_idname = 'SvExSdfSphereNode'
     bl_label = 'SDF Sphere'
-    bl_icon = 'OUTLINER_OB_EMPTY'
+    bl_icon = 'MESH_UVSPHERE'
 
     sphere_radius: FloatProperty(
         name="Radius",

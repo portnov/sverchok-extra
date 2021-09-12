@@ -21,7 +21,7 @@ class SvExSdfTorusNode(bpy.types.Node, SverchCustomTreeNode):
     """
     bl_idname = 'SvExSdfTorusNode'
     bl_label = 'SDF Torus'
-    bl_icon = 'OUTLINER_OB_EMPTY'
+    bl_icon = 'MESH_TORUS'
 
     major_radius : FloatProperty(
         name="Major Radius",

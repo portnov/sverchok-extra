@@ -23,6 +23,7 @@ class SvExSdfShellNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExSdfShellNode'
     bl_label = 'SDF Shell'
     bl_icon = 'OUTLINER_OB_EMPTY'
+    sv_icon = 'SV_HOLLOW_SOLID'
 
     thickness : FloatProperty(
             name = "Thickness",

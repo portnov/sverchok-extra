@@ -21,7 +21,8 @@ class SvExSdf2dPolygonNode(bpy.types.Node, SverchCustomTreeNode):
     """
     bl_idname = 'SvExSdf2dPolygonNode'
     bl_label = 'SDF 2D Polygon'
-    bl_icon = 'OUTLINER_OB_EMPTY'
+    bl_icon = 'RNDCURVE'
+    sv_icon = 'SV_NGON'
 
     def sv_init(self, context):
         self.inputs.new('SvVerticesSocket', "Vertices")

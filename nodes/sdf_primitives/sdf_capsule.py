@@ -21,7 +21,7 @@ class SvExSdfCapsuleNode(bpy.types.Node, SverchCustomTreeNode):
     """
     bl_idname = 'SvExSdfCapsuleNode'
     bl_label = 'SDF Capsule'
-    bl_icon = 'OUTLINER_OB_EMPTY'
+    bl_icon = 'MESH_CAPSULE'
 
     caps_radius : FloatProperty(
         name="Radius",

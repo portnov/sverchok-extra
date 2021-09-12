@@ -23,6 +23,7 @@ class SvExSdfBlendNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExSdfBlendNode'
     bl_label = 'SDF Blend'
     bl_icon = 'OUTLINER_OB_EMPTY'
+    sv_icon = 'SV_MIX_INPUTS'
 
     k_value : FloatProperty(
             name = "K Value",

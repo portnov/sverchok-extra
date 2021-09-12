@@ -24,6 +24,7 @@ class SvExSdfGenerateNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExSdfGenerateNode'
     bl_label = 'SDF Generate Mesh'
     bl_icon = 'OUTLINER_OB_EMPTY'
+    sv_icon = 'SV_EX_MCUBES'
 
     remove_doubles : BoolProperty(
         name = "Remove doubles",

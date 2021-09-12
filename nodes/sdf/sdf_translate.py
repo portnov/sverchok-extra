@@ -21,6 +21,7 @@ class SvExSdfTranslateNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExSdfTranslateNode'
     bl_label = 'SDF Translate'
     bl_icon = 'OUTLINER_OB_EMPTY'
+    sv_icon = 'SV_MOVE'
 
     vector: FloatVectorProperty(
         name="Vector",

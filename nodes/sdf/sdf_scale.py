@@ -21,6 +21,7 @@ class SvExSdfScaleNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExSdfScaleNode'
     bl_label = 'SDF Scale'
     bl_icon = 'OUTLINER_OB_EMPTY'
+    sv_icon = 'SV_SCALE'
 
     scale_v: FloatVectorProperty(
         name="Scale",

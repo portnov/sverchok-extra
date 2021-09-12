@@ -21,7 +21,7 @@ class SvExSdfBoxNode(bpy.types.Node, SverchCustomTreeNode):
     """
     bl_idname = 'SvExSdfBoxNode'
     bl_label = 'SDF Box'
-    bl_icon = 'OUTLINER_OB_EMPTY'
+    bl_icon = 'MESH_CUBE'
 
     size_x : FloatProperty(
         name = "X Size",

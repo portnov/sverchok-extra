@@ -21,6 +21,7 @@ class SvExSdfBooleanNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExSdfBooleanNode'
     bl_label = 'SDF Boolean'
     bl_icon = 'OUTLINER_OB_EMPTY'
+    sv_icon = 'SV_SOLID_BOOLEAN'
 
     operations = [
             ('UNION', "Union", "Union", 0),

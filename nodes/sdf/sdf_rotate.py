@@ -22,6 +22,7 @@ class SvExSdfRotateNode(bpy.types.Node, SverchCustomTreeNode, SvAngleHelper):
     bl_idname = 'SvExSdfRotateNode'
     bl_label = 'SDF Rotate'
     bl_icon = 'OUTLINER_OB_EMPTY'
+    sv_icon = 'SV_ROTATE'
 
     axis_v: FloatVectorProperty(
         name="Axis",

@@ -21,7 +21,8 @@ class SvExSdfPlatonicSolidNode(bpy.types.Node, SverchCustomTreeNode):
     """
     bl_idname = 'SvExSdfPlatonicSolidNode'
     bl_label = 'SDF Platonic Solid'
-    bl_icon = 'OUTLINER_OB_EMPTY'
+    bl_icon = 'GRIP'
+    sv_icon = 'SV_REGULAR_SOLID'
 
     s_radius : FloatProperty(
         name = "Radius",

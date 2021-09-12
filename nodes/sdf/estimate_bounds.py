@@ -21,6 +21,7 @@ class SvExSdfEstimateBoundsNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExSdfEstimateBoundsNode'
     bl_label = 'Estimate Scalar Field Bounds'
     bl_icon = 'OUTLINER_OB_EMPTY'
+    sv_icon = 'SV_BOUNDING_BOX'
 
     def sv_init(self, context):
         self.inputs.new('SvScalarFieldSocket', "Field")

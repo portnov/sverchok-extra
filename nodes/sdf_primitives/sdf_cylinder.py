@@ -21,7 +21,7 @@ class SvExSdfCylinderNode(bpy.types.Node, SverchCustomTreeNode):
     """
     bl_idname = 'SvExSdfCylinderNode'
     bl_label = 'SDF Cylinder'
-    bl_icon = 'OUTLINER_OB_EMPTY'
+    bl_icon = 'MESH_CYLINDER'
 
     cyl_radius: FloatProperty(
         name="Radius",

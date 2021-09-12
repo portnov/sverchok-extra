@@ -21,6 +21,7 @@ class SvExSdfExtrudeNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExSdfExtrudeNode'
     bl_label = 'SDF Extrude'
     bl_icon = 'OUTLINER_OB_EMPTY'
+    sv_icon = 'SV_EXTRUDE_REGION'
 
     height : FloatProperty(
             name = "Height",

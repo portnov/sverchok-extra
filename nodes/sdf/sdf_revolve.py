@@ -21,6 +21,7 @@ class SvExSdfRevolveNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExSdfRevolveNode'
     bl_label = 'SDF Revolve'
     bl_icon = 'OUTLINER_OB_EMPTY'
+    sv_icon = 'SV_REVOLVE_FACE'
 
     offset : FloatProperty(
             name = "Offset",

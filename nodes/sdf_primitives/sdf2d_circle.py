@@ -21,7 +21,7 @@ class SvExSdf2dCircleNode(bpy.types.Node, SverchCustomTreeNode):
     """
     bl_idname = 'SvExSdf2dCircleNode'
     bl_label = 'SDF 2D Circle'
-    bl_icon = 'OUTLINER_OB_EMPTY'
+    bl_icon = 'MESH_CIRCLE'
 
     circle_radius : FloatProperty(
         name = "Radius",

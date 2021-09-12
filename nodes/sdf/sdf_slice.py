@@ -21,6 +21,7 @@ class SvExSdfSliceNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExSdfSliceNode'
     bl_label = 'SDF Slice'
     bl_icon = 'OUTLINER_OB_EMPTY'
+    sv_icon = 'SV_SLICE_SOLID'
 
     z_value : FloatProperty(
             name = "Z Value",

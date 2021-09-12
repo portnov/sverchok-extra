@@ -21,7 +21,7 @@ class SvExSdfPlaneNode(bpy.types.Node, SverchCustomTreeNode):
     """
     bl_idname = 'SvExSdfPlaneNode'
     bl_label = 'SDF Hemispace'
-    bl_icon = 'OUTLINER_OB_EMPTY'
+    bl_icon = 'MESH_PLANE'
 
     origin: FloatVectorProperty(
         name="Origin",
