@@ -125,3 +125,9 @@ if sdf is not None:
             ease.in_square, ease.out_square, ease.in_out_square
         ]))
 
+    easing_options = [(str(k), f.__name__, f.__name__, f.__name__, k) for k, f in easing_dict.items()]
+
+else:
+
+    easing_options = []
+
