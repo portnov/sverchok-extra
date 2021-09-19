@@ -4,7 +4,7 @@ import bpy
 from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, FloatVectorProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
-from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
+from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, get_data_nesting_level
 from sverchok.utils.field.scalar import SvScalarField
 from sverchok.utils.dummy_nodes import add_dummy
 from sverchok_extra.dependencies import sdf
@@ -46,6 +46,8 @@ class SvExSdfBlendNode(bpy.types.Node, SverchCustomTreeNode):
         sdf2_s = self.inputs['SDF2'].sv_get()
         ks_s = self.inputs['KValue'].sv_get()
 
+        input_level = get_data_nesting_level(sdf1_s, data_types=(SvScalarField,))
+        flat_output = input_level == 1
         sdf1_s = ensure_nesting_level(sdf1_s, 2, data_types=(SvScalarField,))
         sdf2_s = ensure_nesting_level(sdf2_s, 2, data_types=(SvScalarField,))
         ks_s = ensure_nesting_level(ks_s, 2)
@@ -59,7 +61,10 @@ class SvExSdfBlendNode(bpy.types.Node, SverchCustomTreeNode):
                 sdf = blend(sdf1, sdf2, k=k)
                 field = SvExSdfScalarField(sdf)
                 new_sdf.append(field)
-            sdf_out.append(new_sdf)
+            if flat_output:
+                sdf_out.extend(new_sdf)
+            else:
+                sdf_out.append(new_sdf)
 
         self.outputs['SDF'].sv_set(sdf_out)
 

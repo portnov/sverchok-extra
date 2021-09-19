@@ -5,7 +5,7 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, Fl
 from mathutils import Matrix
 
 from sverchok.node_tree import SverchCustomTreeNode
-from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
+from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, get_data_nesting_level
 from sverchok.utils.field.scalar import SvScalarField, SvVectorScalarFieldComposition
 from sverchok.utils.field.vector import SvVectorField, SvMatrixVectorField, SvAbsoluteVectorField
 from sverchok.utils.dummy_nodes import add_dummy
@@ -72,6 +72,8 @@ class SvExSdfTransformNode(bpy.types.Node, SverchCustomTreeNode):
             return
 
         sdf_s = self.inputs['SDF'].sv_get()
+        input_level = get_data_nesting_level(sdf1_s, data_types=(SvScalarField,))
+        flat_output = input_level == 1
         sdf_s = ensure_nesting_level(sdf_s, 2, data_types=(SvScalarField,))
 
         if self.inputs['TransformField'].is_linked:
@@ -101,7 +103,10 @@ class SvExSdfTransformNode(bpy.types.Node, SverchCustomTreeNode):
 
                 field = SvVectorScalarFieldComposition(transform, sdf)
                 new_sdf.append(field)
-            sdf_out.append(new_sdf)
+            if flat_output:
+                sdf_out.extend(new_sdf)
+            else:
+                sdf_out.append(new_sdf)
 
         self.outputs['SDF'].sv_set(sdf_out)
 

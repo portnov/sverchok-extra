@@ -4,7 +4,7 @@ import bpy
 from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, FloatVectorProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
-from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
+from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, get_data_nesting_level
 from sverchok.utils.field.scalar import SvScalarField
 from sverchok.utils.dummy_nodes import add_dummy
 from sverchok_extra.dependencies import sdf
@@ -59,6 +59,8 @@ else:
             radius1_s = self.inputs['Radius1'].sv_get()
             radius2_s = self.inputs['Radius2'].sv_get()
 
+            input_level = get_data_nesting_level(sdf1_s, data_types=(SvScalarField,))
+            flat_output = input_level == 1
             sdf1_s = ensure_nesting_level(sdf1_s, 2, data_types=(SvScalarField,))
             sdf2_s = ensure_nesting_level(sdf2_s, 2, data_types=(SvScalarField,))
             radius1_s = ensure_nesting_level(radius1_s, 2)
@@ -75,7 +77,10 @@ else:
                     sdf = transition_radial(sdf1, sdf2, r0=radius1, r1=radius2, e=easing_function)
                     field = SvExSdfScalarField(sdf)
                     new_sdf.append(field)
-                sdf_out.append(new_sdf)
+                if flat_output:
+                    sdf_out.extend(new_sdf)
+                else:
+                    sdf_out.append(new_sdf)
 
             self.outputs['SDF'].sv_set(sdf_out)
 

@@ -4,7 +4,7 @@ import bpy
 from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, FloatVectorProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
-from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
+from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, get_data_nesting_level
 from sverchok.utils.field.scalar import SvScalarField
 from sverchok.utils.dummy_nodes import add_dummy
 #from sverchok.utils.sv_easing_functions import easing_dict
@@ -62,6 +62,8 @@ else:
             point1_s = self.inputs['Point1'].sv_get()
             point2_s = self.inputs['Point2'].sv_get()
 
+            input_level = get_data_nesting_level(sdf1_s, data_types=(SvScalarField,))
+            flat_output = input_level == 1
             sdf1_s = ensure_nesting_level(sdf1_s, 2, data_types=(SvScalarField,))
             sdf2_s = ensure_nesting_level(sdf2_s, 2, data_types=(SvScalarField,))
             point1_s = ensure_nesting_level(point1_s, 3)
@@ -78,7 +80,10 @@ else:
                     sdf = transition_linear(sdf1, sdf2, p0=point1, p1=point2, e=easing_function)
                     field = SvExSdfScalarField(sdf)
                     new_sdf.append(field)
-                sdf_out.append(new_sdf)
+                if flat_output:
+                    sdf_out.extend(new_sdf)
+                else:
+                    sdf_out.append(new_sdf)
 
             self.outputs['SDF'].sv_set(sdf_out)
 

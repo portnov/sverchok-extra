@@ -4,7 +4,7 @@ import bpy
 from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, FloatVectorProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
-from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
+from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, get_data_nesting_level
 from sverchok.utils.field.scalar import SvScalarField
 from sverchok.utils.dummy_nodes import add_dummy
 from sverchok_extra.dependencies import sdf
@@ -40,6 +40,8 @@ class SvExSdfRevolveNode(bpy.types.Node, SverchCustomTreeNode):
         sdf_s = self.inputs['SDF'].sv_get()
         offset_s = self.inputs['Offset'].sv_get()
 
+        input_level = get_data_nesting_level(sdf_s, data_types=(SvScalarField,))
+        flat_output = input_level == 1
         sdf_s = ensure_nesting_level(sdf_s, 2, data_types=(SvScalarField,))
         offset_s = ensure_nesting_level(offset_s, 2)
 
@@ -51,7 +53,10 @@ class SvExSdfRevolveNode(bpy.types.Node, SverchCustomTreeNode):
                 sdf = sdf_2d.revolve(offset)
                 field = SvExSdfScalarField(sdf)
                 new_sdf.append(field)
-            sdf_out.append(new_sdf)
+            if flat_output:
+                sdf_out.extend(new_sdf)
+            else:
+                sdf_out.append(new_sdf)
 
         self.outputs['SDF'].sv_set(sdf_out)
 
