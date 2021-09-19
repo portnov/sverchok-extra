@@ -92,6 +92,11 @@ class SvExSdfSlabNode(bpy.types.Node, SverchCustomTreeNode):
         default = 1.0,
         update=updateNode)
 
+    flat_output : BoolProperty(
+        name = "Flat output",
+        default = True,
+        update=updateNode)
+
     def draw_buttons(self, context, layout):
         box = layout.column(align=True)
 
@@ -106,6 +111,8 @@ class SvExSdfSlabNode(bpy.types.Node, SverchCustomTreeNode):
         row = box.row(align=True)
         row.prop(self, 'use_z_min', toggle=True)
         row.prop(self, 'use_z_max', toggle=True)
+
+        layout.prop(self, 'flat_output')
 
     def sv_init(self, context):
         self.inputs.new('SvStringsSocket', "MinX").prop_name = 'x_min'
@@ -157,7 +164,10 @@ class SvExSdfSlabNode(bpy.types.Node, SverchCustomTreeNode):
                 sdf = slab(x0=x_min, y0=y_min, z0=z_min, x1=x_max, y1=y_max, z1=z_max)
                 field = SvExSdfScalarField(sdf)
                 new_fields.append(field)
-            fields_out.append(new_fields)
+            if self.flat_output:
+                fields_out.extend(new_fields)
+            else:
+                fields_out.append(new_fields)
 
         self.outputs['SDF'].sv_set(fields_out)
 

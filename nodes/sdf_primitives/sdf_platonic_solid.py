@@ -50,8 +50,14 @@ class SvExSdfPlatonicSolidNode(bpy.types.Node, SverchCustomTreeNode):
         default = 'TETRA',
         update = updateNode)
 
+    flat_output : BoolProperty(
+        name = "Flat output",
+        default = True,
+        update=updateNode)
+
     def draw_buttons(self, context, layout):
         layout.prop(self, 'solid_type')
+        layout.prop(self, 'flat_output')
 
     def sv_init(self, context):
         self.inputs.new('SvStringsSocket', "Radius").prop_name = 's_radius'
@@ -84,7 +90,10 @@ class SvExSdfPlatonicSolidNode(bpy.types.Node, SverchCustomTreeNode):
                     sdf = icosahedron(radius).translate(origin)
                 field = SvExSdfScalarField(sdf)
                 new_fields.append(field)
-            fields_out.append(new_fields)
+            if self.flat_output:
+                fields_out.extend(new_fields)
+            else:
+                fields_out.append(new_fields)
 
         self.outputs['SDF'].sv_set(fields_out)
 

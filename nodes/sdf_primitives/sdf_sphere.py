@@ -35,6 +35,14 @@ class SvExSdfSphereNode(bpy.types.Node, SverchCustomTreeNode):
         size=3,
         update=updateNode)
 
+    flat_output : BoolProperty(
+        name = "Flat output",
+        default = True,
+        update=updateNode)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'flat_output')
+
     def sv_init(self, context):
         self.inputs.new('SvStringsSocket', "Radius").prop_name = 'sphere_radius'
         self.inputs.new('SvVerticesSocket', "Origin").prop_name = 'origin'
@@ -57,7 +65,10 @@ class SvExSdfSphereNode(bpy.types.Node, SverchCustomTreeNode):
                 sdf = sphere(radius, origin)
                 field = SvExSdfScalarField(sdf)
                 new_fields.append(field)
-            fields_out.append(new_fields)
+            if self.flat_output:
+                fields_out.extend(new_fields)
+            else:
+                fields_out.append(new_fields)
 
         self.outputs['SDF'].sv_set(fields_out)
 

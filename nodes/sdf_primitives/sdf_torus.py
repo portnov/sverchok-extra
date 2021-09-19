@@ -41,6 +41,14 @@ class SvExSdfTorusNode(bpy.types.Node, SverchCustomTreeNode):
         size=3,
         update=updateNode)
 
+    flat_output : BoolProperty(
+        name = "Flat output",
+        default = True,
+        update=updateNode)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'flat_output')
+
     def sv_init(self, context):
         self.inputs.new('SvStringsSocket', "MajorRadius").prop_name = 'major_radius'
         self.inputs.new('SvStringsSocket', "MinorRadius").prop_name = 'minor_radius'
@@ -66,7 +74,10 @@ class SvExSdfTorusNode(bpy.types.Node, SverchCustomTreeNode):
                 sdf = torus(major_radius, minor_radius).translate(origin)
                 field = SvExSdfScalarField(sdf)
                 new_fields.append(field)
-            fields_out.append(new_fields)
+            if self.flat_output:
+                fields_out.extend(new_fields)
+            else:
+                fields_out.append(new_fields)
 
         self.outputs['SDF'].sv_set(fields_out)
 

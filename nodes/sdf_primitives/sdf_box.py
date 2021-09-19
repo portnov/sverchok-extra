@@ -47,6 +47,14 @@ class SvExSdfBoxNode(bpy.types.Node, SverchCustomTreeNode):
         size=3,
         update=updateNode)
 
+    flat_output : BoolProperty(
+        name = "Flat output",
+        default = True,
+        update=updateNode)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'flat_output')
+
     def sv_init(self, context):
         self.inputs.new('SvStringsSocket', "XSize").prop_name = 'size_x'
         self.inputs.new('SvStringsSocket', "YSize").prop_name = 'size_y'
@@ -75,7 +83,10 @@ class SvExSdfBoxNode(bpy.types.Node, SverchCustomTreeNode):
                 sdf = box(size=(size_x,size_y,size_z), center=origin)
                 field = SvExSdfScalarField(sdf)
                 new_fields.append(field)
-            fields_out.append(new_fields)
+            if self.flat_output:
+                fields_out.extend(new_fields)
+            else:
+                fields_out.append(new_fields)
 
         self.outputs['SDF'].sv_set(fields_out)
 

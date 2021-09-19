@@ -40,6 +40,14 @@ class SvExSdfCapsuleNode(bpy.types.Node, SverchCustomTreeNode):
         size=3,
         update=updateNode)
 
+    flat_output : BoolProperty(
+        name = "Flat output",
+        default = True,
+        update=updateNode)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'flat_output')
+
     def sv_init(self, context):
         self.inputs.new('SvStringsSocket', "Radius").prop_name = 'caps_radius'
         self.inputs.new('SvVerticesSocket', "Point1").prop_name = 'point1'
@@ -65,7 +73,10 @@ class SvExSdfCapsuleNode(bpy.types.Node, SverchCustomTreeNode):
                 sdf = capsule(point1, point2, radius)
                 field = SvExSdfScalarField(sdf)
                 new_fields.append(field)
-            fields_out.append(new_fields)
+            if self.flat_output:
+                fields_out.extend(new_fields)
+            else:
+                fields_out.append(new_fields)
 
         self.outputs['SDF'].sv_set(fields_out)
 
