@@ -60,6 +60,9 @@ def nodes_index():
                 ("spatial.delaunay3d_surface", "SvDelaunayOnSurfaceNode"),
                 ("spatial.delaunay_mesh", "SvDelaunayOnMeshNode")
             ]),
+            ("Extra Matrix", [
+                ('matrix.project_matrix', "SvProjectMatrixNode"),
+            ]),
             ('SDF Primitives', [
                 ("sdf_primitives.sdf_sphere", "SvExSdfSphereNode"),
                 ("sdf_primitives.sdf_box", "SvExSdfBoxNode"),
