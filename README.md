@@ -44,6 +44,29 @@ At the moment, this addon includes the following nodes for Sverchok:
 * *Data* category:
   * Spreadsheet
   * Data Item
+* *SDF Primitives* category (uses [SDF][7]):
+  * SDF Box
+  * SDF Cylinder
+  * ..and many more
+* *SDF Operations* category (uses [SDF][7]):
+  * SDF Translate
+  * SDF Scale
+  * SDF Rotate
+  * SDF Orient
+  * SDF General Transform
+  * SDF Boolean
+  * SDF Blend
+  * SDF Linear Transition
+  * SDF Radial Transition
+  * SDF Dilate / Erode
+  * SDF Shell
+  * SDF Twist
+  * SDF Linear Bend
+  * SDF Slice
+  * SDF Exrtude
+  * SDF Extrude To
+  * SDF Revolve
+  * SDF Generate (specialized version of Marching Cubes)
 
 There will be more.
 
@@ -71,4 +94,5 @@ LICENSE: GPL-3.
 [4]: https://github.com/portnov/sverchok-extra/archive/master.zip
 [5]: https://github.com/portnov/sverchok-extra/wiki/Fields
 [6]: https://github.com/nortikin/sverchok/wiki/Dependencies
+[7]: https://github.com/fogleman/sdf
 
