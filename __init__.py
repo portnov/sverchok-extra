@@ -47,8 +47,7 @@ def nodes_index():
                 ("curve.intersect_surface_plane", "SvExCrossSurfacePlaneNode"),
                 ("curve.fourier_curve", "SvFourierCurveNode"),
                 ("curve.approximate_fourier_curve", "SvApproxFourierCurveNode"),
-                ("curve.interpolate_fourier_curve", "SvInterpFourierCurveNode"),
-                ("curve.geodesic_curve", "SvExGeodesicCurveNode")
+                ("curve.interpolate_fourier_curve", "SvInterpFourierCurveNode")
             ]),
             ("Extra Fields", [
                 ("field.vfield_lines_on_surface", "SvExVFieldLinesOnSurfNode"),
@@ -75,6 +74,11 @@ def nodes_index():
                 ("sdf_primitives.sdf_cylinder", "SvExSdfCylinderNode"),
                 ("sdf_primitives.sdf_rounded_cylinder", "SvExSdfRoundedCylinderNode"),
                 ("sdf_primitives.sdf_capsule", "SvExSdfCapsuleNode"),
+                ("sdf_primitives.sdf_gyroid", "SvExSdfGyroidNode"),
+                ("sdf_primitives.sdf_schwarzP", "SvExSdfSchwarzPNode"),
+                ("sdf_primitives.sdf_schwarzD", "SvExSdfSchwarzDNode"),
+                ("sdf_primitives.sdf_MO", "SvExSdfMONode"),
+                ("sdf_primitives.sdf_EB", "SvExSdfEBNode"),
                 None,
                 ("sdf_primitives.sdf2d_circle", "SvExSdf2dCircleNode"),
                 ("sdf_primitives.sdf2d_hexagon", "SvExSdf2dHexagonNode"),
