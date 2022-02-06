@@ -75,6 +75,7 @@ def nodes_index():
                 ("sdf_primitives.sdf_rounded_cylinder", "SvExSdfRoundedCylinderNode"),
                 ("sdf_primitives.sdf_capsule", "SvExSdfCapsuleNode"),
                 ("sdf_primitives.sdf_gyroid", "SvExSdfGyroidNode"),
+                ("sdf_primitives.sdf_graded_gyroid", "SvExSdfGradedGyroidNode"),
                 ("sdf_primitives.sdf_schwarzP", "SvExSdfSchwarzPNode"),
                 ("sdf_primitives.sdf_schwarzD", "SvExSdfSchwarzDNode"),
                 ("sdf_primitives.sdf_MO", "SvExSdfMONode"),
