@@ -56,13 +56,13 @@ class SvExSdfGradedGyroidNode(bpy.types.Node, SverchCustomTreeNode):
     value_min : FloatProperty(
         name = "Value minimum",
         default = 0.0,
-        min = 0.0,
+        min = -1.73,
         update=updateNode)
 
     value_max : FloatProperty(
         name = "Value maximum",
         default = 0.0,
-        min = 0.0,
+        min = -1.73,
         update=updateNode)
 
     origin: FloatVectorProperty(
