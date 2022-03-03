@@ -119,7 +119,7 @@ class SvExSdfGradedGyroidNode(bpy.types.Node, SverchCustomTreeNode):
         fields_out = []
         for params in zip_long_repeat(size_x_s, size_y_s, size_z_s, thickness_min_s, thickness_max_s, value_min_s, value_max_s, origins_s):
             new_fields = []
-            for size_x, size_y, size_z, thickness_min,thickness_max, value_min, value_max origin in zip_long_repeat(*params):
+            for size_x, size_y, size_z, thickness_min,thickness_max, value_min, value_max, origin in zip_long_repeat(*params):
                 sdf = graded_gyroid(thickness_min, thickness_max, value_min, value_max, size=(size_x,size_y,size_z),center=origin).translate(origin)
                 field = SvExSdfScalarField(sdf)
                 new_fields.append(field)
@@ -132,8 +132,8 @@ class SvExSdfGradedGyroidNode(bpy.types.Node, SverchCustomTreeNode):
 
 def register():
     if sdf is not None:
-        bpy.utils.register_class(SvExSdfGyroidNode)
+        bpy.utils.register_class(SvExSdfGradedGyroidNode)
 
 def unregister():
     if sdf is not None:
-        bpy.utils.unregister_class(SvExSdfGyroidNode)
+        bpy.utils.unregister_class(SvExSdfGradedGyroidNode)
