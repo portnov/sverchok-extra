@@ -94,4 +94,3 @@ def register():
 def unregister():
     if sdf is not None:
         bpy.utils.unregister_class(SvExSdfLinearTransitionNode)
-
