@@ -40,7 +40,7 @@ class SvExSdfExtrudeNode(bpy.types.Node, SverchCustomTreeNode):
         sdf_s = self.inputs['SDF'].sv_get()
         height_s = self.inputs['Height'].sv_get()
 
-        input_level = get_data_nesting_level(sdf1_s, data_types=(SvScalarField,))
+        input_level = get_data_nesting_level(sdf_s, data_types=(SvScalarField,))
         flat_output = input_level == 1
         sdf_s = ensure_nesting_level(sdf_s, 2, data_types=(SvScalarField,))
         height_s = ensure_nesting_level(height_s, 2)
