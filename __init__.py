@@ -52,6 +52,7 @@ def nodes_index():
                 None,
                 ("curve.nurbs_goal_point", "SvNurbsCurvePointsGoalNode"),
                 ("curve.nurbs_goal_tangent", "SvNurbsCurveTangentsGoalNode"),
+                ("curve.nurbs_goal_closed", "SvNurbsCurveClosedGoalNode"),
                 ("curve.nurbs_solver", "SvNurbsCurveSolverNode")
             ]),
             ("Extra Fields", [
