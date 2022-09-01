@@ -48,7 +48,11 @@ def nodes_index():
                 ("curve.fourier_curve", "SvFourierCurveNode"),
                 ("curve.approximate_fourier_curve", "SvApproxFourierCurveNode"),
                 ("curve.interpolate_fourier_curve", "SvInterpFourierCurveNode"),
-                ("curve.geodesic_curve", "SvExGeodesicCurveNode")
+                ("curve.geodesic_curve", "SvExGeodesicCurveNode"),
+                None,
+                ("curve.nurbs_goal_point", "SvNurbsCurvePointsGoalNode"),
+                ("curve.nurbs_goal_tangent", "SvNurbsCurveTangentsGoalNode"),
+                ("curve.nurbs_solver", "SvNurbsCurveSolverNode")
             ]),
             ("Extra Fields", [
                 ("field.vfield_lines_on_surface", "SvExVFieldLinesOnSurfNode"),
