@@ -12,25 +12,26 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, zip_long_repeat, get_data_nesting_level, ensure_nesting_level, repeat_last_for_length
-from sverchok.utils.curve.nurbs_solver import SvNurbsCurveSelfIntersections, SvNurbsCurveCotangents
+from sverchok.utils.curve.nurbs_solver import SvNurbsCurveControlPoints
 
-class SvNurbsCurveClosedGoalNode(bpy.types.Node, SverchCustomTreeNode):
+class SvNurbsCurveCptGoalNode(bpy.types.Node, SverchCustomTreeNode):
     """
-    Triggers: NURBS Curve Closed Goal
-    Tooltip: NURBS Curve Goal - Closed
+    Triggers: NURBS Curve Control Point Goal
+    Tooltip: NURBS Curve Goal - Control Points
     """
-    bl_idname = 'SvNurbsCurveClosedGoalNode'
-    bl_label = 'Curve Goal: Closed'
+    bl_idname = 'SvNurbsCurveCptGoalNode'
+    bl_label = 'Curve Goal: Control Points'
     bl_icon = 'CURVE_NCURVE'
+
+    cpt_idx : IntProperty(
+            name = "CptIndex",
+            default = 0,
+            min = 0,
+            update = updateNode)
 
     weight : FloatProperty(
             name = "Weight",
             default = 1.0,
-            update = updateNode)
-
-    tangents : BoolProperty(
-            name = "Coinciding Tangents",
-            default = True,
             update = updateNode)
 
     relative : BoolProperty(
@@ -39,10 +40,13 @@ class SvNurbsCurveClosedGoalNode(bpy.types.Node, SverchCustomTreeNode):
             update = updateNode)
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'tangents')
         layout.prop(self, 'relative')
 
     def sv_init(self, context):
+        self.inputs.new('SvStringsSocket', "CptIndex").prop_name = 'cpt_idx'
+        p = self.inputs.new('SvVerticesSocket', "Point")
+        p.use_prop = True
+        p.default_property = (1.0, 0.0, 0.0)
         self.inputs.new('SvStringsSocket', "Weight").prop_name = 'weight'
         self.outputs.new('SvStringsSocket', "Goal")
 
@@ -50,27 +54,27 @@ class SvNurbsCurveClosedGoalNode(bpy.types.Node, SverchCustomTreeNode):
         if not any(socket.is_linked for socket in self.outputs):
             return
 
+        cpts_s = self.inputs['CptIndex'].sv_get()
+        points_s = self.inputs['Point'].sv_get()
         weights_s = self.inputs['Weight'].sv_get()
-        weights_s = ensure_nesting_level(weights_s, 2)
+
+        cpts_s = ensure_nesting_level(cpts_s, 3)
+        points_s = ensure_nesting_level(points_s, 4)
+        weights_s = ensure_nesting_level(weights_s, 3)
 
         goals_out = []
-        for params in weights_s:
+        for params in zip_long_repeat(cpts_s, points_s, weights_s):
             new_goals = []
-            for weight in params:
-                closed = SvNurbsCurveSelfIntersections.single(0.0, 1.0, weight, relative_u=True, relative=self.relative)
-                if self.tangents:
-                    tangents = SvNurbsCurveCotangents.single(0.0, 1.0, weight, relative_u=True, relative=self.relative)
-                    goals = [closed, tangents]
-                else:
-                    goals = [closed]
-                new_goals.append(goals)
+            for cpts, points, weights in zip_long_repeat(*params):
+                goal = SvNurbsCurveControlPoints(cpts, points, weights, relative=self.relative)
+                new_goals.append(goal)
             goals_out.append(new_goals)
 
         self.outputs['Goal'].sv_set(goals_out)
 
 def register():
-    bpy.utils.register_class(SvNurbsCurveClosedGoalNode)
+    bpy.utils.register_class(SvNurbsCurveCptGoalNode)
 
 def unregister():
-    bpy.utils.unregister_class(SvNurbsCurveClosedGoalNode)
+    bpy.utils.unregister_class(SvNurbsCurveCptGoalNode)
 
