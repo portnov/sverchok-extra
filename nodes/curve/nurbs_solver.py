@@ -131,7 +131,7 @@ class SvNurbsCurveSolverNode(bpy.types.Node, SverchCustomTreeNode):
                     weights = curve.get_weights()
                     solver.set_curve_params(n_cpts, knotvector, weights)
 
-                new_curve = solver.solve()
+                new_curve = solver.solve(logger=self.get_logger())
                 new_curves.append(new_curve)
             curves_out.append(new_curves)
 
