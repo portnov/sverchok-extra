@@ -20,12 +20,9 @@ from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_
 from sverchok.utils.sv_mesh_utils import polygons_to_edges, mesh_join
 from sverchok.utils.sv_bmesh_utils import pydata_from_bmesh, bmesh_from_pydata
 from sverchok.utils.surface.core import SvSurface
-from sverchok.utils.dummy_nodes import add_dummy
 from sverchok.dependencies import scipy
 
-if scipy is None:
-    add_dummy('SvDelaunayOnSurfaceNode', "Delaunay 3D", 'scipy')
-else:
+if scipy is not None:
     from scipy.spatial import Delaunay
 
 class SvDelaunayOnSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
@@ -37,6 +34,7 @@ class SvDelaunayOnSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
     bl_label = 'Delaunay on Surface'
     bl_icon = 'OUTLINER_OB_EMPTY'
     sv_icon = 'SV_VORONOI'
+    sv_dependencies = {'scipy'}
 
     join : BoolProperty(
         name = "Join",

@@ -5,13 +5,10 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, Fl
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
-from sverchok.utils.dummy_nodes import add_dummy
 from sverchok_extra.dependencies import sdf
 from sverchok_extra.utils.sdf import *
 
-if sdf is None:
-    add_dummy('SvExSdf2dPolygonNode', "SDF 2D Polygon", 'sdf')
-else:
+if sdf is not None:
     from sdf import *
 
 class SvExSdf2dPolygonNode(bpy.types.Node, SverchCustomTreeNode):
@@ -23,6 +20,7 @@ class SvExSdf2dPolygonNode(bpy.types.Node, SverchCustomTreeNode):
     bl_label = 'SDF 2D Polygon'
     bl_icon = 'RNDCURVE'
     sv_icon = 'SV_NGON'
+    sv_dependencies = {'sdf'}
 
     flat_output : BoolProperty(
         name = "Flat output",

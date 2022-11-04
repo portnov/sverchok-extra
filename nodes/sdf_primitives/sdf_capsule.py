@@ -5,13 +5,10 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, Fl
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
-from sverchok.utils.dummy_nodes import add_dummy
 from sverchok_extra.dependencies import sdf
 from sverchok_extra.utils.sdf import *
 
-if sdf is None:
-    add_dummy('SvExSdfCapsuleNode', "SDF Capsule", 'sdf')
-else:
+if sdf is not None:
     from sdf import *
 
 class SvExSdfCapsuleNode(bpy.types.Node, SverchCustomTreeNode):
@@ -22,6 +19,7 @@ class SvExSdfCapsuleNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExSdfCapsuleNode'
     bl_label = 'SDF Capsule'
     bl_icon = 'MESH_CAPSULE'
+    sv_dependencies = {'sdf'}
 
     caps_radius : FloatProperty(
         name="Radius",

@@ -5,13 +5,10 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, Fl
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
-from sverchok.utils.dummy_nodes import add_dummy
 from sverchok_extra.dependencies import sdf
 from sverchok_extra.utils.sdf import *
 
-if sdf is None:
-    add_dummy('SvExSdfCylinderNode', "SDF Cylinder", 'sdf')
-else:
+if sdf is not None:
     from sdf import *
 
 class SvExSdfCylinderNode(bpy.types.Node, SverchCustomTreeNode):
@@ -22,6 +19,7 @@ class SvExSdfCylinderNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExSdfCylinderNode'
     bl_label = 'SDF Cylinder'
     bl_icon = 'MESH_CYLINDER'
+    sv_dependencies = {'sdf'}
 
     cyl_radius: FloatProperty(
         name="Radius",

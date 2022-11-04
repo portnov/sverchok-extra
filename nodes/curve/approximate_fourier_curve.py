@@ -15,10 +15,6 @@ from sverchok.data_structure import updateNode, zip_long_repeat, get_data_nestin
 from sverchok.utils.math import supported_metrics, xyz_metrics
 from sverchok.utils.curve.fourier import SvFourierCurve
 from sverchok.dependencies import scipy
-from sverchok.utils.dummy_nodes import add_dummy
-
-if scipy is None:
-    add_dummy('SvApproxFourierCurveNode', "Approximate Fourier Curve", 'scipy')
 
 class SvApproxFourierCurveNode(bpy.types.Node, SverchCustomTreeNode):
     """
@@ -28,6 +24,7 @@ class SvApproxFourierCurveNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvApproxFourierCurveNode'
     bl_label = 'Approximate Fourier Curve'
     bl_icon = 'CURVE_NCURVE'
+    sv_dependencies = {'scipy'}
 
     degree : IntProperty(
             name = "Degree",

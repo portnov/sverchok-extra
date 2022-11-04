@@ -20,11 +20,8 @@ from sverchok.utils.curve.freecad import SvFreeCadCurve, SvFreeCadNurbsCurve, cu
 from sverchok.utils.surface.core import SvSurface
 from sverchok.utils.surface.freecad import SvSolidFaceSurface, is_solid_face_surface, surface_to_freecad
 from sverchok.dependencies import FreeCAD
-from sverchok.utils.dummy_nodes import add_dummy
 
-if FreeCAD is None:
-    add_dummy('SvSolidWaffleNode', 'Solid Waffle', 'FreeCAD')
-else:
+if FreeCAD is not None:
     import Part
     from FreeCAD import Base
 
@@ -140,6 +137,7 @@ class SvSolidWaffleNode(bpy.types.Node, SverchCustomTreeNode):
     bl_label = 'Solid Waffle'
     bl_icon = 'OUTLINER_OB_EMPTY'
     solid_catergory = "Operators"
+    sv_dependencies = {'FreeCAD'}
 
     split_modes = [
             ('HALF', "Even", "Split in the middle of each intersection", 0),

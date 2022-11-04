@@ -6,13 +6,10 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, Fl
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, get_data_nesting_level
 from sverchok.utils.field.scalar import SvScalarField
-from sverchok.utils.dummy_nodes import add_dummy
 from sverchok_extra.dependencies import sdf
 from sverchok_extra.utils.sdf import *
 
-if sdf is None:
-    add_dummy('SvExSdfDilateErodeNode', "SDF Dilate / Erode", 'sdf')
-else:
+if sdf is not None:
     from sdf import *
 
 class SvExSdfDilateErodeNode(bpy.types.Node, SverchCustomTreeNode):
@@ -23,6 +20,7 @@ class SvExSdfDilateErodeNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExSdfDilateErodeNode'
     bl_label = 'SDF Dilate / Erode'
     bl_icon = 'OUTLINER_OB_EMPTY'
+    sv_dependencies = {'sdf'}
 
     k_value : FloatProperty(
             name = "K Value",

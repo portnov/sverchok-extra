@@ -6,12 +6,8 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, Fl
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level, get_data_nesting_level
 from sverchok.utils.field.scalar import SvScalarField
-from sverchok.utils.dummy_nodes import add_dummy
 from sverchok_extra.dependencies import sdf
 from sverchok_extra.utils.sdf import *
-
-if sdf is None:
-    add_dummy('SvExSdfSliceNode', "SDF Slice", 'sdf')
 
 class SvExSdfSliceNode(bpy.types.Node, SverchCustomTreeNode):
     """
@@ -22,6 +18,7 @@ class SvExSdfSliceNode(bpy.types.Node, SverchCustomTreeNode):
     bl_label = 'SDF Slice'
     bl_icon = 'OUTLINER_OB_EMPTY'
     sv_icon = 'SV_SLICE_SOLID'
+    sv_dependencies = {'sdf'}
 
     z_value : FloatProperty(
             name = "Z Value",

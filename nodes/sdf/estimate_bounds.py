@@ -5,13 +5,9 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
-from sverchok.utils.dummy_nodes import add_dummy
 from sverchok.utils.field.scalar import SvScalarField
 from sverchok_extra.dependencies import sdf
 from sverchok_extra.utils.sdf import *
-
-if sdf is None:
-    add_dummy('SvExSdfEstimateBoundsNode', "Estimate Scalar Field Bounds", 'sdf')
 
 class SvExSdfEstimateBoundsNode(bpy.types.Node, SverchCustomTreeNode):
     """
@@ -22,6 +18,7 @@ class SvExSdfEstimateBoundsNode(bpy.types.Node, SverchCustomTreeNode):
     bl_label = 'Estimate Scalar Field Bounds'
     bl_icon = 'OUTLINER_OB_EMPTY'
     sv_icon = 'SV_BOUNDING_BOX'
+    sv_dependencies = {'sdf'}
 
     def sv_init(self, context):
         self.inputs.new('SvScalarFieldSocket', "Field")

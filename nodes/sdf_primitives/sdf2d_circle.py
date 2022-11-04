@@ -5,13 +5,10 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, Fl
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
-from sverchok.utils.dummy_nodes import add_dummy
 from sverchok_extra.dependencies import sdf
 from sverchok_extra.utils.sdf import *
 
-if sdf is None:
-    add_dummy('SvExSdf2dCircleNode', "SDF 2D Circle", 'sdf')
-else:
+if sdf is not None:
     from sdf import *
 
 class SvExSdf2dCircleNode(bpy.types.Node, SverchCustomTreeNode):
@@ -22,6 +19,7 @@ class SvExSdf2dCircleNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExSdf2dCircleNode'
     bl_label = 'SDF 2D Circle'
     bl_icon = 'MESH_CIRCLE'
+    sv_dependencies = {'sdf'}
 
     circle_radius : FloatProperty(
         name = "Radius",

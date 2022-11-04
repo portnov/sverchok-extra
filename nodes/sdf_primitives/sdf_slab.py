@@ -5,13 +5,10 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, Fl
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
-from sverchok.utils.dummy_nodes import add_dummy
 from sverchok_extra.dependencies import sdf
 from sverchok_extra.utils.sdf import *
 
-if sdf is None:
-    add_dummy('SvExSdfSlabNode', "SDF Slab", 'sdf')
-else:
+if sdf is not None:
     from sdf import *
 
 class SvExSdfSlabNode(bpy.types.Node, SverchCustomTreeNode):
@@ -22,6 +19,7 @@ class SvExSdfSlabNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvExSdfSlabNode'
     bl_label = 'SDF Slab'
     bl_icon = 'OUTLINER_OB_EMPTY'
+    sv_dependencies = {'sdf'}
 
     def update_sockets(self, context):
         self.inputs['MinX'].hide_safe = not self.use_x_min
