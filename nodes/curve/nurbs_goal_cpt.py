@@ -14,7 +14,7 @@ from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, zip_long_repeat, get_data_nesting_level, ensure_nesting_level, repeat_last_for_length
 from sverchok.utils.curve.nurbs_solver import SvNurbsCurveControlPoints
 
-class SvNurbsCurveCptGoalNode(bpy.types.Node, SverchCustomTreeNode):
+class SvNurbsCurveCptGoalNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: NURBS Curve Control Point Goal
     Tooltip: NURBS Curve Goal - Control Points

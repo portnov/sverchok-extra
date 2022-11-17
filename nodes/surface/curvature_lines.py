@@ -41,7 +41,7 @@ def solve_lines(surface, p0, tf, method='RK45', negate=False, step=None, directi
         raise Exception("Can't solve the equation: " + res.message)
     return res.y.T
 
-class SvExSurfaceCurvatureLinesNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExSurfaceCurvatureLinesNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: Surface Curvature Lines
     Tooltip: Generate surface principal curvature lines

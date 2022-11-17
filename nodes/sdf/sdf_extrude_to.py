@@ -12,7 +12,7 @@ from sverchok_extra.utils.sdf import *
 if sdf is None:
     easing_options = [['x']]
 
-class SvExSdfExtrudeToNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExSdfExtrudeToNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: SDF Extrude To
     Tooltip: SDF Extrude To

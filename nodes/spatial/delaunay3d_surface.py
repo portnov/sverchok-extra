@@ -25,7 +25,7 @@ from sverchok.dependencies import scipy
 if scipy is not None:
     from scipy.spatial import Delaunay
 
-class SvDelaunayOnSurfaceNode(bpy.types.Node, SverchCustomTreeNode):
+class SvDelaunayOnSurfaceNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: Delaunay 3D Surface
     Tooltip: Generate 3D Delaunay Triangulation on a Surface

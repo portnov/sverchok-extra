@@ -11,7 +11,7 @@ from sverchok_extra.utils.sdf import *
 if sdf is not None:
     from sdf import *
 
-class SvExSdfPlaneNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExSdfPlaneNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: SDF Hemispace
     Tooltip: SDF Hemispace

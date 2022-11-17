@@ -15,7 +15,7 @@ if sdf is not None:
 else:
     easing_options = [['x']]
 
-class SvExSdfLinearTransitionNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExSdfLinearTransitionNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: SDF Linear Transition
     Tooltip: SDF Linear Transition

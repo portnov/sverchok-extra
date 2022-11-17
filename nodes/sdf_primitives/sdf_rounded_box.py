@@ -11,7 +11,7 @@ from sverchok_extra.utils.sdf import *
 if sdf is not None:
     from sdf import *
 
-class SvExSdfRoundedBoxNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExSdfRoundedBoxNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: SDF Rounded Box
     Tooltip: SDF Rounded Box

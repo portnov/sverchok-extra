@@ -11,7 +11,7 @@ from sverchok_extra.dependencies import sdf
 from sverchok_extra.utils.sdf import *
 from sverchok.utils.sv_transform_helper import AngleUnits, SvAngleHelper
 
-class SvExSdfTwistNode(bpy.types.Node, SverchCustomTreeNode, SvAngleHelper):
+class SvExSdfTwistNode(SverchCustomTreeNode, bpy.types.Node, SvAngleHelper):
     """
     Triggers: SDF Twist
     Tooltip: SDF Twist
