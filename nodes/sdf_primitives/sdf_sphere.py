@@ -70,11 +70,10 @@ class SvExSdfSphereNode(bpy.types.Node, SverchCustomTreeNode):
 
         self.outputs['SDF'].sv_set(fields_out)
 
+
 def register():
-    if sdf is not None:
-        bpy.utils.register_class(SvExSdfSphereNode)
+    bpy.utils.register_class(SvExSdfSphereNode)
+
 
 def unregister():
-    if sdf is not None:
-        bpy.utils.unregister_class(SvExSdfSphereNode)
-
+    bpy.utils.unregister_class(SvExSdfSphereNode)

@@ -62,11 +62,10 @@ class SvExSdfDilateErodeNode(bpy.types.Node, SverchCustomTreeNode):
 
         self.outputs['SDF'].sv_set(sdf_out)
 
+
 def register():
-    if sdf is not None:
-        bpy.utils.register_class(SvExSdfDilateErodeNode)
+    bpy.utils.register_class(SvExSdfDilateErodeNode)
+
 
 def unregister():
-    if sdf is not None:
-        bpy.utils.unregister_class(SvExSdfDilateErodeNode)
-
+    bpy.utils.unregister_class(SvExSdfDilateErodeNode)

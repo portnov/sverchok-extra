@@ -73,11 +73,10 @@ class SvExSdf2dHexagonNode(bpy.types.Node, SverchCustomTreeNode):
 
         self.outputs['SDF'].sv_set(fields_out)
 
+
 def register():
-    if sdf is not None:
-        bpy.utils.register_class(SvExSdf2dHexagonNode)
+    bpy.utils.register_class(SvExSdf2dHexagonNode)
+
 
 def unregister():
-    if sdf is not None:
-        bpy.utils.unregister_class(SvExSdf2dHexagonNode)
-
+    bpy.utils.unregister_class(SvExSdf2dHexagonNode)
