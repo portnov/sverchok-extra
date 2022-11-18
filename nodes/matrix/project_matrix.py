@@ -14,7 +14,7 @@ from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, zip_long_repeat, get_data_nesting_level, ensure_nesting_level
 from sverchok.utils.geom import PlaneEquation
 
-class SvProjectMatrixNode(bpy.types.Node, SverchCustomTreeNode):
+class SvProjectMatrixNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: Project Matrix Plane
     Tooltip: Project a Matrix onto a Plane

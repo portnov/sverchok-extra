@@ -9,7 +9,7 @@ from sverchok.utils.field.scalar import SvScalarField
 from sverchok_extra.dependencies import sdf
 from sverchok_extra.utils.sdf import *
 
-class SvExSdfSliceNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExSdfSliceNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: SDF Slice
     Tooltip: SDF Slice

@@ -10,7 +10,7 @@ from sverchok_extra.dependencies import sdf
 from sverchok_extra.utils.sdf import *
 
 
-class SvExSdfLinearBendNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExSdfLinearBendNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: SDF Linear Bend
     Tooltip: SDF Linear Bend

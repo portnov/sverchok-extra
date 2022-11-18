@@ -16,7 +16,7 @@ if sdf is not None:
 else:
     BATCH_SIZE = 1
 
-class SvExSdfGenerateNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExSdfGenerateNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: SDF Generate Mesh
     Tooltip: SDF Generate Mesh

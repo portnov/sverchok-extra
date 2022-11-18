@@ -14,7 +14,7 @@ from sverchok_extra.utils.sdf import *
 if sdf is not None:
     from sdf import *
 
-class SvExSdfTransformNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExSdfTransformNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: SDF General Transform
     Tooltip: SDF General Transform

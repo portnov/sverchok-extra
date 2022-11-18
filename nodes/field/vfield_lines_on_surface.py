@@ -68,7 +68,7 @@ def solve_lines(surface, field, p0, max_t = None, step = None, iterations=None, 
     #print("R", result.shape)
     return result
 
-class SvExVFieldLinesOnSurfNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExVFieldLinesOnSurfNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: Vector Field lines on Surface
     Tooltip: Vector Field lines on Surface

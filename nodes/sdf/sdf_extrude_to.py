@@ -10,7 +10,7 @@ from sverchok_extra.dependencies import sdf
 from sverchok_extra.utils.sdf import *
 
 
-class SvExSdfExtrudeToNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExSdfExtrudeToNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: SDF Extrude To
     Tooltip: SDF Extrude To

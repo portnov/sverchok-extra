@@ -9,7 +9,7 @@ from sverchok.utils.field.scalar import SvScalarField
 from sverchok_extra.dependencies import sdf
 from sverchok_extra.utils.sdf import *
 
-class SvExSdfOrientNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExSdfOrientNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: SDF Orient
     Tooltip: SDF Orient

@@ -11,7 +11,7 @@ from sverchok_extra.utils.sdf import *
 if sdf is not None:
     from sdf import sphere
 
-class SvExSdfSphereNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExSdfSphereNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: SDF Sphere
     Tooltip: SDF Sphere

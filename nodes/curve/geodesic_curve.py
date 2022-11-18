@@ -18,7 +18,7 @@ from sverchok.utils.curve.splines import SvSplineCurve
 
 from sverchok_extra.utils.geodesic import calculate_geodesic_curve
 
-class SvExGeodesicCurveNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExGeodesicCurveNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: Geodesic Curve
     Tooltip: Calculate geodesic curves on a surface

@@ -12,7 +12,7 @@ from sverchok_extra.utils.sdf import *
 if sdf is not None:
     from sdf import *
 
-class SvExSdfShellNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExSdfShellNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: SDF Shell
     Tooltip: SDF Shell

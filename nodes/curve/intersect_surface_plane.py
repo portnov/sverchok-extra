@@ -15,7 +15,7 @@ from sverchok.dependencies import scipy, skimage
 from sverchok_extra.utils.manifolds import intersect_surface_plane_msquares, intersect_surface_plane_uv
 
 
-class SvExCrossSurfacePlaneNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExCrossSurfacePlaneNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: Intersect Surface with Plane
     Tooltip: Intersect Surface with Plane

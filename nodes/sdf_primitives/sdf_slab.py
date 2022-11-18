@@ -11,7 +11,7 @@ from sverchok_extra.utils.sdf import *
 if sdf is not None:
     from sdf import *
 
-class SvExSdfSlabNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExSdfSlabNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: SDF Slab
     Tooltip: SDF Slab

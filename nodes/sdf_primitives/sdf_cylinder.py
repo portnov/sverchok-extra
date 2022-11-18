@@ -11,7 +11,7 @@ from sverchok_extra.utils.sdf import *
 if sdf is not None:
     from sdf import *
 
-class SvExSdfCylinderNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExSdfCylinderNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: SDF Cylinder
     Tooltip: SDF Cylinder

@@ -65,7 +65,7 @@ class SvExUpdateGalMeshNodeOp(bpy.types.Operator):
         node.active = False
         return {'FINISHED'}
 
-class SvExGalGenerateMeshNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExGalGenerateMeshNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: Generate Mesh
     Tooltip: Generate Mesh

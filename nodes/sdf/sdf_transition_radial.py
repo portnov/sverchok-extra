@@ -13,7 +13,7 @@ if sdf is not None:
     from sdf import *
 
 
-class SvExSdfRadialTransitionNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExSdfRadialTransitionNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: SDF Radial Transition
     Tooltip: SDF Radial Transition

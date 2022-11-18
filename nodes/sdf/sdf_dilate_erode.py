@@ -12,7 +12,7 @@ from sverchok_extra.utils.sdf import *
 if sdf is not None:
     from sdf import *
 
-class SvExSdfDilateErodeNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExSdfDilateErodeNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: SDF Dilate / Erode
     Tooltip: SDF Dilate / Erode

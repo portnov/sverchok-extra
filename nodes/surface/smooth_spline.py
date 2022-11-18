@@ -15,7 +15,7 @@ from sverchok.dependencies import scipy
 if scipy is not None:
     from scipy.interpolate import SmoothBivariateSpline
 
-    class SvExBivariateSplineNode(bpy.types.Node, SverchCustomTreeNode):
+    class SvExBivariateSplineNode(SverchCustomTreeNode, bpy.types.Node):
         """
         Triggers: Smooth Bivariate Spline Surface
         Tooltip: Smooth weighted surface spline
