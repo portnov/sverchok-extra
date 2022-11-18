@@ -16,7 +16,7 @@ from sverchok.data_structure import updateNode, zip_long_repeat, get_data_nestin
 from sverchok.utils.math import supported_metrics, xyz_metrics
 from sverchok.utils.curve.fourier import SvFourierCurve
 
-class SvFourierCurveNode(bpy.types.Node, SverchCustomTreeNode):
+class SvFourierCurveNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: Build Fourier Curve
     Tooltip: Create Fourier Curve from amplitude values

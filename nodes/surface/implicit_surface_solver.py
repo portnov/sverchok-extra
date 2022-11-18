@@ -29,7 +29,7 @@ def solve(field, init, iso_value, step_coeff, maxiter=30, threshold=1e-4):
         step = step_coeff * v[np.newaxis].T * grad / n
         p -= step
 
-class SvExImplSurfaceSolverNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExImplSurfaceSolverNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: Implicit Surface Wrap
     Tooltip: Wrap points onto the implicit surface

@@ -51,7 +51,7 @@ class SvDictKeyEntry(bpy.types.PropertyGroup):
             items = get_items,
             update = update_key)
 
-class SvDataItemNode(bpy.types.Node, SverchCustomTreeNode):
+class SvDataItemNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: data dictionary item
     Tooltip: Select data items from nested dictionary

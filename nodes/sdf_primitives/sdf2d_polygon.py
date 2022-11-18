@@ -11,7 +11,7 @@ from sverchok_extra.utils.sdf import *
 if sdf is not None:
     from sdf import *
 
-class SvExSdf2dPolygonNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExSdf2dPolygonNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: SDF 2D Polygon
     Tooltip: SDF 2D Polygon

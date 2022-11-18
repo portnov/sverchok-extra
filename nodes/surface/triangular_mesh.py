@@ -65,7 +65,7 @@ if pygalmesh is not None and scipy is not None:
             node.active = False
             return {'FINISHED'}
 
-    class SvExGalGenerateMeshNode(bpy.types.Node, SverchCustomTreeNode):
+    class SvExGalGenerateMeshNode(SverchCustomTreeNode, bpy.types.Node):
         """
         Triggers: Generate Mesh
         Tooltip: Generate Mesh

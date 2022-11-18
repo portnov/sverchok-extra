@@ -16,7 +16,7 @@ from sverchok.utils.curve.core import SvCurve
 from sverchok.utils.curve.nurbs import SvNurbsCurve
 from sverchok.utils.curve.nurbs_solver import SvNurbsCurveSolver, SvNurbsCurveGoal
 
-class SvNurbsCurveSolverNode(bpy.types.Node, SverchCustomTreeNode):
+class SvNurbsCurveSolverNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: NURBS Curve Solver
     Tooltip: NURBS Curve Solver

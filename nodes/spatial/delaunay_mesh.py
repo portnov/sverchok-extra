@@ -16,7 +16,7 @@ from sverchok.data_structure import zip_long_repeat, repeat_last_for_length, upd
 from sverchok.utils.sv_bmesh_utils import bmesh_from_pydata
 from sverchok.utils.mesh_spatial import mesh_insert_verts, find_nearest_idxs
 
-class SvDelaunayOnMeshNode(bpy.types.Node, SverchCustomTreeNode):
+class SvDelaunayOnMeshNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: Delaunay Mesh
     Tooltip: Add vertices to the mesh by use of Delaunay triangulation

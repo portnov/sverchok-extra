@@ -10,7 +10,7 @@ from sverchok_extra.dependencies import sdf
 from sverchok_extra.utils.sdf import *
 from sverchok.utils.sv_transform_helper import AngleUnits, SvAngleHelper
 
-class SvExSdfRotateNode(bpy.types.Node, SverchCustomTreeNode, SvAngleHelper):
+class SvExSdfRotateNode(SverchCustomTreeNode, bpy.types.Node, SvAngleHelper):
     """
     Triggers: SDF Rotate
     Tooltip: SDF Rotate

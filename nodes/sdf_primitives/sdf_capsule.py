@@ -11,7 +11,7 @@ from sverchok_extra.utils.sdf import *
 if sdf is not None:
     from sdf import *
 
-class SvExSdfCapsuleNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExSdfCapsuleNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: SDF Capsule
     Tooltip: SDF Capsule

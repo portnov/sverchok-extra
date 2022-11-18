@@ -11,7 +11,7 @@ from sverchok_extra.utils.sdf import *
 if sdf is not None:
     from sdf import *
 
-class SvExSdfRoundedCylinderNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExSdfRoundedCylinderNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: SDF Rounded Cylinder
     Tooltip: SDF Rounded Cylinder

@@ -26,7 +26,7 @@ from sverchok.data_structure import updateNode, match_long_repeat, zip_long_repe
 from sverchok.utils.logging import info, debug
 from sverchok_extra.utils.modules.spreadsheet.ui import *
 
-class SvSpreadsheetNode(bpy.types.Node, SverchCustomTreeNode):
+class SvSpreadsheetNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: spreadsheet data input
     Tooltip: Input data with spreadsheet-like interface

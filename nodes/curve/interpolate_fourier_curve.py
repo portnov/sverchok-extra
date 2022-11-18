@@ -16,7 +16,7 @@ from sverchok.data_structure import updateNode, zip_long_repeat, get_data_nestin
 from sverchok.utils.math import supported_metrics, xyz_metrics
 from sverchok.utils.curve.fourier import SvFourierCurve
 
-class SvInterpFourierCurveNode(bpy.types.Node, SverchCustomTreeNode):
+class SvInterpFourierCurveNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: Interpolate Fourier Curve
     Tooltip: Interpolate Fourier Curve

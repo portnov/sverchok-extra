@@ -16,7 +16,7 @@ from sverchok.utils.math import supported_metrics, xyz_metrics
 from sverchok.utils.curve.fourier import SvFourierCurve
 from sverchok.dependencies import scipy
 
-class SvApproxFourierCurveNode(bpy.types.Node, SverchCustomTreeNode):
+class SvApproxFourierCurveNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: Approximate Fourier Curve
     Tooltip: Approximate Fourier Curve

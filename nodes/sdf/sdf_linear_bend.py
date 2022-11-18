@@ -12,7 +12,7 @@ from sverchok_extra.utils.sdf import *
 if sdf is None:
     easing_options = [['x']]
 
-class SvExSdfLinearBendNode(bpy.types.Node, SverchCustomTreeNode):
+class SvExSdfLinearBendNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: SDF Linear Bend
     Tooltip: SDF Linear Bend

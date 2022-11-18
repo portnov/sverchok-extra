@@ -128,7 +128,7 @@ def do_waffel(solid, matrix_a, matrix_b, zs_a, zs_b, thickness, split_face, sele
     
     return result_a, result_b
 
-class SvSolidWaffleNode(bpy.types.Node, SverchCustomTreeNode):
+class SvSolidWaffleNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: Solid Waffle
     Tooltip: Generate waffle-like structure from a Solid object
