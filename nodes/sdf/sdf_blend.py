@@ -66,11 +66,10 @@ class SvExSdfBlendNode(SverchCustomTreeNode, bpy.types.Node):
 
         self.outputs['SDF'].sv_set(sdf_out)
 
+
 def register():
-    if sdf is not None:
-        bpy.utils.register_class(SvExSdfBlendNode)
+    bpy.utils.register_class(SvExSdfBlendNode)
+
 
 def unregister():
-    if sdf is not None:
-        bpy.utils.unregister_class(SvExSdfBlendNode)
-
+    bpy.utils.unregister_class(SvExSdfBlendNode)

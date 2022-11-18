@@ -94,11 +94,10 @@ class SvExSdfRoundedCylinderNode(SverchCustomTreeNode, bpy.types.Node):
 
         self.outputs['SDF'].sv_set(fields_out)
 
+
 def register():
-    if sdf is not None:
-        bpy.utils.register_class(SvExSdfRoundedCylinderNode)
+    bpy.utils.register_class(SvExSdfRoundedCylinderNode)
+
 
 def unregister():
-    if sdf is not None:
-        bpy.utils.unregister_class(SvExSdfRoundedCylinderNode)
-
+    bpy.utils.unregister_class(SvExSdfRoundedCylinderNode)

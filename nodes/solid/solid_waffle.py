@@ -224,11 +224,10 @@ class SvSolidWaffleNode(SverchCustomTreeNode, bpy.types.Node):
         self.outputs['FacesA'].sv_set(face_a_out)
         self.outputs['FacesB'].sv_set(face_b_out)
 
+
 def register():
-    if FreeCAD is not None:
-        bpy.utils.register_class(SvSolidWaffleNode)
+    bpy.utils.register_class(SvSolidWaffleNode)
+
 
 def unregister():
-    if FreeCAD is not None:
-        bpy.utils.unregister_class(SvSolidWaffleNode)
-
+    bpy.utils.unregister_class(SvSolidWaffleNode)

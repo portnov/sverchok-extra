@@ -108,11 +108,10 @@ class SvExSdfTransformNode(SverchCustomTreeNode, bpy.types.Node):
 
         self.outputs['SDF'].sv_set(sdf_out)
 
+
 def register():
-    if sdf is not None:
-        bpy.utils.register_class(SvExSdfTransformNode)
+    bpy.utils.register_class(SvExSdfTransformNode)
+
 
 def unregister():
-    if sdf is not None:
-        bpy.utils.unregister_class(SvExSdfTransformNode)
-
+    bpy.utils.unregister_class(SvExSdfTransformNode)

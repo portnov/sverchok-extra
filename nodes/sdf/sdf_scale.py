@@ -58,11 +58,10 @@ class SvExSdfScaleNode(SverchCustomTreeNode, bpy.types.Node):
 
         self.outputs['SDF'].sv_set(sdf_out)
 
+
 def register():
-    if sdf is not None:
-        bpy.utils.register_class(SvExSdfScaleNode)
+    bpy.utils.register_class(SvExSdfScaleNode)
+
 
 def unregister():
-    if sdf is not None:
-        bpy.utils.unregister_class(SvExSdfScaleNode)
-
+    bpy.utils.unregister_class(SvExSdfScaleNode)

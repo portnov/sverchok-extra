@@ -78,11 +78,10 @@ class SvExSdfCapsuleNode(SverchCustomTreeNode, bpy.types.Node):
 
         self.outputs['SDF'].sv_set(fields_out)
 
+
 def register():
-    if sdf is not None:
-        bpy.utils.register_class(SvExSdfCapsuleNode)
+    bpy.utils.register_class(SvExSdfCapsuleNode)
+
 
 def unregister():
-    if sdf is not None:
-        bpy.utils.unregister_class(SvExSdfCapsuleNode)
-
+    bpy.utils.unregister_class(SvExSdfCapsuleNode)

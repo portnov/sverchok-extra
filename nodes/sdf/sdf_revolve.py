@@ -57,11 +57,10 @@ class SvExSdfRevolveNode(SverchCustomTreeNode, bpy.types.Node):
 
         self.outputs['SDF'].sv_set(sdf_out)
 
+
 def register():
-    if sdf is not None:
-        bpy.utils.register_class(SvExSdfRevolveNode)
+    bpy.utils.register_class(SvExSdfRevolveNode)
+
 
 def unregister():
-    if sdf is not None:
-        bpy.utils.unregister_class(SvExSdfRevolveNode)
-
+    bpy.utils.unregister_class(SvExSdfRevolveNode)

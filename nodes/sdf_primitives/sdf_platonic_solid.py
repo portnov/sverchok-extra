@@ -95,11 +95,10 @@ class SvExSdfPlatonicSolidNode(SverchCustomTreeNode, bpy.types.Node):
 
         self.outputs['SDF'].sv_set(fields_out)
 
+
 def register():
-    if sdf is not None:
-        bpy.utils.register_class(SvExSdfPlatonicSolidNode)
+    bpy.utils.register_class(SvExSdfPlatonicSolidNode)
+
 
 def unregister():
-    if sdf is not None:
-        bpy.utils.unregister_class(SvExSdfPlatonicSolidNode)
-
+    bpy.utils.unregister_class(SvExSdfPlatonicSolidNode)

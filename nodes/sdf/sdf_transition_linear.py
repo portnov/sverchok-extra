@@ -12,8 +12,7 @@ from sverchok_extra.utils.sdf import *
 
 if sdf is not None:
     from sdf import *
-else:
-    easing_options = [['x']]
+
 
 class SvExSdfLinearTransitionNode(SverchCustomTreeNode, bpy.types.Node):
     """
@@ -87,11 +86,10 @@ class SvExSdfLinearTransitionNode(SverchCustomTreeNode, bpy.types.Node):
 
         self.outputs['SDF'].sv_set(sdf_out)
 
+
 def register():
-    if sdf is not None:
-        bpy.utils.register_class(SvExSdfLinearTransitionNode)
+    bpy.utils.register_class(SvExSdfLinearTransitionNode)
+
 
 def unregister():
-    if sdf is not None:
-        bpy.utils.unregister_class(SvExSdfLinearTransitionNode)
-
+    bpy.utils.unregister_class(SvExSdfLinearTransitionNode)

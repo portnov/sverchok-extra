@@ -9,8 +9,6 @@ from sverchok.utils.field.scalar import SvScalarField
 from sverchok_extra.dependencies import sdf
 from sverchok_extra.utils.sdf import *
 
-if sdf is None:
-    easing_options = [['x']]
 
 class SvExSdfLinearBendNode(SverchCustomTreeNode, bpy.types.Node):
     """
@@ -91,11 +89,10 @@ class SvExSdfLinearBendNode(SverchCustomTreeNode, bpy.types.Node):
 
         self.outputs['SDF'].sv_set(sdf_out)
 
+
 def register():
-    if sdf is not None:
-        bpy.utils.register_class(SvExSdfLinearBendNode)
+    bpy.utils.register_class(SvExSdfLinearBendNode)
+
 
 def unregister():
-    if sdf is not None:
-        bpy.utils.unregister_class(SvExSdfLinearBendNode)
-
+    bpy.utils.unregister_class(SvExSdfLinearBendNode)

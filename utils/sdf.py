@@ -129,5 +129,5 @@ if sdf is not None:
 
 else:
 
-    easing_options = []
+    easing_options = [('x', 'x', '')]  # plug
 

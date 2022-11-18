@@ -38,11 +38,10 @@ class SvExSdfEstimateBoundsNode(SverchCustomTreeNode, bpy.types.Node):
 
         self.outputs['Bounds'].sv_set(bounds_out)
 
+
 def register():
-    if sdf is not None:
-        bpy.utils.register_class(SvExSdfEstimateBoundsNode)
+    bpy.utils.register_class(SvExSdfEstimateBoundsNode)
+
 
 def unregister():
-    if sdf is not None:
-        bpy.utils.unregister_class(SvExSdfEstimateBoundsNode)
-
+    bpy.utils.unregister_class(SvExSdfEstimateBoundsNode)

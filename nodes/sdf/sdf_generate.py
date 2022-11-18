@@ -162,12 +162,10 @@ class SvExSdfGenerateNode(SverchCustomTreeNode, bpy.types.Node):
         self.outputs['Vertices'].sv_set(verts_out)
         self.outputs['Faces'].sv_set(faces_out)
 
+
 def register():
-    if sdf is not None:
-        bpy.utils.register_class(SvExSdfGenerateNode)
+    bpy.utils.register_class(SvExSdfGenerateNode)
+
 
 def unregister():
-    if sdf is not None:
-        bpy.utils.unregister_class(SvExSdfGenerateNode)
-
-
+    bpy.utils.unregister_class(SvExSdfGenerateNode)

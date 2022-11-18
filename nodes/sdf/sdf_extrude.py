@@ -57,11 +57,10 @@ class SvExSdfExtrudeNode(SverchCustomTreeNode, bpy.types.Node):
 
         self.outputs['SDF'].sv_set(sdf_out)
 
+
 def register():
-    if sdf is not None:
-        bpy.utils.register_class(SvExSdfExtrudeNode)
+    bpy.utils.register_class(SvExSdfExtrudeNode)
+
 
 def unregister():
-    if sdf is not None:
-        bpy.utils.unregister_class(SvExSdfExtrudeNode)
-
+    bpy.utils.unregister_class(SvExSdfExtrudeNode)
