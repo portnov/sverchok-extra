@@ -44,6 +44,13 @@ At the moment, this addon includes the following nodes for Sverchok:
 * *Data* category:
   * Spreadsheet
   * Data Item
+* *Matrix Extra* category:
+  * Project Matrix on Plane
+* *Solid Extra* category:
+  * Solid Waffle
+* *Spatial Extra* category:
+  * Delanuay 3D on Surface
+  * Delaunay Mesh - add vertices to existing mesh by use of Delaunay triangulation
 * *SDF Primitives* category (uses [SDF][7]):
   * SDF Box
   * SDF Cylinder
