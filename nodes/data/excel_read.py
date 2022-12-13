@@ -54,6 +54,7 @@ class SvReadExcelNode(SverchCustomTreeNode, bpy.types.Node):
     bl_idname = 'SvReadExcelNode'
     bl_label = 'Read Excel'
     bl_icon = 'IMPORT'
+    sv_dependencies = {'pyexcel'}
 
     use_row_names : BoolProperty(
             name = "Row names in first column",
