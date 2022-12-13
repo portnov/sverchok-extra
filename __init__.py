@@ -106,7 +106,8 @@ def nodes_index():
             ("Data", [
                 ("data.spreadsheet", "SvSpreadsheetNode"),
                 ("data.data_item", "SvDataItemNode"),
-                ("data.excel_read", "SvReadExcelNode")
+                ("data.excel_read", "SvReadExcelNode"),
+                ("data.excel_write", "SvWriteExcelNode")
             ])
     ]
 

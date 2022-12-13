@@ -84,7 +84,7 @@ class SvReadExcelNode(SverchCustomTreeNode, bpy.types.Node):
         updateNode(self, context)
 
     out_mode : EnumProperty(
-            name = "Outputs",
+            name = "Output",
             items = out_modes,
             default = 'LIST',
             update = update_sockets)
@@ -197,7 +197,6 @@ class SvReadExcelNode(SverchCustomTreeNode, bpy.types.Node):
         self.read_file()
 
 def register():
-    print("REGISTER EXCEL")
     bpy.utils.register_class(SvReadExcelOperator)
     bpy.utils.register_class(SvReadExcelNode)
 
