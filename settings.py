@@ -35,6 +35,7 @@ class SvExPreferences(AddonPreferences):
         draw_message(box, "pyexcel_xls", dependencies=ex_dependencies)
         draw_message(box, "pyexcel_xlsx", dependencies=ex_dependencies)
         draw_message(box, "pyexcel_ods", dependencies=ex_dependencies)
+        draw_message(box, "pyexcel_io", dependencies=ex_dependencies)
 
 def register():
     bpy.utils.register_class(SvExPreferences)

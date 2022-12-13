@@ -68,3 +68,11 @@ try:
 except ImportError:
     pyexcel_ods = None
 
+pyexcel_io_d = ex_dependencies["pyexcel_io"] = SvDependency("pyexcel_io", "https://github.com/pyexcel/pyexcel-io")
+pyexcel_io_d.pip_installable = True
+try:
+    import pyexcel_io
+    pyexcel_io_d.module = pyexcel_io
+except ImportError:
+    pyexcel_io = None
+
