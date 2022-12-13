@@ -6,7 +6,7 @@ from sverchok.data_structure import updateNode
 from sverchok.utils.sv_operator_mixins import SvGenericNodeLocator
 from sverchok.utils.dictionary import SvDict
 
-import pyexcel
+from sverchok_extra.dependencies import pyexcel
 
 class SvReadExcelOperator(bpy.types.Operator, SvGenericNodeLocator):
     bl_idname = "node.sv_read_excel"
