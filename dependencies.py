@@ -37,6 +37,7 @@ except ImportError:
     sdf = None
 
 pyexcel_d = ex_dependencies["pyexcel"] = SvDependency("pyexcel", "https://github.com/pyexcel/pyexcel")
+pyexcel_d.pip_installable = True
 try:
     import pyexcel
     pyexcel_d.module = pyexcel
@@ -44,6 +45,7 @@ except ImportError:
     pyexcel = None
 
 pyexcel_xls_d = ex_dependencies["pyexcel_xls"] = SvDependency("pyexcel_xls", "https://github.com/pyexcel/pyexcel-xls")
+pyexcel_xls_d.pip_installable = True
 try:
     import pyexcel_xls
     pyexcel_xls_d.module = pyexcel_xls
@@ -51,6 +53,7 @@ except ImportError:
     pyexcel_xls = None
 
 pyexcel_xlsx_d = ex_dependencies["pyexcel_xlsx"] = SvDependency("pyexcel_xlsx", "https://github.com/pyexcel/pyexcel-xlsx")
+pyexcel_xlsx_d.pip_installable = True
 try:
     import pyexcel_xlsx
     pyexcel_xlsx_d.module = pyexcel_xlsx
@@ -58,6 +61,7 @@ except ImportError:
     pyexcel_xlsx = None
 
 pyexcel_ods_d = ex_dependencies["pyexcel_ods"] = SvDependency("pyexcel_ods", "https://github.com/pyexcel/pyexcel-ods")
+pyexcel_ods_d.pip_installable = True
 try:
     import pyexcel_ods
     pyexcel_ods_d.module = pyexcel_ods
