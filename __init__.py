@@ -17,8 +17,6 @@ import importlib
 
 import nodeitems_utils
 
-from sverchok.core import make_node_list
-from sverchok.utils import auto_gather_node_classes
 from sverchok.utils.logging import info, debug
 from sverchok.ui.nodeview_space_menu import add_node_menu
 
@@ -183,8 +181,6 @@ def register():
     icons.register()
 
     register_nodes()
-    extra_nodes = importlib.import_module(".nodes", "sverchok_extra")
-    auto_gather_node_classes(extra_nodes)
     show_welcome()
 
 def unregister():
