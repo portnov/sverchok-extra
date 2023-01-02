@@ -106,6 +106,10 @@ def nodes_index():
                 ("data.data_item", "SvDataItemNode"),
                 ("data.excel_read", "SvReadExcelNode"),
                 ("data.excel_write", "SvWriteExcelNode")
+            ]),
+            ("API", [
+                ('exchange.api_in', 'SvExApiInNode'),
+                ('exchange.api_out', 'SvExApiOutNode')
             ])
     ]
 
