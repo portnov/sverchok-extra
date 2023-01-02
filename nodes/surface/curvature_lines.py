@@ -1,5 +1,6 @@
 
 import numpy as np
+from math import ceil
 
 import bpy
 from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
@@ -15,7 +16,37 @@ from sverchok.dependencies import scipy
 if scipy is not None:
     from scipy.integrate import solve_ivp
 
+def solve_euler(surface, p0, max_t, negate=False, step=None, direction='MAX'):
+    u_min, u_max, v_min, v_max = surface.get_domain()
+    t = 0.0
+    uvs = p0[:,:2]
+    m = len(p0)
+    n = ceil(max_t / step)
+    result = np.zeros((n, m, 2))
+    i = 0
+    while t <= max_t:
+        calculator = surface.curvature_calculator(uvs[:,0], uvs[:,1], order=True)
+        data = calculator.calc(need_uv_directions = True, need_matrix=False)
+        if direction == 'MAX':
+            directions = data.principal_direction_2_uv
+        else:
+            directions = data.principal_direction_1_uv
+        if negate:
+            directions = - directions
+
+        uvs += directions * step
+        uvs = np.clip(uvs, [u_min,v_min], [u_max, v_max])
+        #if (uvs[:,0] < u_min).any() or (uvs[:,0] > u_max).any() or (uvs[:,1] < v_min).any() or (uvs[:,1] > v_max).any():
+        #    break
+        result[i] = uvs
+        i += 1
+        t += step
+    return result
+
 def solve_lines(surface, p0, tf, method='RK45', negate=False, step=None, direction='MAX'):
+
+    if method == 'EULER':
+        return solve_euler(surface, p0, tf, negate=negate, step=step, direction=direction)
 
     def f(t, ps):
         #print("P:", ps.shape)
@@ -75,18 +106,19 @@ class SvExSurfaceCurvatureLinesNode(SverchCustomTreeNode, bpy.types.Node):
             update = updateNode)
 
     methods = [
-        ('RK45', "Runge-Kutta 5(4)", "Runge-Kutta 5(4)", 0),
-        ('RK23', "Runge-Kutta 3(2)", "Runge-Kutta 3(2)", 1),
-        ('DOP853', "Runge-Kutta 8(7)", "Runge-Kutta 8(7)", 2),
-        ('Radau', "Implicit Runge-Kutta", "Implicit Runge-Kutta - Radau IIA 5", 3),
-        ('BDF', "Backward differentiation", "Implicit multi-step variable-order (1 to 5) method based on a backward differentiation formula for the derivative approximation", 4),
-        ('LSODA', "Adams / BDF", "Adams/BDF method with automatic stiffness detection and switching", 5)
+        ('EULER', "Euler", "Euler", 0),
+        ('RK45', "Runge-Kutta 5(4)", "Runge-Kutta 5(4)", 1),
+        ('RK23', "Runge-Kutta 3(2)", "Runge-Kutta 3(2)", 2),
+        ('DOP853', "Runge-Kutta 8(7)", "Runge-Kutta 8(7)", 3),
+        ('Radau', "Implicit Runge-Kutta", "Implicit Runge-Kutta - Radau IIA 5", 4),
+        ('BDF', "Backward differentiation", "Implicit multi-step variable-order (1 to 5) method based on a backward differentiation formula for the derivative approximation", 5),
+        ('LSODA', "Adams / BDF", "Adams/BDF method with automatic stiffness detection and switching", 6)
     ]
 
     method : EnumProperty(
         name = "Method",
         items = methods,
-        default = 'RK45',
+        default = 'EULER',
         update = updateNode)
 
     def draw_buttons(self, context, layout):
@@ -122,19 +154,32 @@ class SvExSurfaceCurvatureLinesNode(SverchCustomTreeNode, bpy.types.Node):
         inputs = zip_long_repeat(surfaces_s, src_point_s, step_s, maxt_s)
         for surfaces, src_point_i, step_i, maxt_i in inputs:
             for surface, src_points, step, max_t in zip_long_repeat(surfaces, src_point_i, step_i, maxt_i):
-                for src_point in src_points:
-                    u0,v0,_ = src_point
-                    print(step)
-                    new_uv = solve_lines(surface, np.array([u0,v0]),
-                                    max_t,
-                                    method = self.method,
-                                    negate = self.negate,
-                                    step = step,
-                                    direction = self.direction)
-                    us, vs = new_uv[:,0], new_uv[:,1]
-                    new_verts = surface.evaluate_array(us, vs).tolist()
-                    uv_out.append(new_uv.tolist())
-                    verts_out.append(new_verts)
+                if self.method == 'EULER':
+                    new_uv = solve_euler(surface, np.array(src_points),
+                                max_t,
+                                negate = self.negate,
+                                step = step,
+                                direction = self.direction)
+                    print(f"New_uv: {new_uv.shape}")
+                    us_i, vs_i = new_uv[:,:,0], new_uv[:,:,1]
+                    for us, vs in zip(us_i, vs_i):
+                        new_verts = surface.evaluate_array(us, vs).tolist()
+                        uv_out.append(new_uv.tolist())
+                        verts_out.append(new_verts)
+                else:
+                    for src_point in src_points:
+                        u0,v0,_ = src_point
+                        #print(step)
+                        new_uv = solve_lines(surface, np.array([u0,v0]),
+                                        max_t,
+                                        method = self.method,
+                                        negate = self.negate,
+                                        step = step,
+                                        direction = self.direction)
+                        us, vs = new_uv[:,0], new_uv[:,1]
+                        new_verts = surface.evaluate_array(us, vs).tolist()
+                        uv_out.append(new_uv.tolist())
+                        verts_out.append(new_verts)
 
         self.outputs['Vertices'].sv_set(verts_out)
         self.outputs['UVPoints'].sv_set(uv_out)
