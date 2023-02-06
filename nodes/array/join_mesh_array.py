@@ -24,7 +24,7 @@ class SvArrJoinMeshNode(SverchCustomTreeNode, bpy.types.Node):
      """
     bl_idname = 'SvArrJoinMeshNode'
     bl_label = 'Join Mesh (Array)'
-    sv_icon = 'SV_MOVE'
+    sv_icon = 'SV_ALPHA'
 
     def sv_init(self, context):
         self.inputs.new('SvStringsSocket', 'Array')

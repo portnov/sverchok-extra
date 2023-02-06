@@ -25,7 +25,7 @@ class SvArrMoveMeshNode(SverchCustomTreeNode, bpy.types.Node):
     bl_idname = 'SvArrMoveMeshNode'
     bl_label = 'Move Mesh (Array)'
     bl_icon = 'ORIENTATION_VIEW'
-    sv_icon = 'SV_MOVE'
+    sv_icon = 'SV_ALPHA'
 
     def sv_init(self, context):
         self.inputs.new('SvStringsSocket', 'Array')

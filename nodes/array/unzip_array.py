@@ -15,6 +15,18 @@ import bpy
 from sverchok.node_tree import SverchCustomTreeNode
 
 
+class UpdateNodeInterface(bpy.types.Operator):
+    bl_idname = "sverchok.update_node_interface"
+    bl_label = "Update node sockets"
+    bl_options = {'REGISTER', 'UNDO', 'INTERNAL'}
+
+    def execute(self, context):
+        node = context.node
+        node.update_sockets()
+        node.process_node(context)
+        return {'FINISHED'}
+
+
 class SvUnzipArrayNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: array
@@ -25,11 +37,18 @@ class SvUnzipArrayNode(SverchCustomTreeNode, bpy.types.Node):
     sv_icon = 'SV_ALPHA'
     sv_dependencies = ['awkward']
 
+    def sv_draw_buttons(self, context, layout):
+        layout.operator(UpdateNodeInterface.bl_idname, text='Update Interface')
+
     def sv_init(self, context):
         self.inputs.new('SvStringsSocket', 'Data')
 
-    def sv_update(self):
-        data = self.inputs[0].sv_get(deepcopy=False, default=None)
+    # def insert_link(self, link):
+    #     self.update_sockets(link.from_socket)
+
+    def update_sockets(self, other=None):
+        other = other if other else self.inputs[0].other
+        data = other.sv_get(deepcopy=False, default=None) if other else None
         if data is None or not hasattr(data, 'fields'):
             self.outputs.clear()
             return
@@ -52,4 +71,5 @@ class SvUnzipArrayNode(SverchCustomTreeNode, bpy.types.Node):
             sock.sv_set(out_data)
 
 
-register, unregister = bpy.utils.register_classes_factory([SvUnzipArrayNode])
+register, unregister = bpy.utils.register_classes_factory([
+    SvUnzipArrayNode, UpdateNodeInterface])

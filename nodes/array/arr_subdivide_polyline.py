@@ -54,10 +54,12 @@ class SvArrSubdividePolylineNode(SverchCustomTreeNode, bpy.types.Node):
         if line is None:
             return
         cuts = self.inputs[1].sv_get(deepcopy=False)
-        cuts = cuts if self.inputs[1].is_linked else ak.Array(cuts[0])
+        cuts = ak.values_astype(cuts, int) if self.inputs[1].is_linked \
+            else ak.Array([max(cuts[0]+[0])])
 
         new_verts = amath.subdivide_polyline(line.verts, cuts, self.interpolation)
-        new_line = ak.Array({'verts': new_verts})
+        new_edges = amath.connect_polyline(new_verts)
+        new_line = ak.Array({'verts': new_verts, 'edges': new_edges})
         self.outputs[0].sv_set(new_line)
 
 

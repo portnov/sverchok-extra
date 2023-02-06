@@ -31,14 +31,18 @@ class SvArrVectorInNode(SverchCustomTreeNode, bpy.types.Node):
         self.inputs.new('SvStringsSocket', "Y").use_prop = True
         self.inputs.new('SvStringsSocket', "Z").use_prop = True
         self.outputs.new('SvVerticesSocket', "Vectors")
+        self.width = 100
 
     def process(self):
         x = self.inputs[0].sv_get(deepcopy=False)
-        x = x[..., np.newaxis] if self.inputs[0].is_linked else x[0][0]
+        x = x if self.inputs[0].is_linked else x[0][0]
+        x = x[..., np.newaxis] if hasattr(x, '__len__') else x
         y = self.inputs[1].sv_get(deepcopy=False)
-        y = y[..., np.newaxis] if self.inputs[1].is_linked else y[0][0]
+        y = y if self.inputs[1].is_linked else y[0][0]
+        y = y[..., np.newaxis] if hasattr(y, '__len__') else y
         z = self.inputs[2].sv_get(deepcopy=False)
-        z = z[..., np.newaxis] if self.inputs[2].is_linked else z[0][0]
+        z = z if self.inputs[2].is_linked else z[0][0]
+        z = z[..., np.newaxis] if hasattr(z, '__len__') else z
         if not any(s.is_linked for s in self.inputs):
             self.outputs[0].sv_set(ak.Array([x, y, z]))
             return

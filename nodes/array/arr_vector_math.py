@@ -81,6 +81,7 @@ class SvArrVectorMathNode(SverchCustomTreeNode, bpy.types.Node):
     def process(self):
         x = self.inputs[0].sv_get(deepcopy=False)
         x = x if self.inputs[0].is_linked else ak.Array(x[0][0])
+        x = x.verts if hasattr(x, 'fields') and 'verts' in x.fields else x
         y = self.inputs[1].sv_get(deepcopy=False)
         y = y if self.inputs[1].is_linked else ak.Array(y[0][0])
         z = self.inputs[2].sv_get(deepcopy=False)

@@ -6,10 +6,10 @@
 # License-Filename: LICENSE
 
 import bpy
+import numpy as np
 from bpy.props import IntProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
-from sverchok_extra.utils import array_math as amath
 
 try:
     import awkward as ak
@@ -17,13 +17,13 @@ except ImportError:
     ak = None
 
 
-class SvArrGetItemNode(SverchCustomTreeNode, bpy.types.Node):
+class SvNewAxisNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: array
     Tooltip:
     """
-    bl_idname = 'SvArrGetItemNode'
-    bl_label = 'Get Item (Array)'
+    bl_idname = 'SvNewAxisNode'
+    bl_label = 'New Axis'
     sv_icon = 'SV_ALPHA'
     sv_dependencies = ['awkward']
 
@@ -34,9 +34,6 @@ class SvArrGetItemNode(SverchCustomTreeNode, bpy.types.Node):
 
     def sv_init(self, context):
         self.inputs.new('SvStringsSocket', 'Data')
-        s = self.inputs.new('SvStringsSocket', 'Index')
-        s.use_prop = True
-        s.default_property_type = 'int'
         self.outputs.new('SvStringsSocket', 'Data')
 
     def sv_update(self):
@@ -49,10 +46,22 @@ class SvArrGetItemNode(SverchCustomTreeNode, bpy.types.Node):
         data = self.inputs[0].sv_get(deepcopy=False, default=None)
         if data is None:
             return
-        where = self.inputs[1].sv_get(deepcopy=False)
-        where = where if self.inputs[1].is_linked else where[0][0]
-        data = data[amath.slices(where, axis=self.axis)]
+        if self.axis >= 0:
+            item = []
+            for _ in range(self.axis):
+                item.append(slice(None, None, None))
+            item.append(np.newaxis)
+            item = tuple(item)
+        else:
+            item = []
+            for _ in range(abs(self.axis)-1):
+                item.append(slice(None, None, None))
+            item.append(np.newaxis)
+            item.append(...)
+            item.reverse()
+            item = tuple(item)
+        data = data[item]
         self.outputs[0].sv_set(data)
 
 
-register, unregister = bpy.utils.register_classes_factory([SvArrGetItemNode])
+register, unregister = bpy.utils.register_classes_factory([SvNewAxisNode])

@@ -64,6 +64,7 @@ class SvInputValueNode(SverchCustomTreeNode, bpy.types.Node):
     def sv_init(self, context):
         self.inputs.new('SvStringsSocket', "Data").use_prop = True
         self.outputs.new('SvStringsSocket', "Data")
+        self.width = 100
 
     def process(self):
         sock = self.inputs[0]
@@ -79,7 +80,7 @@ class SvInputValueNode(SverchCustomTreeNode, bpy.types.Node):
         else:
             val = sock.sv_get(deepcopy=False)
             if self.type_mode == 'VECTOR':
-                value = ak.Array([list(val[0][0])])
+                value = ak.Array(list(val[0][0]))
             else:
                 value = val[0][0]
 

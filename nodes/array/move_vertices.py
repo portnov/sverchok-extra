@@ -24,7 +24,7 @@ class SvArrMoveVerticesNode(SverchCustomTreeNode, bpy.types.Node):
     bl_idname = 'SvArrMoveVerticesNode'
     bl_label = 'Move Vertices (Array)'
     bl_icon = 'ORIENTATION_VIEW'
-    sv_icon = 'SV_MOVE'
+    sv_icon = 'SV_ALPHA'
 
     def sv_init(self, context):
         self.inputs.new('SvVerticesSocket', 'Vertices')

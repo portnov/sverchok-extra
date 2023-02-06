@@ -4,38 +4,33 @@
 #
 # SPDX-License-Identifier: GPL3
 # License-Filename: LICENSE
-
+from copy import copy
 from itertools import takewhile
+
+import bpy
+
+from sverchok.node_tree import SverchCustomTreeNode
 
 try:
     import awkward as ak
 except ImportError:
     ak = None
 
-import bpy
-from bpy.props import IntProperty
 
-from sverchok.node_tree import SverchCustomTreeNode
-
-
-class SvZipArrayNode(SverchCustomTreeNode, bpy.types.Node):
+class SvSetFieldNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: array
     Tooltip:
     """
-    bl_idname = 'SvZipArrayNode'
-    bl_label = 'Zip Arrays'
+    bl_idname = 'SvSetFieldNode'
+    bl_label = 'Set Field'
     sv_icon = 'SV_ALPHA'
     sv_dependencies = ['awkward']
 
-    depth_limit: IntProperty(default=1, update=lambda s, c: s.process_node(c))
-
-    def sv_draw_buttons(self, context, layout):
-        layout.prop(self, 'depth_limit')
-
     def sv_init(self, context):
+        self.inputs.new('SvStringsSocket', 'Array')
         self.inputs.new('SvTextSocket', 'Data').custom_draw = 'draw_field'
-        self.outputs.new('SvStringsSocket', 'Data')
+        self.outputs.new('SvStringsSocket', 'Array')
 
     def sv_update(self):
         if self.inputs[-1].is_linked:
@@ -43,10 +38,10 @@ class SvZipArrayNode(SverchCustomTreeNode, bpy.types.Node):
 
         back_inp = list(self.inputs)[::-1]
         empty = len(list(takewhile(lambda s: not s.is_linked, back_inp)))
-        for _ in range(empty - 1):
+        for _ in range(empty - 2):
             self.inputs.remove(self.inputs[-1])
 
-        others = {s.other.bl_idname for s in self.inputs if s.is_linked}
+        others = {s.other.bl_idname for s in self.inputs[1:] if s.is_linked}
         out_type = 'SvStringsSocket' if len(others) != 1 else others.pop()
         if self.outputs[0].bl_idname != out_type:
             self.outputs[0].replace_socket(out_type)
@@ -55,17 +50,17 @@ class SvZipArrayNode(SverchCustomTreeNode, bpy.types.Node):
         layout.prop(socket, 'default_property', text='')
 
     def process(self):
-        arrays = [s.sv_get(deepcopy=False) for s in self.inputs if s.is_linked]
-        if not arrays:
+        arr = self.inputs['Array'].sv_get(deepcopy=False, default=None)
+        if arr is None:
             return
-        fields = [s.default_property for s in self.inputs if s.is_linked]
-        depth_limit = self.depth_limit if self.depth_limit else None
-        if any(fields):
-            out = ak.zip({n: d for n, d in zip(fields, arrays)},
-                         depth_limit=depth_limit)
-        else:
-            out = ak.zip(arrays, depth_limit=depth_limit)
-        self.outputs[0].sv_set(out)
+        arr = copy(arr)
+        arrays = [s.sv_get(deepcopy=False) for s in self.inputs[1:] if s.is_linked]
+        fields = [s.default_property for s in self.inputs[1:] if s.is_linked]
+        for f, a in zip(fields, arrays):
+            if not f:
+                continue
+            arr[f] = a
+        self.outputs[0].sv_set(arr)
 
 
-register, unregister = bpy.utils.register_classes_factory([SvZipArrayNode])
+register, unregister = bpy.utils.register_classes_factory([SvSetFieldNode])

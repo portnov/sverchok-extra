@@ -4,6 +4,7 @@
 #
 # SPDX-License-Identifier: GPL3
 # License-Filename: LICENSE
+import numpy as np
 
 try:
     import awkward as ak
@@ -89,7 +90,7 @@ class SvInputArrayNode(SverchCustomTreeNode, bpy.types.Node):
             else:
                 val = sock.sv_get(deepcopy=False)
                 if self.type_mode == 'VECTOR':
-                    data.append([list(val[0][0])])
+                    data.append(ak.Array(list(val[0][0]))[np.newaxis])
                 else:
                     data.append(val[0])
 
