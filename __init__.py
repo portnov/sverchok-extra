@@ -25,6 +25,7 @@ if __name__ != "sverchok_extra":
     sys.modules["sverchok_extra"] = sys.modules[__name__]
 
 from sverchok_extra import icons
+from sverchok_extra.utils import array_math
 from sverchok_extra import settings
 from sverchok_extra.utils import show_welcome
 
@@ -109,7 +110,53 @@ def nodes_index():
             ]),
             ("API", [
                 ('exchange.api_in', 'SvExApiInNode'),
-                ('exchange.api_out', 'SvExApiOutNode')
+                ('exchange.api_out', 'SvExApiOutNode'),
+            ]),
+            ('Array', [
+                ('array.input_value', 'SvInputValueNode'),
+                ('array.input_array', 'SvInputArrayNode'),
+                ('array.arr_number_range', 'SvArrNumberRangeNode'),
+                ('array.random_array', 'SvRandomArrayNode'),
+                ('array.py_to_array', 'SvPyToArrayNode'),
+                ('array.arr_vector_in', 'SvArrVectorInNode'),
+                ('array.arr_matrix_in', 'SvArrMatrixInNode'),
+                ('array.arr_polyline', 'SvArrPolylineNode'),
+                None,
+                ('array.arr_math', 'SvArrMathNode'),
+                ('array.bridge_polylines', 'SvArrBridgePolylinesNode'),
+                ('array.arr_polyline_length', 'SvArrPolylineLengthNode'),
+                ('array.arr_resample_polyline', 'SvResamplePolylineNode'),
+                ('array.arr_subdivide_polyline', 'SvArrSubdividePolylineNode'),
+                ('array.arr_vector_math', 'SvArrVectorMathNode'),
+                ('array.arr_rotate_vector', 'SvArrRotateVectorNode'),
+                ('array.move_vertices', 'SvArrMoveVerticesNode'),
+                ('array.arr_vector_noise', 'SvArrVectorNoiseNode'),
+                ('array.matrix_transform', 'SvArrMatrixTransformNode'),
+                ('array.move_mesh_array', 'SvArrMoveMeshNode'),
+                ('array.join_mesh_array', 'SvArrJoinMeshNode'),
+                ('array.flip_mesh_normals_array', 'SvArrFlipMeshNormalsNode'),
+                None,
+                ('array.array_length', 'SvArrayLengthNode'),
+                ('array.run_lengths', 'SvArrRunLengthsNode'),
+                ('array.zip_array', 'SvZipArrayNode'),
+                ('array.set_field', 'SvSetFieldNode'),
+                ('array.unzip_array', 'SvUnzipArrayNode'),
+                ('array.arr_get_item', 'SvArrGetItemNode'),
+                ('array.slice_array', 'SvSliceArrayNode'),
+                ('array.concatenate_arrays', 'SvConcatenateArraysNode'),
+                ('array.to_regular_array', 'SvToRegularArrayNode'),
+                ('array.new_axis', 'SvNewAxisNode'),
+                ('array.unflatten_array', 'SvUnflattenArrayNode'),
+                ('array.unflattening_array', 'SvUnflatteningArrayNode'),
+                ('array.flatten_array', 'SvFlattenArrayNode'),
+                ('array.flattening_array', 'SvFlatteningArrayNode'),
+                ('array.broadcast_arrays', 'SvBroadcastArraysNode'),
+                ('array.where_array', 'SvWhereArrayNode'),
+                ('array.local_index', 'SvLocalIndexNode'),
+                None,
+                ('array.array_to_py', 'SvArrayToPyNode'),
+                ('array.print_array', 'SvPrintArrayNode'),
+                ('array.array_viewer', 'SvArrMeshViewerNode'),
             ])
     ]
 
@@ -174,6 +221,16 @@ def reload_modules():
     for im in imported_modules:
         debug("Reloading: %s", im)
         importlib.reload(im)
+
+    util_modules = [m for p, m in sys.modules.items()
+                    if p.startswith('sverchok_extra.utils')]
+    for module in util_modules:
+        importlib.reload(module)
+
+
+if reload_event:
+    reload_modules()
+
 
 def register():
     global our_menu_classes
