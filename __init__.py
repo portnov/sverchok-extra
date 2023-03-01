@@ -14,10 +14,10 @@ bl_info = {
 
 import sys
 import importlib
+import logging
 
 import nodeitems_utils
 
-from sverchok.utils.logging import info, debug
 from sverchok.ui.nodeview_space_menu import add_node_menu
 
 # make sverchok the root module name, (if sverchok dir not named exactly "sverchok")
@@ -25,9 +25,11 @@ if __name__ != "sverchok_extra":
     sys.modules["sverchok_extra"] = sys.modules[__name__]
 
 from sverchok_extra import icons
-from sverchok_extra.utils import array_math
 from sverchok_extra import settings
 from sverchok_extra.utils import show_welcome
+
+logger = logging.getLogger('sverchok.extra')
+
 
 def nodes_index():
     return [("Extra Surfaces", [
@@ -198,7 +200,7 @@ reload_event = False
 
 if "bpy" in locals():
     reload_event = True
-    info("Reloading sverchok-extra...")
+    logger.info("Reloading sverchok-extra...")
 
 import bpy
 
@@ -206,7 +208,7 @@ def register_nodes():
     node_modules = make_node_list()
     for module in node_modules:
         module.register()
-    info("Registered %s nodes", len(node_modules))
+    logger.info("Registered %s nodes", len(node_modules))
 
 def unregister_nodes():
     global imported_modules
@@ -219,7 +221,7 @@ our_menu_classes = []
 def reload_modules():
     global imported_modules
     for im in imported_modules:
-        debug("Reloading: %s", im)
+        logger.debug("Reloading: %s", im)
         importlib.reload(im)
 
     util_modules = [m for p, m in sys.modules.items()
@@ -235,7 +237,7 @@ if reload_event:
 def register():
     global our_menu_classes
 
-    debug("Registering sverchok-extra")
+    logger.debug("Registering sverchok-extra")
 
     add_node_menu.register()
     settings.register()

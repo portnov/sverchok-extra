@@ -5,7 +5,6 @@ ex_dependencies = dict()
 
 try:
     import sverchok
-    from sverchok.utils.logging import info, error, debug
 
     from sverchok.dependencies import (
             SvDependency,

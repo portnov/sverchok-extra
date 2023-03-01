@@ -9,9 +9,8 @@ import numpy as np
 
 from sverchok.utils.geom import Spline, CubicSpline
 from sverchok.utils.curve.splines import SvSplineCurve
-from sverchok.utils.logging import getLogger
+from sverchok_extra import logger
 
-logger = getLogger()
 
 def project(surface, derivs, uv_pts, vectors):
     #uv_pts = uv_pts[1:-1]

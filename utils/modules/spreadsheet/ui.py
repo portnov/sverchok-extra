@@ -24,7 +24,8 @@ from sverchok.data_structure import updateNode
 from sverchok.utils.dictionary import SvDict
 from sverchok.utils.modules.eval_formula import get_variables
 from sverchok_extra.utils.modules.spreadsheet.evaluator import eval_spreadsheet, SvSpreadsheetAccessor
-from sverchok.utils.logging import info, debug
+from sverchok_extra import logger
+
 
 SUPPORTED_TYPES = [
         ('float', "Float", 'SvStringsSocket', 'SvDefaultColumnHandler'),
@@ -46,7 +47,7 @@ class SvColumnDescriptor(PropertyGroup):
         if hasattr(context, 'node'):
             context.node.on_update_column(context)
         else:
-            info("update_column: no node in context")
+            logger.info("update_column: no node in context")
 
     name : StringProperty(name="Name", update=update_column)
     data_type : EnumProperty(name = "Type",
