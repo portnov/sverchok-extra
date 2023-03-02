@@ -1,13 +1,7 @@
 
 import numpy as np
-from math import sqrt, atanh, sinh, cosh
 
-from mathutils import kdtree
-from mathutils.bvhtree import BVHTree
-
-from sverchok.utils.curve import SvCurve, SvIsoUvCurve
-from sverchok.utils.logging import debug, info
-from sverchok.utils.geom import PlaneEquation, LineEquation
+from sverchok.utils.curve import SvIsoUvCurve
 
 from sverchok.dependencies import scipy, skimage
 from sverchok.utils.marching_squares import make_contours
@@ -17,6 +11,7 @@ if scipy is not None:
 
 if skimage is not None:
     from skimage import measure
+
 
 def intersect_surface_plane_msquares(surface, plane, need_points = True, samples_u=50, samples_v=50):
     u_min, u_max = surface.get_u_min(), surface.get_u_max()

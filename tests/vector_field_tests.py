@@ -1,11 +1,5 @@
 
-import numpy as np
-
-from mathutils import Matrix
-
 from sverchok.utils.testing import SverchokTestCase
-from sverchok.utils.logging import info, debug, error, exception
-from sverchok.utils.modules.eval_formula import get_variables, sv_compile, safe_eval_compiled
 from sverchok.utils.field.scalar import *
 from sverchok.utils.field.vector import *
 
@@ -13,6 +7,7 @@ from sverchok_extra.data.field.scalar import *
 from sverchok_extra.data.field.vector import *
 from sverchok_extra.tests.make_fields import make_vector_field
 from sverchok_extra.tests.make_fields import make_scalar_field
+
 
 class MatrixVectorFieldTestCase(SverchokTestCase):
     def test_matrix(self):

@@ -2,13 +2,11 @@
 import numpy as np
 
 import bpy
-from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
+from bpy.props import FloatProperty, EnumProperty, IntProperty
 from mathutils import Matrix
 
-import sverchok
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, zip_long_repeat, fullList
-from sverchok.utils.logging import info, exception
 
 from sverchok.dependencies import scipy
 

@@ -18,13 +18,10 @@
 
 from collections import defaultdict
 
-import bpy
-from bpy.props import CollectionProperty, EnumProperty
-
 from sverchok.node_tree import SverchCustomTreeNode
-from sverchok.data_structure import updateNode, match_long_repeat, zip_long_repeat
-from sverchok.utils.logging import info, debug
+from sverchok.data_structure import match_long_repeat, zip_long_repeat
 from sverchok_extra.utils.modules.spreadsheet.ui import *
+
 
 class SvSpreadsheetNode(SverchCustomTreeNode, bpy.types.Node):
     """

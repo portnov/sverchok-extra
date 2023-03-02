@@ -1,19 +1,17 @@
 
-from os.path import join, dirname, basename
+from os.path import join, dirname
 import logging
 import unittest
 from io import StringIO
 from contextlib import contextmanager
 
-import sverchok
-from sverchok.utils.logging import info, debug, error
 import sverchok_extra
 
 try:
     import coverage
     coverage_available = True
 except ImportError:
-    info("Coverage module is not installed")
+    sverchok_extra.logger.info("Coverage module is not installed")
     coverage_available = False
 
 @contextmanager
@@ -48,7 +46,7 @@ def run_all_tests(pattern=None):
         runner = unittest.TextTestRunner(stream = buffer, verbosity=2)
         with coverage_report():
             result = runner.run(suite)
-            info("Test cases result:\n%s", buffer.getvalue())
+            sverchok_extra.logger.info("Test cases result:\n%s", buffer.getvalue())
             return result
     finally:
         logging.getLogger().removeHandler(log_handler)

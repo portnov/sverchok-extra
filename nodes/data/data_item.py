@@ -8,13 +8,12 @@
 from collections import defaultdict
 
 import bpy
-from bpy.types import Operator, Node, PropertyGroup
-from bpy.props import StringProperty, EnumProperty, IntProperty, BoolProperty, FloatProperty, CollectionProperty, PointerProperty, FloatVectorProperty
+from bpy.props import StringProperty, EnumProperty, IntProperty, CollectionProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode
 from sverchok.utils.dictionary import SvDict
-from sverchok.utils.logging import info, debug
+
 
 ANY = '__SV_ANY_KEY__'
 

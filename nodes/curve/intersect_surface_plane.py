@@ -1,13 +1,9 @@
 
-import numpy as np
-
 import bpy
-from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty, StringProperty
-from mathutils import Vector, Matrix
+from bpy.props import EnumProperty, IntProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
-from sverchok.data_structure import updateNode, zip_long_repeat, match_long_repeat, ensure_nesting_level
-from sverchok.utils.logging import info, exception
+from sverchok.data_structure import updateNode, zip_long_repeat, ensure_nesting_level
 from sverchok.utils.surface import SvSurface
 from sverchok.utils.geom import PlaneEquation
 from sverchok.dependencies import scipy, skimage
