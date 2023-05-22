@@ -75,3 +75,11 @@ try:
 except ImportError:
     pyexcel_io = None
 
+awkward_d = ex_dependencies["awkward"] = SvDependency("awkward", "https://github.com/scikit-hep/awkward")
+awkward_d.pip_installable = True
+try:
+    import awkward
+    awkward_d.module = awkward
+except ImportError:
+    awkward = None
+
