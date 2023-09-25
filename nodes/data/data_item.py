@@ -118,23 +118,22 @@ class SvDataItemNode(SverchCustomTreeNode, bpy.types.Node):
         
         d = self.get_data()[0]
         #n_existing = len(self.outputs)
-        with self.sv_throttle_tree_update():
-            links = {sock.name: [link.to_socket for link in sock.links] for sock in self.outputs}
-            self.outputs.clear()
+        links = {sock.name: [link.to_socket for link in sock.links] for sock in self.outputs}
+        self.outputs.clear()
 
-            new_socks = []
-            if show_item:
-                sock = self.outputs.new('SvStringsSocket', "Item")
+        new_socks = []
+        if show_item:
+            sock = self.outputs.new('SvStringsSocket', "Item")
+            new_socks.append(sock)
+
+        if len(empty) == 1:
+            for key, data in d.get_nested_inputs_at(empty[0]).items():
+                sock = self.outputs.new(data['type'], data['name'])
                 new_socks.append(sock)
 
-            if len(empty) == 1:
-                for key, data in d.get_nested_inputs_at(empty[0]).items():
-                    sock = self.outputs.new(data['type'], data['name'])
-                    new_socks.append(sock)
-
-            for new_sock in new_socks:
-                for to_sock in links.get(new_sock.name, []):
-                    self.id_data.links.new(new_sock, to_sock)
+        for new_sock in new_socks:
+            for to_sock in links.get(new_sock.name, []):
+                self.id_data.links.new(new_sock, to_sock)
 
     def sv_init(self, context):
         self.inputs.new('SvDictionarySocket', 'Data')
