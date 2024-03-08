@@ -14,7 +14,7 @@ try:
             FreeCAD
         )
 
-    sverchok_d = ex_dependencies["sverchok"] = SvDependency(None, "https://github.com/nortikin/sverchok")
+    sverchok_d = ex_dependencies["sverchok"] = SvDependency('Sverchok', "https://github.com/nortikin/sverchok")
     sverchok_d.module = sverchok
 except ImportError:
     message =  "Sverchok addon is not available. Sverchok-Extra will not work."
