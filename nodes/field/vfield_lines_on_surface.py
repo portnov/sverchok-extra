@@ -179,10 +179,8 @@ class SvExVFieldLinesOnSurfNode(SverchCustomTreeNode, bpy.types.Node):
         self.outputs['UVPoints'].sv_set(uv_out)
 
 def register():
-    if scipy is not None:
-        bpy.utils.register_class(SvExVFieldLinesOnSurfNode)
+    bpy.utils.register_class(SvExVFieldLinesOnSurfNode)
 
 def unregister():
-    if scipy is not None:
-        bpy.utils.unregister_class(SvExVFieldLinesOnSurfNode)
+    bpy.utils.unregister_class(SvExVFieldLinesOnSurfNode)
 

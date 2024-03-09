@@ -167,10 +167,8 @@ class SvDelaunayOnSurfaceNode(SverchCustomTreeNode, bpy.types.Node):
         self.outputs['Faces'].sv_set(faces_out)
 
 def register():
-    if scipy is not None:
-        bpy.utils.register_class(SvDelaunayOnSurfaceNode)
+    bpy.utils.register_class(SvDelaunayOnSurfaceNode)
 
 def unregister():
-    if scipy is not None:
-        bpy.utils.unregister_class(SvDelaunayOnSurfaceNode)
+    bpy.utils.unregister_class(SvDelaunayOnSurfaceNode)
 

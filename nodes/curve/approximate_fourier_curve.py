@@ -90,9 +90,7 @@ class SvApproxFourierCurveNode(SverchCustomTreeNode, bpy.types.Node):
         self.outputs['Amplitudes'].sv_set(points_out)
 
 def register():
-    if scipy is not None:
-        bpy.utils.register_class(SvApproxFourierCurveNode)
+    bpy.utils.register_class(SvApproxFourierCurveNode)
 
 def unregister():
-    if scipy is not None:
-        bpy.utils.unregister_class(SvApproxFourierCurveNode)
+    bpy.utils.unregister_class(SvApproxFourierCurveNode)
