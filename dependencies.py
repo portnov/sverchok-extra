@@ -35,6 +35,14 @@ try:
 except ImportError:
     sdf = None
 
+scipy_d = ex_dependencies["scipy"] = SvDependency("scipy", "https://www.scipy.org/")
+scipy_d.pip_installable = True
+try:
+    import scipy
+    scipy_d.module = scipy
+except ImportError:
+    scipy = None
+
 pyexcel_d = ex_dependencies["pyexcel"] = SvDependency("pyexcel", "https://github.com/pyexcel/pyexcel")
 pyexcel_d.pip_installable = True
 try:
