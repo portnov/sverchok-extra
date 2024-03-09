@@ -31,6 +31,7 @@ class SvExPreferences(AddonPreferences):
         draw_message(box, "sverchok", dependencies=ex_dependencies)
         draw_message(box, "pygalmesh", dependencies=ex_dependencies)
         draw_message(box, "sdf", dependencies=ex_dependencies)
+        draw_message(box, "scipy")
         draw_message(box, "pyexcel", dependencies=ex_dependencies)
         draw_message(box, "pyexcel_xls", dependencies=ex_dependencies)
         draw_message(box, "pyexcel_xlsx", dependencies=ex_dependencies)
