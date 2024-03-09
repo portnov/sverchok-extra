@@ -11,6 +11,7 @@ from sverchok.utils.field.scalar import SvScalarField
 from sverchok_extra.dependencies import pygalmesh, scipy
 
 if pygalmesh is not None and scipy is not None:
+    
     from scipy.interpolate import RegularGridInterpolator
 
     class SvDomain(pygalmesh.DomainBase):
