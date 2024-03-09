@@ -79,6 +79,7 @@ class SvExSurfaceCurvatureLinesNode(SverchCustomTreeNode, bpy.types.Node):
     bl_label = 'Surface Curvature Lines'
     bl_icon = 'OUTLINER_OB_EMPTY'
     sv_icon = 'SV_EVAL_SURFACE'
+    sv_dependencies = ['scipy']
 
     directions = [
         ('MIN', "Minimum", "Minimum principal curvature direction", 0),
