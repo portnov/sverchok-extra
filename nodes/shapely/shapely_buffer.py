@@ -62,6 +62,11 @@ class SvExShapelyBufferNode(SverchCustomTreeNode, bpy.types.Node):
             min = 1,
             update = updateNode)
 
+    single_sided : BoolProperty(
+            name = "Single Sided",
+            default = False,
+            update = updateNode)
+
     def sv_init(self, context):
         self.inputs.new('SvGeom2DSocket', "Geometry")
         self.inputs.new('SvStringsSocket', "Distance").prop_name = 'distance'
@@ -70,6 +75,7 @@ class SvExShapelyBufferNode(SverchCustomTreeNode, bpy.types.Node):
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'operation', expand=True)
+        layout.prop(self, 'single_sided')
         layout.prop(self, 'cap_style')
         layout.prop(self, 'join_style')
 
@@ -92,10 +98,11 @@ class SvExShapelyBufferNode(SverchCustomTreeNode, bpy.types.Node):
             for geometry, distance, quad_segs in zip_long_repeat(*params):
                 if self.operation == 'ERODE':
                     distance = -distance
-                g = geometry.buffer(distance,
+                g = shapely.buffer(geometry, distance,
                                     quad_segs = quad_segs,
                                     cap_style = self.cap_style,
-                                    join_style = self.join_style)
+                                    join_style = self.join_style,
+                                    single_sided = self.single_sided)
                 new_geometry.append(g)
             if flat_output:
                 geometry_out.extend(new_geometry)

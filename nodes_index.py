@@ -57,7 +57,9 @@ def nodes_index():
                     ("shapely.shapely_simplify", "SvExShapelySimplifyNode"),
                     ("shapely.shapely_boundary", "SvExShapelyBoundaryNode"),
                     None,
+                    ("shapely.shapely_length", "SvExShapelyLengthNode"),
                     ("shapely.shapely_area", "SvExShapelyAreaNode"),
+                    ("shapely.shapely_distance", "SvExShapelyDistanceNode"),
                     None,
                     ("shapely.shapely_triangulate", "SvExShapelyTriangulateNode")
                 ]},
