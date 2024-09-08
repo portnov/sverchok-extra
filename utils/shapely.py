@@ -114,3 +114,9 @@ def boundary(geometry):
     else:
         return shapely.boundary(geometry)
 
+def union_collection(geometry):
+    if isinstance(geometry, (shapely.GeometryCollection, shapely.MultiLineString, shapely.MultiPolygon)):
+        return shapely.union_all(list(geometry.geoms))
+    else:
+        return geometry
+
