@@ -153,8 +153,8 @@ class SvExSdfGenerateNode(SverchCustomTreeNode, bpy.types.Node):
                 if self.remove_doubles:
                     verts, _, faces = remove_doubles(verts, [], faces, self.threshold)
 
-                new_verts.extend(verts)
-                new_faces.extend(faces)
+                new_verts.append(verts)
+                new_faces.append(faces)
 
             verts_out.append(new_verts)
             faces_out.append(new_faces)

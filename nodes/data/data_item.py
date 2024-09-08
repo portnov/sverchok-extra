@@ -22,7 +22,9 @@ class SvStringItem(bpy.types.PropertyGroup):
 
 class SvDictKeyEntry(bpy.types.PropertyGroup):
     def update_key(self, context):
+        print("update_key")
         if hasattr(context, 'node'):
+            print(f"update_key, key = {self['key']}, old key = {self['prev_key']}")
             context.node.update_sockets_throttled(context)
             #updateNode(context.node, context)
         else:
@@ -44,11 +46,20 @@ class SvDictKeyEntry(bpy.types.PropertyGroup):
             item = self.known_keys.add()
             item.string = k
 
+    def get_key(self):
+        return self.get("key", 0)
+
+    def set_key(self, key):
+        self["prev_key"] = self.get("key", 0)
+        self["key"] = key
+
     known_keys : CollectionProperty(type=SvStringItem)
 
     key : EnumProperty(name = "Key",
             items = get_items,
-            update = update_key)
+            update = update_key,
+            get = get_key,
+            set = set_key)
 
 class SvDataItemNode(SverchCustomTreeNode, bpy.types.Node):
     """
@@ -83,17 +94,19 @@ class SvDataItemNode(SverchCustomTreeNode, bpy.types.Node):
         count = d.get_max_nesting_level() + 1
         existing = len(self.keys)
         dc = count - existing
+        print(f"update_keys, dc = {dc}")
         if dc > 0:
             for i in range(dc):
                 k = self.keys.add()
-        else:
+        elif dc < 0:
             for i in range(-dc):
                 n = len(self.keys)
                 self.keys.remove(n-1)
 
-        for i, k in enumerate(self.keys):
-            keys = [ANY] + list(d.get_nested_keys_at(i))
-            k.set_known_keys(keys)
+        if dc != 0:
+            for i, k in enumerate(self.keys):
+                keys = [ANY] + list(d.get_nested_keys_at(i))
+                k.set_known_keys(keys)
 
     #def sv_update(self):
     #    self.update_keys(None)

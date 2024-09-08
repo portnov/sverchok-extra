@@ -40,6 +40,24 @@ def nodes_index():
                     ({'icon_name': 'EMPTY_AXIS'}, ),                                               # icon image ID of Group menu name. Used only first elem of tuple
                     ("matrix.project_matrix", "SvProjectMatrixNode"),
                 ]},
+                {"2D Geometry": [
+                    ({'icon_name': 'EMPTY_AXIS'}, ),                                               # icon image ID of Group menu name. Used only first elem of tuple
+                    ("shapely.shapely_polygon", "SvExShapelyPolygonNode"),
+                    ("shapely.shapely_polyline", "SvExShapelyPolylineNode"),
+                    ("shapely.shapely_point", "SvExShapelyPointNode"),
+                    ("shapely.shapely_from_mesh", "SvExShapelyFromMeshNode"),
+                    ("shapely.shapely_voronoi", "SvExShapelyVoronoiNode"),
+                    None,
+                    ("shapely.shapely_transform", "SvExShapelyTransformNode"),
+                    ("shapely.shapely_boolean", "SvExShapelyBooleanNode"),
+                    ("shapely.shapely_buffer", "SvExShapelyBufferNode"),
+                    ("shapely.shapely_offset", "SvExShapelyOffsetNode"),
+                    ("shapely.shapely_boundary", "SvExShapelyBoundaryNode"),
+                    None,
+                    ("shapely.shapely_area", "SvExShapelyAreaNode"),
+                    None,
+                    ("shapely.shapely_triangulate", "SvExShapelyTriangulateNode")
+                ]},
                 {"SDF Primitives": [
                     ({'icon_name': 'SV_EX_SDF_ICON'}, ),                                           # icon image ID of Group menu name. Used only first elem of tuple
                     ("sdf_primitives.sdf_sphere", "SvExSdfSphereNode"),

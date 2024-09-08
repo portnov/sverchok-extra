@@ -26,6 +26,7 @@ if __name__ != "sverchok_extra":
 
 from sverchok_extra import icons
 from sverchok_extra import settings
+from sverchok_extra.utils import sockets
 from sverchok_extra.nodes_index import nodes_index
 from sverchok_extra.utils import show_welcome
 
@@ -134,6 +135,7 @@ def register():
     add_node_menu.register()
     settings.register()
     icons.register()
+    sockets.register()
 
     register_nodes()
     show_welcome()
@@ -150,5 +152,6 @@ def unregister():
             print(e)
     unregister_nodes()
 
+    sockets.unregister()
     icons.unregister()
     settings.unregister()

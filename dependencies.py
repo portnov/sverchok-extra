@@ -91,3 +91,11 @@ try:
 except ImportError:
     awkward = None
 
+shapely_d = ex_dependencies["shapely"] = SvDependency("shapely", "https://github.com/shapely/shapely")
+shapely_d.pip_installable = True
+try:
+    import shapely
+    shapely_d.module = shapely
+except ImportError:
+    shapely = None
+

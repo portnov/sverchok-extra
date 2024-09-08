@@ -16,7 +16,7 @@ from sverchok.utils.surface.core import SvSurface
 from sverchok.utils.geom import Spline, CubicSpline
 from sverchok.utils.curve.splines import SvSplineCurve
 
-from sverchok_extra.utils.geodesic import calculate_geodesic_curve
+from sverchok.utils.geodesic import geodesic_curve_by_two_points, cubic_spline
 
 class SvExGeodesicCurveNode(SverchCustomTreeNode, bpy.types.Node):
     """
@@ -110,7 +110,8 @@ class SvExGeodesicCurveNode(SverchCustomTreeNode, bpy.types.Node):
             new_curves = []
             new_uv_pts = []
             for surface, point1, point2, n_points, n_iterations, step, tolerance in zip_long_repeat(*params):
-                uv_pts, curve = calculate_geodesic_curve(surface, point1, point2, n_points, n_iterations, step, tolerance)
+                uv_pts = geodesic_curve_by_two_points(surface, point1, point2, n_points, n_iterations, step, tolerance, logger=self.sv_logger)
+                curve = cubic_spline(surface, uv_pts)
                 new_curves.append(curve)
                 new_uv_pts.append(uv_pts)
 
