@@ -15,6 +15,7 @@ def nodes_index():
                     ("curve.approximate_fourier_curve", "SvApproxFourierCurveNode"),
                     ("curve.interpolate_fourier_curve", "SvInterpFourierCurveNode"),
                     ("curve.geodesic_curve", "SvExGeodesicCurveNode"),
+                    ("curve.geodesic_cauchy", "SvExGeodesicCauchyNode"),
                     None,
                     ("curve.nurbs_goal_point", "SvNurbsCurvePointsGoalNode"),
                     ("curve.nurbs_goal_tangent", "SvNurbsCurveTangentsGoalNode"),

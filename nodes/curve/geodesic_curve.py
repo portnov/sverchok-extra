@@ -13,18 +13,17 @@ from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, zip_long_repeat, get_data_nesting_level, ensure_nesting_level, repeat_last_for_length
 from sverchok.utils.surface.core import SvSurface
-from sverchok.utils.geom import Spline, CubicSpline
-from sverchok.utils.curve.splines import SvSplineCurve
+from sverchok.utils.curve.algorithms import SvCurveOnSurface
 
 from sverchok.utils.geodesic import geodesic_curve_by_two_points, cubic_spline
 
 class SvExGeodesicCurveNode(SverchCustomTreeNode, bpy.types.Node):
     """
-    Triggers: Geodesic Curve
+    Triggers: Geodesic Curve by two points
     Tooltip: Calculate geodesic curves on a surface
     """
     bl_idname = 'SvExGeodesicCurveNode'
-    bl_label = 'Geodesic Curve'
+    bl_label = 'Geodesic Curve by Two Points'
     bl_icon = 'CURVE_NCURVE'
 
     n_points : IntProperty(
@@ -78,8 +77,10 @@ class SvExGeodesicCurveNode(SverchCustomTreeNode, bpy.types.Node):
         self.inputs.new('SvStringsSocket', "Step").prop_name = 'step'
         self.inputs.new('SvStringsSocket', "Tolerance").prop_name = 'tolerance'
 
-        self.outputs.new('SvCurveSocket', "UVCurve")
+        self.outputs.new('SvVerticesSocket', "Points")
+        self.outputs.new('SvCurveSocket', "Curve")
         self.outputs.new('SvVerticesSocket', "UVPoints")
+        self.outputs.new('SvCurveSocket', "UVCurve")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'join')
@@ -104,26 +105,43 @@ class SvExGeodesicCurveNode(SverchCustomTreeNode, bpy.types.Node):
         step_s = ensure_nesting_level(step_s, 2)
         tolerance_s = ensure_nesting_level(tolerance_s, 2)
 
-        curves_out = []
+        uv_curves_out = []
         uv_points_out = []
+        curves_out = []
+        points_out = []
         for params in zip_long_repeat(surface_s, point1_s, point2_s, n_points_s, n_iterations_s, step_s, tolerance_s):
-            new_curves = []
+            new_uv_curves = []
             new_uv_pts = []
+            new_curves = []
+            new_points = []
             for surface, point1, point2, n_points, n_iterations, step, tolerance in zip_long_repeat(*params):
-                uv_pts = geodesic_curve_by_two_points(surface, point1, point2, n_points, n_iterations, step, tolerance, logger=self.sv_logger)
-                curve = cubic_spline(surface, uv_pts)
-                new_curves.append(curve)
+                uv_pts = geodesic_curve_by_two_points(surface, point1, point2,
+                                                      n_points, n_iterations,
+                                                      step, tolerance,
+                                                      logger=self.sv_logger)
+                pts = surface.evaluate_array(uv_pts[:,0], uv_pts[:,1])
+                uv_curve = cubic_spline(surface, uv_pts)
+                curve = SvCurveOnSurface(uv_curve, surface, axis=2)
+                new_uv_curves.append(uv_curve)
                 new_uv_pts.append(uv_pts)
+                new_curves.append(curve)
+                new_points.append(pts)
 
             if self.join:
-                curves_out.extend(new_curves)
+                uv_curves_out.extend(new_uv_curves)
                 uv_points_out.extend(new_uv_pts)
+                curves_out.extend(new_curves)
+                points_out.extend(new_points)
             else:
-                curves_out.append(new_curves)
+                uv_curves_out.append(new_uv_curves)
                 uv_points_out.append(new_uv_pts)
+                curves_out.append(new_curves)
+                points_out.append(new_points)
 
-        self.outputs['UVCurve'].sv_set(curves_out)
+        self.outputs['UVCurve'].sv_set(uv_curves_out)
         self.outputs['UVPoints'].sv_set(uv_points_out)
+        self.outputs['Curve'].sv_set(curves_out)
+        self.outputs['Points'].sv_set(points_out)
 
 def register():
     bpy.utils.register_class(SvExGeodesicCurveNode)
