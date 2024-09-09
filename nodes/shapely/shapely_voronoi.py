@@ -14,7 +14,7 @@ class SvExShapelyVoronoiNode(SverchCustomTreeNode, bpy.types.Node):
     Tooltip: 2D Voronoi
     """
     bl_idname = 'SvExShapelyVoronoiNode'
-    bl_label = '2D Voronoi'
+    bl_label = '2D Voronoi (Shapely)'
     bl_icon = 'OUTLINER_OB_EMPTY'
     sv_icon = 'SV_VORONOI'
     sv_dependencies = {'shapely'}
