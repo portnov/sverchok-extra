@@ -26,6 +26,7 @@ def nodes_index():
                 {"Extra Fields": [
                     ({'icon_name': 'OUTLINER_OB_FORCE_FIELD'}, ),                                  # icon image ID of Group menu name. Used only first elem of tuple
                     ("field.vfield_lines_on_surface", "SvExVFieldLinesOnSurfNode"),
+                    ("field.exponential_map", "SvExExponentialMapNode"),
                     ("sdf.estimate_bounds", "SvExSdfEstimateBoundsNode")
                 ]},
                 {"Extra Solids": [
