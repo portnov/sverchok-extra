@@ -180,9 +180,9 @@ class SvExGeodesicCauchyNode(SverchCustomTreeNode, bpy.types.Node):
                 uv_curve = [cubic_spline(surface, uv_points) for uv_points in solution.uv_points]
                 curve = [SvCurveOnSurface(uv, surface, axis=2) for uv in uv_curve]
 
-                new_orig_points.append(solution.orig_points)
-                new_uv_points.append(solution.uv_points)
-                new_points.append(solution.surface_points)
+                new_orig_points.append(solution.orig_points.tolist())
+                new_uv_points.append(solution.uv_points.tolist())
+                new_points.append(solution.surface_points.tolist())
                 new_uv_curves.append(uv_curve)
                 new_curves.append(curve)
 
