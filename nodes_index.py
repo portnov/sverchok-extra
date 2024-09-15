@@ -54,6 +54,7 @@ def nodes_index():
                     ("shapely.shapely_boolean", "SvExShapelyBooleanNode"),
                     ("shapely.shapely_buffer", "SvExShapelyBufferNode"),
                     ("shapely.shapely_offset", "SvExShapelyOffsetNode"),
+                    ("shapely.shapely_clip_by_rect", "SvExShapelyClipByRectNode"),
                     ("shapely.shapely_convex_hull", "SvExShapelyConvexHullNode"),
                     ("shapely.shapely_concave_hull", "SvExShapelyConcaveHullNode"),
                     ("shapely.shapely_simplify", "SvExShapelySimplifyNode"),
