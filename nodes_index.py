@@ -1,10 +1,6 @@
 def nodes_index():
     return [{"Extra": [                                                                 # Group menu name
                 ({'icon_name': 'SV_EX_ROOT_ICON'}, ),                                   # icon image ID of Group menu name. Used only first elem of tuple
-                {"Extra Analyzer": [
-                    ({'icon_name': 'VIEWZOOM'}, ),
-                    ("analyze.inscribed_circle", "SvSemiInscribedCircleNode"),
-                ]},
                 {"Extra Surfaces": [
                     ({'icon_name': 'SURFACE_DATA'}, ),                                  # icon image ID of Group menu name. Used only first elem of tuple
                     ("surface.smooth_spline", "SvExBivariateSplineNode"),               # Menu item path and class name
