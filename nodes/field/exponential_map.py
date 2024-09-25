@@ -19,10 +19,10 @@ from sverchok.utils.geodesic import exponential_map, curve_exponential_map, BY_P
 class SvExExponentialMapNode(SverchCustomTreeNode, bpy.types.Node):
     """
     Triggers: Geodesic Exponential Map
-    Tooltip: Local geodesic mapping for a surface
+    Tooltip: Locally proportional mapping for a surface
     """
     bl_idname = 'SvExExponentialMapNode'
-    bl_label = 'Geodesic Mapping'
+    bl_label = 'Proportional Mapping to Surface'
     bl_icon = 'CURVE_NCURVE'
     sv_dependencies = {'scipy'}
 
