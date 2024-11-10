@@ -172,17 +172,17 @@ class SvExGeodesicCauchyNode(SverchCustomTreeNode, bpy.types.Node):
                     angles = np.array(angles)
                     starts = repeat_last_for_length(starts, k)
                 starts = np.array(starts)
-                solution = geodesic_cauchy_problem(surface, starts,
-                                                   angles, distance,
-                                                   steps,
+                solution = geodesic_cauchy_problem(surface, starts, angles=angles,
+                                                   target_radius=distance,
+                                                   n_steps=steps,
                                                    closed_u = self.closed_u,
                                                    closed_v = self.closed_v)
                 uv_curve = [cubic_spline(surface, uv_points) for uv_points in solution.uv_points]
                 curve = [SvCurveOnSurface(uv, surface, axis=2) for uv in uv_curve]
 
-                new_orig_points.append(solution.orig_points.tolist())
-                new_uv_points.append(solution.uv_points.tolist())
-                new_points.append(solution.surface_points.tolist())
+                new_orig_points.append(solution.get_all_orig_points())
+                new_uv_points.append(solution.get_all_uv_points())
+                new_points.append(solution.get_all_surface_points())
                 new_uv_curves.append(uv_curve)
                 new_curves.append(curve)
 
