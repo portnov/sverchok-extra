@@ -39,9 +39,9 @@ class SvExShapelyFromMeshNode(SverchCustomTreeNode, bpy.types.Node):
         input_level = get_data_nesting_level(verts_s)
         flat_output = input_level == 3
         verts_s = ensure_nesting_level(verts_s, 4)
-        edges_s = self.inputs['Edges'].sv_get()
+        edges_s = self.inputs['Edges'].sv_get(default=[])
         edges_s = ensure_nesting_level(edges_s, 4)
-        faces_s = self.inputs['Faces'].sv_get()
+        faces_s = self.inputs['Faces'].sv_get(default=[])
         faces_s = ensure_nesting_level(faces_s, 4)
 
         geometry_out = []
