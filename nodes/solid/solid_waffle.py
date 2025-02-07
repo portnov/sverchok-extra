@@ -32,16 +32,11 @@ def matrix_z(matrix):
     z = matrix @ Vector((0,0,1)) - location
     return z
 
-def make_sections(solid, matrix_a, zs_a, matrix_b, zs_b):
+def make_sections(solid, matrix_a, zs_a):
     normal_a = Base.Vector(matrix_z(matrix_a))
-    normal_b = Base.Vector(matrix_z(matrix_b))
-    slice_wires_a = solid.slices(normal_a, zs_a).Wires
-    slice_wires_b = solid.slices(normal_b, zs_b).Wires
-
-    slice_faces_a = [Part.Face(wire) for wire in slice_wires_a]
-    slice_faces_b = [Part.Face(wire) for wire in slice_wires_b]
-
-    return slice_faces_a, slice_faces_b
+    slice_wires_a = solid.slice(normal_a, zs_a)[0].Wires
+    slice_faces_a = Part.Face(slice_wires_a)
+    return slice_faces_a
 
 def bisect_wire(solid, matrix):
     location = matrix.translation
@@ -58,7 +53,6 @@ def do_split_many(solids, split_face, select):
     fuse = SvGeneralFuse([split_face] + solids)
     mids_1, mids_2 = [], []
     for mid_parts in fuse.map[1:]:
-        #print("M", mid_parts[0].Shells)
         if len(mid_parts) != 2:
             raise Exception(f"The surface does not cut the intersection of solids in 2 parts; result is {mid_parts}")
         mid_1, mid_2 = mid_parts
@@ -71,10 +65,8 @@ def do_split_many(solids, split_face, select):
         mids_2.append(mid_2)
     return mids_1, mids_2
 
-def do_waffel(solid, matrix_a, matrix_b, zs_a, zs_b, thickness, split_face, select):
-    sections_a, sections_b = make_sections(solid, matrix_a, zs_a, matrix_b, zs_b)
+def do_waffel(solid, thickness, split_face, select, sections_a, sections_b):
     n_a = len(sections_a)
-    all_sections = sections_a + sections_b
     cyls = []
     cyl_idx = 0
     cyls_per_section = defaultdict(list)
@@ -87,7 +79,6 @@ def do_waffel(solid, matrix_a, matrix_b, zs_a, zs_b, thickness, split_face, sele
             intersection_edge = r.Compounds[0].Edges[0]
             start = intersection_edge.Curve.value(intersection_edge.FirstParameter)
             end = intersection_edge.Curve.value(intersection_edge.LastParameter)
-            #print(f"{i}+{j} => {start} - {end}")
             direction = end - start
             start = start - thickness * direction
             end = end + thickness * direction
@@ -202,24 +193,45 @@ class SvSolidWaffleNode(SverchCustomTreeNode, bpy.types.Node):
 
         face_a_out = []
         face_b_out = []
-        for inputs in zip_long_repeat(solids_in, matrix_a_in, matrix_b_in, zs_a_in, zs_b_in, split_matrix_in, split_surface_in, thickness_in):
+        splitted_a = []
+        splitted_b = []
+        for inputs in zip_long_repeat(solids_in, split_matrix_in, split_surface_in, thickness_in):
+            #print('ТЕСТ:',  matrix_a_in, matrix_b_in, zs_a_in[0], zs_b_in[0])
             new_face_a = []
             new_face_b = []
-            for solid, matrix_a, matrix_b, zs_a, zs_b, split_matrix, split_surface, thickness in zip_long_repeat(*inputs):
-                select = matrix_z(matrix_a).cross(matrix_z(matrix_b))
-                select = tuple(select)
+            for solid, split_matrix, split_surface, thickness in zip_long_repeat(*inputs):
                 if self.split_mode == 'HALF':
                     split_face = None
+                    for matrix_a, zs_a, in zip_long_repeat(matrix_a_in[0], zs_a_in[0][0]):
+                        select = tuple()
+                        sections_a = make_sections(solid, matrix_a, zs_a)
+                        splitted_a.append(sections_a)
+                    for matrix_b, zs_b in zip_long_repeat(matrix_b_in[0], zs_b_in[0][0]):
+                        sections_b = make_sections(solid, matrix_b, zs_b)
+                        splitted_b.append(sections_b)
+
                 elif self.split_mode == 'MATRIX':
                     split_face = bisect_face(solid, split_matrix)
+                    for matrix_a, matrix_b, zs_a, zs_b in zip_long_repeat(matrix_a_in[0], matrix_b_in[0], zs_a_in[0][0], zs_b_in[0][0]):
+                        select = matrix_z(matrix_a).cross(matrix_z(matrix_b))
+                        select = tuple(select)
+                        sections_a = make_sections(solid, matrix_a, zs_a)
+                        sections_b = make_sections(solid, matrix_b, zs_b)
+                        splitted_a.append(sections_a)
+                        splitted_b.append(sections_b)
                 else:
                     split_face = surface_to_freecad(split_surface, make_face=True).face
-
-                result_a, result_b = do_waffel(solid, matrix_a, matrix_b, zs_a, zs_b, thickness, split_face, select)    
-                new_face_a.append(result_a)
-                new_face_b.append(result_b)
-            face_a_out.append(new_face_a)
-            face_b_out.append(new_face_b)
+                    for matrix_a, matrix_b, zs_a, zs_b in zip_long_repeat(matrix_a_in[0], matrix_b_in[0], zs_a_in[0][0], zs_b_in[0][0]):
+                        select = matrix_z(matrix_a).cross(matrix_z(matrix_b))
+                        select = tuple(select)
+                        sections_a = make_sections(solid, matrix_a, zs_a)
+                        sections_b = make_sections(solid, matrix_b, zs_b)
+                        splitted_a.append(sections_a)
+                        splitted_b.append(sections_b)
+        #print(splitted_a, splitted_b)
+        result_a, result_b = do_waffel(solid, thickness, split_face, select, splitted_a, splitted_b)
+        face_a_out.append(result_a)
+        face_b_out.append(result_b)
 
         self.outputs['FacesA'].sv_set(face_a_out)
         self.outputs['FacesB'].sv_set(face_b_out)
