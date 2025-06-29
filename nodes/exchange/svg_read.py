@@ -53,11 +53,20 @@ class SvReadSvgNode(SverchCustomTreeNode, bpy.types.Node):
             default = True,
             update = updateNode)
 
+    tolerance : FloatProperty(
+        name = "Tolerance",
+        description = "Minimum step after which to stop iterations",
+        min = 1e-10,
+        default = 0.001,
+        precision = 8,
+        update = updateNode)
+
     def draw_buttons(self, context, layout):
         self.wrapper_tracked_ui_draw_op(layout, SvReadSvgOperator.bl_idname, icon='FILE_REFRESH', text="UPDATE")
         layout.prop(self, 'convert_coords')
         layout.prop(self, 'concat_paths')
         layout.prop(self, 'svg_ppi')
+        layout.prop(self, 'tolerance')
 
     def sv_init(self, context):
         self.inputs.new('SvFilePathSocket', "FilePath")
@@ -68,7 +77,8 @@ class SvReadSvgNode(SverchCustomTreeNode, bpy.types.Node):
         curves = parse_svg(path,
                            ppi = self.svg_ppi,
                            concatenate_paths = self.concat_paths,
-                           convert_coords = self.convert_coords)
+                           convert_coords = self.convert_coords,
+                           tolerance = self.tolerance)
         self.outputs['Curves'].sv_set(curves)
 
     def process(self):

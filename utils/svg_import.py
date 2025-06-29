@@ -10,8 +10,10 @@ if svgelements is not None:
 import numpy as np
 import mathutils
 
+from sverchok.utils.curve.core import UnsupportedCurveTypeException
 from sverchok.utils.curve.primitives import SvLine, SvCircle, SvEllipse
 from sverchok.utils.curve.bezier import SvBezierCurve, SvCubicBezierCurve
+from sverchok.utils.curve.nurbs import SvNurbsCurve
 from sverchok.utils.curve.algorithms import concatenate_curves, sort_curves_for_concat
 
 def convert_matrix(transform, center):
@@ -23,15 +25,15 @@ def convert_matrix(transform, center):
     translate = mathutils.Matrix.Translation((center[0], center[1], 0))
     return matrix @ translate
 
-def process_path(element, concatenate=True):
+def process_path(element, concatenate=True, tolerance=1e-6):
     result = []
     for segment in element:
         curve = process_path_element(segment)
         if curve:
             result.append(curve)
     if concatenate:
-        result = sort_curves_for_concat(result, allow_flip=True).curves
-        curve = concatenate_curves(result, allow_generic=False, allow_split=True)
+        result = sort_curves_for_concat(result, allow_flip=False).curves
+        curve = concatenate_curves(result, allow_generic=False, allow_split=True, tolerance=tolerance)
         if isinstance(curve, list):
             result = curve
         else:
@@ -63,17 +65,17 @@ def process_path_element(segment):
         pass
         #print("Unsupported:", segment)
 
-def process_element(element, concatenate_paths=True):
+def process_element(element, concatenate_paths=True, tolerance=1e-6):
     result = []
     #print("Process", type(element))
     if isinstance(element, Group) and not isinstance(element, SVG):
         for child in element:
-            group = process_element(child, concatenate_paths=concatenate_paths)
+            group = process_element(child, concatenate_paths=concatenate_paths, tolerance=tolerance)
             if group:
                 result.extend(group)
 
     elif isinstance(element, Path):
-        result.extend(process_path(element, concatenate=concatenate_paths))
+        result.extend(process_path(element, concatenate=concatenate_paths, tolerance=tolerance))
         
     elif isinstance(element, (Line, SimpleLine)):
         start = (element.x1, element.y1, 0)
@@ -106,7 +108,7 @@ def process_element(element, concatenate_paths=True):
 
     return result
 
-def parse_svg(path, ppi=96.0, concatenate_paths=True, convert_coords=True):
+def parse_svg(path, ppi=96.0, concatenate_paths=True, convert_coords=True, tolerance=1e-6):
     result = []
     svg = SVG.parse(path, ppi=ppi)
 
@@ -115,12 +117,18 @@ def parse_svg(path, ppi=96.0, concatenate_paths=True, convert_coords=True):
 
     print("SVG", len(list(svg.elements())))
     for element in svg:
-        sub = process_element(element, concatenate_paths=concatenate_paths)
+        sub = process_element(element, concatenate_paths=concatenate_paths, tolerance=tolerance)
         if sub:
+            curves = sub
+            #for curve in sub:
+            #    nurbs_curve = SvNurbsCurve.to_nurbs(curve)
+            #    if nurbs_curve is None:
+            #        raise UnsupportedCurveTypeException(f"Cannot convert to NURBS: {curve}")
+            #    curves.append(nurbs_curve)
             if convert_coords:
-                for curve in sub:
+                for curve in curves:
                     result.append(curve.mirror(1).translate(vector))
             else:
-                result.extend(sub)
+                result.extend(curves)
     return result
 
