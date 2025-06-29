@@ -7,11 +7,12 @@ if svgelements is not None:
             SimpleLine, Group, Close,
             CubicBezier, QuadraticBezier)
 
+import numpy as np
 import mathutils
 
 from sverchok.utils.curve.primitives import SvLine, SvCircle, SvEllipse
 from sverchok.utils.curve.bezier import SvBezierCurve, SvCubicBezierCurve
-from sverchok.utils.curve.algorithms import concatenate_curves
+from sverchok.utils.curve.algorithms import concatenate_curves, sort_curves_for_concat
 
 def convert_matrix(transform, center):
     m = [[transform.a, transform.c, 0, transform.e],
@@ -30,8 +31,12 @@ def process_path(element, concatenate=True):
             #print(curve)
             result.append(curve)
     if concatenate:
-        curve = concatenate_curves(result, allow_generic=False)
-        result = [curve]
+        result = sort_curves_for_concat(result, allow_flip=True).curves
+        curve = concatenate_curves(result, allow_generic=False, allow_split=True)
+        if isinstance(curve, list):
+            result = curve
+        else:
+            result = [curve]
     return result
 
 def process_path_element(segment):
@@ -101,13 +106,20 @@ def process_element(element, concatenate_paths=True):
 
     return result
 
-def parse_svg(path, ppi=96.0, concatenate_paths=True):
+def parse_svg(path, ppi=96.0, concatenate_paths=True, convert_coords=True):
     result = []
     svg = SVG.parse(path, ppi=ppi)
-    print("SVG", svg.width, svg.height)
+
+    if convert_coords:
+        vector = np.array((0, svg.height, 0))
+
     for element in svg.elements():
         sub = process_element(element, concatenate_paths=concatenate_paths)
         if sub:
-            result.extend(sub)
+            if convert_coords:
+                for curve in sub:
+                    result.append(curve.mirror(1).translate(vector))
+            else:
+                result.extend(sub)
     return result
 

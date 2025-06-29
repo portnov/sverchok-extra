@@ -48,8 +48,14 @@ class SvReadSvgNode(SverchCustomTreeNode, bpy.types.Node):
             default = True,
             update = updateNode)
 
+    convert_coords : BoolProperty(
+            name = "Convert coordinates",
+            default = True,
+            update = updateNode)
+
     def draw_buttons(self, context, layout):
         self.wrapper_tracked_ui_draw_op(layout, SvReadSvgOperator.bl_idname, icon='FILE_REFRESH', text="UPDATE")
+        layout.prop(self, 'convert_coords')
         layout.prop(self, 'concat_paths')
         layout.prop(self, 'svg_ppi')
 
@@ -59,7 +65,10 @@ class SvReadSvgNode(SverchCustomTreeNode, bpy.types.Node):
 
     def read_file(self):
         path = self.inputs['FilePath'].sv_get()[0][0]
-        curves = parse_svg(path, ppi=self.svg_ppi, concatenate_paths=self.concat_paths)
+        curves = parse_svg(path,
+                           ppi = self.svg_ppi,
+                           concatenate_paths = self.concat_paths,
+                           convert_coords = self.convert_coords)
         self.outputs['Curves'].sv_set(curves)
 
     def process(self):
