@@ -60,10 +60,12 @@ def process_path_element(segment):
         ellipse.u_bounds = (start_t, start_t + segment.sweep)
         return ellipse
     else:
-        print("Unsupported:", segment)
+        pass
+        #print("Unsupported:", segment)
 
 def process_element(element, concatenate_paths=True):
     result = []
+    print("Process", type(element))
     if isinstance(element, Group) and not isinstance(element, SVG):
         for child in element:
             group = process_element(child, concatenate_paths=concatenate_paths)
@@ -111,7 +113,8 @@ def parse_svg(path, ppi=96.0, concatenate_paths=True, convert_coords=True):
     if convert_coords:
         vector = np.array((0, svg.height, 0))
 
-    for element in svg.elements():
+    print("SVG", len(list(svg.elements())))
+    for element in svg:
         sub = process_element(element, concatenate_paths=concatenate_paths)
         if sub:
             if convert_coords:
