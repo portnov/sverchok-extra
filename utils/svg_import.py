@@ -28,7 +28,6 @@ def process_path(element, concatenate=True):
     for segment in element:
         curve = process_path_element(segment)
         if curve:
-            #print(curve)
             result.append(curve)
     if concatenate:
         result = sort_curves_for_concat(result, allow_flip=True).curves
@@ -65,7 +64,7 @@ def process_path_element(segment):
 
 def process_element(element, concatenate_paths=True):
     result = []
-    if isinstance(element, Group):
+    if isinstance(element, Group) and not isinstance(element, SVG):
         for child in element:
             group = process_element(child, concatenate_paths=concatenate_paths)
             if group:
@@ -85,7 +84,6 @@ def process_element(element, concatenate_paths=True):
         result.append(SvCircle(matrix = m, radius=r, center=(cx,cy, 0)))
     
     elif isinstance(element, Ellipse):
-        #print("E", element)
         cx, cy, rx, ry = element.cx, element.cy, element.rx, element.ry
         m = convert_matrix(element.transform, (cx, cy))
         ellipse = SvEllipse(matrix=m, a=rx, b=ry)
