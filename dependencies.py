@@ -99,3 +99,11 @@ try:
 except ImportError:
     shapely = None
 
+svgelements_d = ex_dependencies["svgelements"] = SvDependency("svgelements", "https://github.com/meerk40t/svgelements")
+svgelements_d.pip_installable = True
+try:
+    import svgelements
+    svgelements_d.module = svgelements
+except ImportError:
+    svgelements = None
+

@@ -108,6 +108,9 @@ def nodes_index():
                     None,
                     ("sdf.sdf_generate", "SvExSdfGenerateNode"),
                 ]},
+                {"Extra Exchange": [
+                    ("exchange.svg_read", "SvReadSvgNode"),
+                ]},
                 {"Data": [
                     ({'icon_name': 'THREE_DOTS'}, ),                                                # icon image ID of Group menu name. Used only first elem of tuple
                     ("data.spreadsheet", "SvSpreadsheetNode"),

@@ -39,6 +39,7 @@ class SvExPreferences(AddonPreferences):
         draw_message(box, "pyexcel_io", dependencies=ex_dependencies)
         draw_message(box, "shapely", dependencies=ex_dependencies)
         draw_message(box, "awkward", dependencies=ex_dependencies)
+        draw_message(box, "svgelements", dependencies=ex_dependencies)
 
 
 def register():
