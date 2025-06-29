@@ -65,7 +65,7 @@ def process_path_element(segment):
 
 def process_element(element, concatenate_paths=True):
     result = []
-    print("Process", type(element))
+    #print("Process", type(element))
     if isinstance(element, Group) and not isinstance(element, SVG):
         for child in element:
             group = process_element(child, concatenate_paths=concatenate_paths)
