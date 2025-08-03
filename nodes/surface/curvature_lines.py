@@ -13,6 +13,7 @@ from sverchok.dependencies import scipy
 
 if scipy is not None:
     from scipy.integrate import solve_ivp
+    from scipy.interpolate import Rbf
 
 def solve_euler(surface, p0, max_t, negate=False, step=None, direction='MAX'):
     u_min, u_max, v_min, v_max = surface.get_domain()
@@ -46,25 +47,47 @@ def solve_lines(surface, p0, tf, method='RK45', negate=False, step=None, directi
     if method == 'EULER':
         return solve_euler(surface, p0, tf, negate=negate, step=step, direction=direction)
 
+    u_min, u_max = surface.get_u_bounds()
+    v_min, v_max = surface.get_u_bounds()
+    us = np.linspace(u_min, u_max, num=50)
+    vs = np.linspace(v_min, v_max, num=50)
+    us, vs = np.meshgrid(us, vs)
+    us = us.flatten()
+    vs = vs.flatten()
+
+    calculator = surface.curvature_calculator(us, vs, order=True)
+    data = calculator.calc(need_uv_directions = True, need_matrix=False)
+    if direction == 'MAX':
+        directions = data.principal_direction_2_uv
+    else:
+        directions = data.principal_direction_1_uv
+    if negate:
+        directions = - directions
+    rbf = Rbf(us, vs, directions,
+              function = 'thin_plate',
+              mode = 'N-D')
+
     def f(t, ps):
-        #print("P:", ps.shape)
         us = ps[0,:]
         vs = ps[1,:]
-        calculator = surface.curvature_calculator(us, vs, order=True)
-        data = calculator.calc(need_uv_directions = True, need_matrix=False)
-        if direction == 'MAX':
-            directions = data.principal_direction_2_uv
-        else:
-            directions = data.principal_direction_1_uv
-        if negate:
-            directions = - directions
-        return directions
+        return rbf(us, vs)
 
     kwargs = dict()
     if step is not None:
         kwargs['first_step'] = step
         kwargs['max_step'] = step
-    res = solve_ivp(f, (0, tf), p0, method=method, vectorized=True, **kwargs)
+
+
+    ev1 = lambda t,y: y[0] - u_min
+    ev1.terminal = True
+    ev2 = lambda t,y: y[1] - v_min
+    ev2.terminal = True
+    ev3 = lambda t,y: u_max - y[0]
+    ev3.terminal = True
+    ev4 = lambda t,y: v_max - y[1]
+    ev4.terminal = True
+
+    res = solve_ivp(f, (0, tf), p0, method=method, events=[ev1,ev2,ev3,ev4], vectorized=True, **kwargs)
 
     if not res.success:
         raise Exception("Can't solve the equation: " + res.message)
