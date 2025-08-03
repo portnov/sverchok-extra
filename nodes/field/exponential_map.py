@@ -199,8 +199,8 @@ class SvExExponentialMapNode(SverchCustomTreeNode, bpy.types.Node):
                                                     length_resolution = resolution,
                                                     closed_u = self.closed_u,
                                                     closed_v = self.closed_v)
-                uv_field = exp_map.get_uv_field()
-                field = exp_map.get_field()
+                uv_field = exp_map.get_uv_field(function='thin_plate')
+                field = exp_map.get_field(function='thin_plate')
                 new_uv_fields.append(uv_field)
                 new_fields.append(field)
                 new_points.append(exp_map.surface_points.tolist())
