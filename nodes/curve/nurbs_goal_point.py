@@ -6,7 +6,6 @@
 # License-Filename: LICENSE
 
 import numpy as np
-
 import bpy
 from bpy.props import FloatProperty, EnumProperty, BoolProperty, IntProperty
 
@@ -65,6 +64,7 @@ class SvNurbsCurvePointsGoalNode(SverchCustomTreeNode, bpy.types.Node):
         for params in zip_long_repeat(ts_s, points_s, weights_s):
             new_goals = []
             for ts, points, weights in zip_long_repeat(*params):
+                print("T", ts, points, weights)
                 goal = SvNurbsCurvePoints(ts, points, weights, relative=self.relative)
                 new_goals.append(goal)
             goals_out.append(new_goals)

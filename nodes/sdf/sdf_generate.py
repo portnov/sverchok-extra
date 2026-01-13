@@ -12,7 +12,8 @@ from sverchok.utils.sv_bmesh_utils import remove_doubles
 
 if sdf is not None:
     from sdf import *
-    BATCH_SIZE = sdf.mesh.BATCH_SIZE
+    from sdf import core as sdf_core
+    BATCH_SIZE = sdf.core.BATCH_SIZE
 else:
     BATCH_SIZE = 1
 
@@ -130,14 +131,14 @@ class SvExSdfGenerateNode(SverchCustomTreeNode, bpy.types.Node):
                 sdf = scalar_field_to_sdf(sdf, 0)
 
                 if self.precision_mode == 'STEP':
-                    samples = mesh.SAMPLES
+                    samples = sdf_core.SAMPLES
                 else:
                     step = None
 
                 if self.specify_workers:
                     workers = self.workers
                 else:
-                    workers = mesh.WORKERS
+                    workers = sdf_core.WORKERS
 
                 print(f"Step={step}, samples={samples}")
 
