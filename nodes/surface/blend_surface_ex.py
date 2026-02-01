@@ -45,6 +45,18 @@ class SvBlendSurfaceExNode(SverchCustomTreeNode, bpy.types.Node):
             default = SurfaceEdge.MIN_U.name,
             update = updateNode)
 
+    invert1 : BoolProperty(
+            name = "Invert",
+            description = "Invert tangents",
+            default = False,
+            update = updateNode)
+
+    invert2 : BoolProperty(
+            name = "Invert",
+            description = "Invert tangents",
+            default = False,
+            update = updateNode)
+
     tangency_modes = [
             (BlendSurfaceConstraint.G1.name, "G1 - Tangency", "G1 tangency: match tangent vectors", 0),
             (BlendSurfaceConstraint.NORMALS_MATCH.name, "G2 - Normals Match", "G2 tangency: match tangent vectors, normal vectors", 1)
@@ -81,20 +93,27 @@ class SvBlendSurfaceExNode(SverchCustomTreeNode, bpy.types.Node):
             update = updateNode)
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'tangency_mode')
-        box = layout.row(align=True)
-        box.prop(self, 'curve1_mode', text='')
-        box = layout.row(align=True)
-        box.prop(self, 'curve2_mode', text='')
+        layout.prop(self, 'tangency_mode', text='')
         layout.prop(self, 'use_cpts')
 
     def draw_buttons_ext(self, context, layout):
         self.draw_buttons(context, layout)
         layout.prop(self, 'tolerance')
 
+    def draw_surface_socket(self, socket, context, layout):
+        if socket.name == 'Surface1':
+            mode_name = 'curve1_mode'
+            invert_name = 'invert1'
+        else:
+            mode_name = 'curve2_mode'
+            invert_name = 'invert2'
+        box = layout.row(align=True)
+        box.prop(self, mode_name, text='')
+        box.prop(self, invert_name, toggle=True)
+
     def sv_init(self, context):
-        self.inputs.new('SvSurfaceSocket', 'Surface1')
-        self.inputs.new('SvSurfaceSocket', 'Surface2')
+        self.inputs.new('SvSurfaceSocket', 'Surface1').custom_draw = 'draw_surface_socket'
+        self.inputs.new('SvSurfaceSocket', 'Surface2').custom_draw = 'draw_surface_socket'
         self.inputs.new('SvStringsSocket', 'Curvature').prop_name = 'lambda_curvature'
         self.inputs.new('SvStringsSocket', 'Bending').prop_name = 'lambda_bending'
         self.outputs.new('SvSurfaceSocket', 'Surface')
@@ -102,8 +121,8 @@ class SvBlendSurfaceExNode(SverchCustomTreeNode, bpy.types.Node):
     def _process(self, surface1, surface2, curvature, bending):
         edge1 = SurfaceEdge[self.curve1_mode]
         edge2 = SurfaceEdge[self.curve2_mode]
-        input1 = BlendSurfaceInput(surface1, edge1.direction, edge1.boundary)
-        input2 = BlendSurfaceInput(surface2, edge2.direction, edge2.boundary)
+        input1 = BlendSurfaceInput(surface1, edge1.direction, edge1.boundary, self.invert1)
+        input2 = BlendSurfaceInput(surface2, edge2.direction, edge2.boundary, self.invert2)
         optimizer = BlendSurfaceOptimizer(input1, input2)
         surface = optimizer.solve(
                     constraint = BlendSurfaceConstraint[self.tangency_mode],
