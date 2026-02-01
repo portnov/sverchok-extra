@@ -3,7 +3,8 @@ def nodes_index():
                 ({'icon_name': 'SV_EX_ROOT_ICON'}, ),                                   # icon image ID of Group menu name. Used only first elem of tuple
                 {"Extra Surfaces": [
                     ({'icon_name': 'SURFACE_DATA'}, ),                                  # icon image ID of Group menu name. Used only first elem of tuple
-                    ("surface.smooth_spline", "SvExBivariateSplineNode"),               # Menu item path and class name
+                    ("surface.blend_surface_ex", "SvBlendSurfaceExNode"),               # Menu item path and class name
+                    ("surface.smooth_spline", "SvExBivariateSplineNode"),
                     ("surface.curvature_lines", "SvExSurfaceCurvatureLinesNode"),
                     ("surface.implicit_surface_solver", "SvExImplSurfaceSolverNode"),
                     ("surface.triangular_mesh", "SvExGalGenerateMeshNode"),
