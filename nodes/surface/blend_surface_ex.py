@@ -59,7 +59,8 @@ class SvBlendSurfaceExNode(SverchCustomTreeNode, bpy.types.Node):
 
     tangency_modes = [
             (BlendSurfaceConstraint.G1.name, "G1 - Tangency", "G1 tangency: match tangent vectors", 0),
-            (BlendSurfaceConstraint.NORMALS_MATCH.name, "G2 - Normals Match", "G2 tangency: match tangent vectors, normal vectors", 1)
+            (BlendSurfaceConstraint.NORMALS_MATCH.name, "G2 - Normals Match", "G2 tangency: match tangent vectors, normal vectors", 1),
+            (BlendSurfaceConstraint.CURVATURE_MATCH.name, "G2 - Curvature Match", "G2 tangency: match tangent vectors, normal vectors", 2)
         ]
 
     tangency_mode : EnumProperty(
