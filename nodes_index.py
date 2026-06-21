@@ -12,6 +12,7 @@ def nodes_index():
                 {"Extra Curves": [
                     ({'icon_name': 'OUTLINER_OB_CURVE'}, ),                             # icon image ID of Group menu name. Used only first elem of tuple
                     ("curve.intersect_surface_plane", "SvExCrossSurfacePlaneNode"),
+                    ("curve.optimal_bezier", "SvExOptimalBezierSplineNode"),
                     ("curve.fourier_curve", "SvFourierCurveNode"),
                     ("curve.approximate_fourier_curve", "SvApproxFourierCurveNode"),
                     ("curve.interpolate_fourier_curve", "SvInterpFourierCurveNode"),
